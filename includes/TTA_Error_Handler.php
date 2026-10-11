@@ -29,7 +29,7 @@ class TTA_Error_Handler {
 		// phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fopen
 		$this->handle = fopen( $this->log_file, 'a' );
 		if ( ! $this->handle ) {
-			throw new \Exception( "Unable to open log file: " . esc_html( $this->log_file ) );
+			throw new \Exception( 'Unable to open log file: ' . esc_html( $this->log_file ) );
 		}
 
 		$this->log( $message );
@@ -60,7 +60,7 @@ class TTA_Error_Handler {
 				// phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fclose
 				fclose( $handle );
 			} else {
-				throw new \Exception( "Failed to create log file: " . esc_html( $this->log_file ) );
+				throw new \Exception( 'Failed to create log file: ' . esc_html( $this->log_file ) );
 			}
 		}
 	}
@@ -75,7 +75,7 @@ class TTA_Error_Handler {
 	public function log( $message ) {
 		if ( $this->handle ) {
 			// phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fwrite
-			fwrite( $this->handle, gmdate( 'Y-m-d H:i:s' ) . " - " . $message . "\n" );
+			fwrite( $this->handle, gmdate( 'Y-m-d H:i:s' ) . ' - ' . $message . "\n" );
 		}
 	}
 
@@ -88,5 +88,4 @@ class TTA_Error_Handler {
 			fclose( $this->handle );
 		}
 	}
-
 }
