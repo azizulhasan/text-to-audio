@@ -5,7 +5,7 @@ Tags: accessibility, speech, tts, text to speech, text to audio
 Requires at least: 5.6
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 2.3.18
+Stable tag: 2.3.19
 License: GPLv3 or later
 License URI: https://www.gnu.org/licenses/gpl-3.0.txt
 
@@ -395,6 +395,9 @@ We are looking for people to help translate this plugin. If you can help, we wou
 Help us and the WordPress community translate the plugin. [Contact us](http://atlasaidev.com/contact-us/) and we'll guide you through the process.
 
 
+= 2.3.19 ( 11 Oct 2026 ) =
+Changed : Code tidy-up to follow the WordPress coding standards. Nothing changes in how the plugin works.
+
 = 2.3.18 ( 08 Oct 2026 ) =
 Changed : Behind-the-scenes tidy-up and a compatibility check with WordPress 7.1. Nothing changes in how the plugin works.
 
@@ -546,6 +549,9 @@ Fixed : Removed external sample-audio requests from the dashboard; previews now 
 
 
 == Upgrade Notice ==
+
+= 2.3.19 =
+Routine maintenance release with a code tidy-up. Safe to update; nothing changes in how the plugin works.
 
 = 2.3.18 =
 Routine maintenance release with a behind-the-scenes tidy-up. Safe to update; nothing changes in how the plugin works.
