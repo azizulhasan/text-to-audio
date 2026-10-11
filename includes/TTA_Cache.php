@@ -13,7 +13,6 @@ defined( 'ABSPATH' ) || exit;
  *  plugins_data,
  *  post_types,
  * should load button
- *
  */
 class TTA_Cache {
 	/**
@@ -35,10 +34,10 @@ class TTA_Cache {
 	/**
 	 * Set Cached Data
 	 *
-	 * @param string $key Cache name. Expected to not be SQL-escaped. Must be
-	 *                             172 characters or fewer.
-	 * @param mixed $data Data to cache. Must be serializable if non-scalar.
-	 *                             Expected to not be SQL-escaped.
+	 * @param string   $key Cache name. Expected to not be SQL-escaped. Must be
+	 *                               172 characters or fewer.
+	 * @param mixed    $data Data to cache. Must be serializable if non-scalar.
+	 *                                Expected to not be SQL-escaped.
 	 * @param int|bool $expiration Optional. Time until expiration in seconds. Default 0 (no expiration).
 	 *
 	 * @return bool
@@ -50,7 +49,7 @@ class TTA_Cache {
 
 		if ( false === $expiration ) {
 			// TODO: this dynamic.
-//			$expiration = get_option( 'atlas_voice_settings', array( 'cache_ttl' => 6 * HOUR_IN_SECONDS ) );
+			// $expiration = get_option( 'atlas_voice_settings', array( 'cache_ttl' => 6 * HOUR_IN_SECONDS ) );
 			$expiration = 24 * HOUR_IN_SECONDS;
 		}
 
@@ -67,7 +66,6 @@ class TTA_Cache {
 		}
 
 		return delete_transient( $prefix . $key );
-
 	}
 
 	/**
@@ -123,17 +121,17 @@ class TTA_Cache {
 
 	public static function get_key( $cache_key = 'all' ) {
 		// key will be method name and value will be cache key,
-		$cache_keys = [
-//			'should_load_button' => 'should_load_button', // TODO:: when to update.
-			'get_all_categories' => 'get_all_categories',
-			'get_all_tags'       => 'get_all_tags',
-//			'get_player_id'      => 'get_player_id', // TODO:: when to update.
-			'is_pro_active'      => 'is_pro_active',
-			'all_post_status'    => 'all_post_status',
-			'tts_get_settings'   => 'all_settings',
-			'get_post_types'     => 'get_post_types',
-			'all_plugins'        => 'all_plugins',
-		];
+		$cache_keys = array(
+			// 'should_load_button' => 'should_load_button', // TODO:: when to update.
+							'get_all_categories' => 'get_all_categories',
+			'get_all_tags'                       => 'get_all_tags',
+			// 'get_player_id'      => 'get_player_id', // TODO:: when to update.
+							'is_pro_active'      => 'is_pro_active',
+			'all_post_status'                    => 'all_post_status',
+			'tts_get_settings'                   => 'all_settings',
+			'get_post_types'                     => 'get_post_types',
+			'all_plugins'                        => 'all_plugins',
+		);
 
 		if ( $cache_key == 'all' ) {
 			return $cache_keys;
@@ -149,7 +147,7 @@ class TTA_Cache {
 	 * @return mixed|null
 	 */
 	private static function all_settings( $identifier = '', $post_id = '' ) {
-		$all_settings_keys = [
+		$all_settings_keys = array(
 			'listening'  => 'tta_listening_settings',
 			'settings'   => 'tta_settings_data',
 			'recording'  => 'tta_record_settings',
@@ -157,7 +155,7 @@ class TTA_Cache {
 			'analytics'  => 'tta_analytics_settings',
 			'compatible' => 'tta_compatible_data',
 			'aliases'    => 'tts_text_aliases',
-		];
+		);
 		$cached_settings   = self::get( 'all_settings' );
 		if ( ! $cached_settings ) {
 			$all_settings_data = self::set_tts_transient( $all_settings_keys );
@@ -179,13 +177,12 @@ class TTA_Cache {
 				$post_css_selectors = json_decode( json_encode( $post_css_selectors[0] ), true );
 			}
 
-
 			if ( ! empty( $post_css_selectors ) && isset( $post_css_selectors['tta__settings_use_own_css_selectors'] ) && $post_css_selectors['tta__settings_use_own_css_selectors'] ) {
 
 				if ( TTA_Helper::check_all_properties_are_empty( $post_css_selectors ) ) {
 
-					$settings                                                   = $all_settings_data['settings'];
-					$settings['tta__settings_css_selectors']                    = $post_css_selectors['tta__settings_css_selectors'];
+					$settings                                = $all_settings_data['settings'];
+					$settings['tta__settings_css_selectors'] = $post_css_selectors['tta__settings_css_selectors'];
 					$settings['tta__settings_exclude_content_by_css_selectors'] = $post_css_selectors['tta__settings_exclude_content_by_css_selectors'];
 					$settings['tta__settings_exclude_texts']                    = $post_css_selectors['tta__settings_exclude_texts'];
 					$settings['tta__settings_exclude_tags']                     = $post_css_selectors['tta__settings_exclude_tags'];
@@ -193,15 +190,12 @@ class TTA_Cache {
 					$all_settings_data['settings'] = $settings;
 				}
 			}
-
 		}
-
 
 		if ( $identifier ) {
 			$specified_identifier_data = isset( $all_settings_data[ $identifier ] ) ? $all_settings_data[ $identifier ] : $all_settings_data;
 			$all_settings_data         = $specified_identifier_data;
 		}
-
 
 		global $post;
 
@@ -209,7 +203,7 @@ class TTA_Cache {
 	}
 
 	private static function set_tts_transient( $all_settings_keys ) {
-		$all_settings_data = [];
+		$all_settings_data = array();
 		foreach ( $all_settings_keys as $identifier => $settings_key ) {
 			$settings                         = get_option( $settings_key );
 			$settings                         = ! $settings ? false : (array) $settings;
@@ -270,7 +264,7 @@ class TTA_Cache {
 		// Only proceed if the post type is valid
 		TTA_Helper::get_post_types();
 
-        TTA_Helper::delete_duplicate_post_ids_if_have( $post_id );
+		TTA_Helper::delete_duplicate_post_ids_if_have( $post_id );
 	}
 
 	public static function update_transient_during_plugins_crud() {
@@ -280,6 +274,5 @@ class TTA_Cache {
 		$cache_key = self::get_key( 'all_plugins' );
 		self::delete( $cache_key );
 		self::delete( 'tts_rest_api_url' );
-
 	}
 }
