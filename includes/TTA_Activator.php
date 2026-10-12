@@ -53,36 +53,38 @@ class TTA_Activator {
 		 * Customization settings.
 		 */
 		if ( $renew_all_settings || ! get_option( 'tta_customize_settings' ) ) {
-			update_option( 'tta_customize_settings', array
-			(
-				"backgroundColor"        => "#ffffff",
-				"color"                  => "#000000",
-				"hoverBackgroundColor"   => "#000000",
-				"hoverTextColor"         => "#ffffff",
-				"width"                  => "100",
-				'tta_play_btn_shortcode' => '[atlasvoice]',
-				'buttonSettings'         => [
-					'id'                         => 1,
-					'button_position'            => 'before_content',
-					// TTS-267: where the player docks once it scrolls out of
-					// view. Separate from button_position (inline placement);
-					// honoured unless tta__settings_stop_floating_button is on.
-					'float_position'             => 'bottom_fixed',
-					'display_player_to'          => [ 'all' ],
-					'who_can_download_mp3_file'  => [ 'all' ],
-					'generate_mp3_date_from' => '',
-					'generate_mp3_date_to'   => ''
-				],
-				'height'                 => '50',
-				'border'                 => '2',
-				'border_color'           => '#000000',
-				'fontSize'               => '20',
-				'borderRadius'           => '10',
-                'marginTop'              => '0',
-                'marginBottom'           => '0',
-                'marginLeft'             => '0',
-                'marginRight'            => '0',
-			) );
+			update_option(
+				'tta_customize_settings',
+				array(
+					'backgroundColor'        => '#ffffff',
+					'color'                  => '#000000',
+					'hoverBackgroundColor'   => '#000000',
+					'hoverTextColor'         => '#ffffff',
+					'width'                  => '100',
+					'tta_play_btn_shortcode' => '[atlasvoice]',
+					'buttonSettings'         => array(
+						'id'                        => 1,
+						'button_position'           => 'before_content',
+						// TTS-267: where the player docks once it scrolls out of
+						// view. Separate from button_position (inline placement);
+						// honoured unless tta__settings_stop_floating_button is on.
+						'float_position'            => 'bottom_fixed',
+						'display_player_to'         => array( 'all' ),
+						'who_can_download_mp3_file' => array( 'all' ),
+						'generate_mp3_date_from'    => '',
+						'generate_mp3_date_to'      => '',
+					),
+					'height'                 => '50',
+					'border'                 => '2',
+					'border_color'           => '#000000',
+					'fontSize'               => '20',
+					'borderRadius'           => '10',
+					'marginTop'              => '0',
+					'marginBottom'           => '0',
+					'marginLeft'             => '0',
+					'marginRight'            => '0',
+				)
+			);
 
 		}
 
@@ -90,81 +92,82 @@ class TTA_Activator {
 		 * Text To Audio settings.
 		 */
 		if ( $renew_all_settings || ! get_option( 'tta_settings_data' ) ) {
-			update_option( 'tta_settings_data', array
-			(
-				'tta__settings_enable_button_add'                     => true,
-				'tta__settings_apply_number_format'                   => false,
-				"tta__settings_allow_listening_for_post_types"        => [ 'post' ],
-				"tta__settings_allow_listening_for_posts_status"      => [ 'publish' ],
-				// D26.8 — default selector points at the legacy wrapper class
-				// emitted by Pro and (post-D26.7) Free, so a fresh install
-				// extracts content out of the box without admin config.
-				'tta__settings_css_selectors'                         => '',
-				'tta__settings_exclude_content_by_css_selectors'      => '',
-				'tta__settings_exclude_texts'                         => [],
-				// TTS-238 D27.34 — default-skip these tag types out of the
-				// box. Mirrors the picker's pre-checked checkbox set so a
-				// fresh install never reads aside / figure / blockquote /
-				// script / style aloud. Pipe-joined string to match the
-				// canonical storage shape.
-				// TTS-280: the list itself now lives on TTA_Speech, which is
-				// also what applies it at runtime in Free and Pro. Two copies
-				// is how the PHP path ended up excluding a different set of
-				// tags than the setting claimed.
-				'tta__settings_exclude_tags'                          => TTA_Speech::default_exclude_tags_string(),
-				// D26.7 — wrapper opt-out flag. Default ON so the new default
-				// selector above keeps working; admins on themes that break
-				// on the wrapper can flip this off.
-				'tta__settings_emit_legacy_wrapper'                   => true,
-				'tta__settings_atlasvoice_per_type_overrides'         => [],
-				"tta__settings_display_btn_icon"                      => true,
-				"tta__settings_exclude_post_ids"                      => [],
-				'tta__settings_stop_auto_playing_after_switching_tab' => true,
-				'tta__settings_stop_auto_pause_after_switching_tab'   => true,
-				// TTS-267: false = docking ON by default. The key reads as
-				// "stop floating", so false is the feature enabled.
-				'tta__settings_stop_floating_button'                  => false,
-				'tta__settings_exclude_categories'                    => [],
-				'tta__settings_exclude_wp_tags'                       => [],
-				'tta__settings_clear_cache'                           => [],
-				// TTS-255 — per-post player toggle in the admin bar ("Toggle
-				// AtlasVoice audio player for this post"). OFF by default;
-				// filter: tts_show_post_player_toggle.
-				'tta__settings_show_admin_bar_toggle'                 => false,
-				// TTS-255 — front-end on-page selector (Step Rail). OFF by
-				// default; even when on it renders only via ?atlasvoice_picker=1,
-				// never on a plain post URL. Filter: tts_enable_steprail.
-				'tta__settings_enable_steprail'                       => false,
-				// TTS-255 — admin-bar AtlasVoice production/staging indicator.
-				// TTS-258: ON by default (still shown while the Step Rail UI is
-				// open). Filter: tts_show_atlasvoice_mode_bar.
-				'tta__settings_show_mode_bar'                         => true,
-				'tta__settings_show_dashboard_widget'                 => true,
-				'tta__settings_clear_all_cache'                       => true,
-				'tta__settings_add_post_title_to_read'                => true,
-				'tta__settings_add_post_excerpt_to_read'              => false,
-				'tta__settings_text_after_content'					  => '',
-				'tta__settings_text_before_content'					  => '',
-				'tta__settings_read_content_from_dom'				  => true,
-				'tta__settings_enable_tts_status'				      => true,
-				// TTS-247 — fresh installs start in STAGING. Nothing
-				// auto-generates or shows to visitors until the admin
-				// verifies content via the step-rail picker and clicks
-				// "Go Live". Existing installs are grandfathered to
-				// 'production' by TTA_Activator::maybe_set_default_mode()
-				// so their live players / MP3s never disappear on upgrade.
-				'tta__settings_atlasvoice_mode'                       => 'staging',
-			) );
+			update_option(
+				'tta_settings_data',
+				array(
+					'tta__settings_enable_button_add'      => true,
+					'tta__settings_apply_number_format'    => false,
+					'tta__settings_allow_listening_for_post_types' => array( 'post' ),
+					'tta__settings_allow_listening_for_posts_status' => array( 'publish' ),
+					// D26.8 — default selector points at the legacy wrapper class
+					// emitted by Pro and (post-D26.7) Free, so a fresh install
+					// extracts content out of the box without admin config.
+					'tta__settings_css_selectors'          => '',
+					'tta__settings_exclude_content_by_css_selectors' => '',
+					'tta__settings_exclude_texts'          => array(),
+					// TTS-238 D27.34 — default-skip these tag types out of the
+					// box. Mirrors the picker's pre-checked checkbox set so a
+					// fresh install never reads aside / figure / blockquote /
+					// script / style aloud. Pipe-joined string to match the
+					// canonical storage shape.
+					// TTS-280: the list itself now lives on TTA_Speech, which is
+					// also what applies it at runtime in Free and Pro. Two copies
+					// is how the PHP path ended up excluding a different set of
+					// tags than the setting claimed.
+					'tta__settings_exclude_tags'           => TTA_Speech::default_exclude_tags_string(),
+					// D26.7 — wrapper opt-out flag. Default ON so the new default
+					// selector above keeps working; admins on themes that break
+					// on the wrapper can flip this off.
+					'tta__settings_emit_legacy_wrapper'    => true,
+					'tta__settings_atlasvoice_per_type_overrides' => array(),
+					'tta__settings_display_btn_icon'       => true,
+					'tta__settings_exclude_post_ids'       => array(),
+					'tta__settings_stop_auto_playing_after_switching_tab' => true,
+					'tta__settings_stop_auto_pause_after_switching_tab' => true,
+					// TTS-267: false = docking ON by default. The key reads as
+					// "stop floating", so false is the feature enabled.
+					'tta__settings_stop_floating_button'   => false,
+					'tta__settings_exclude_categories'     => array(),
+					'tta__settings_exclude_wp_tags'        => array(),
+					'tta__settings_clear_cache'            => array(),
+					// TTS-255 — per-post player toggle in the admin bar ("Toggle
+					// AtlasVoice audio player for this post"). OFF by default;
+					// filter: tts_show_post_player_toggle.
+					'tta__settings_show_admin_bar_toggle'  => false,
+					// TTS-255 — front-end on-page selector (Step Rail). OFF by
+					// default; even when on it renders only via ?atlasvoice_picker=1,
+					// never on a plain post URL. Filter: tts_enable_steprail.
+					'tta__settings_enable_steprail'        => false,
+					// TTS-255 — admin-bar AtlasVoice production/staging indicator.
+					// TTS-258: ON by default (still shown while the Step Rail UI is
+					// open). Filter: tts_show_atlasvoice_mode_bar.
+					'tta__settings_show_mode_bar'          => true,
+					'tta__settings_show_dashboard_widget'  => true,
+					'tta__settings_clear_all_cache'        => true,
+					'tta__settings_add_post_title_to_read' => true,
+					'tta__settings_add_post_excerpt_to_read' => false,
+					'tta__settings_text_after_content'     => '',
+					'tta__settings_text_before_content'    => '',
+					'tta__settings_read_content_from_dom'  => true,
+					'tta__settings_enable_tts_status'      => true,
+					// TTS-247 — fresh installs start in STAGING. Nothing
+					// auto-generates or shows to visitors until the admin
+					// verifies content via the step-rail picker and clicks
+					// "Go Live". Existing installs are grandfathered to
+					// 'production' by TTA_Activator::maybe_set_default_mode()
+					// so their live players / MP3s never disappear on upgrade.
+					'tta__settings_atlasvoice_mode'        => 'staging',
+				)
+			);
 		}
-
 
 		/**
 		 * Listening settings.
 		 * Auto-detect voice/language based on WordPress locale.
 		 */
 		if ( $renew_all_settings || ! get_option( 'tta_listening_settings' ) ) {
-			$locale    = get_locale();
-			$voice_map = array(
+			$locale         = get_locale();
+			$voice_map      = array(
 				'en_US' => array( 'Google US English', 'en-US' ),
 				'en_GB' => array( 'Google UK English Female', 'en-GB' ),
 				'en_AU' => array( 'Google UK English Female', 'en-GB' ),
@@ -187,31 +190,36 @@ class TTA_Activator {
 			);
 			$voice_defaults = isset( $voice_map[ $locale ] ) ? $voice_map[ $locale ] : array( 'Google UK English Female', 'en-GB' );
 
-			update_option( 'tta_listening_settings', array(
-				'tta__listening_voice'  => $voice_defaults[0],
-				'tta__listening_pitch'  => 1,
-				'tta__listening_rate'   => 1,
-				'tta__listening_volume' => 1,
-				'tta__listening_lang'   => $voice_defaults[1],
-			), false );
+			update_option(
+				'tta_listening_settings',
+				array(
+					'tta__listening_voice'  => $voice_defaults[0],
+					'tta__listening_pitch'  => 1,
+					'tta__listening_rate'   => 1,
+					'tta__listening_volume' => 1,
+					'tta__listening_lang'   => $voice_defaults[1],
+				),
+				false
+			);
 		}
-
 
 		/**
 		 * Recording settings.
 		 */
 		if ( $renew_all_settings || ! get_option( 'tta_record_settings' ) ) {
-			update_option( 'tta_record_settings', array
-			(
-				"is_record_continously"   => true,
-				"tta__recording__lang"    => "en-US",
-				"tta__sentence_delimiter" => ".",
-			), false );
+			update_option(
+				'tta_record_settings',
+				array(
+					'is_record_continously'   => true,
+					'tta__recording__lang'    => 'en-US',
+					'tta__sentence_delimiter' => '.',
+				),
+				false
+			);
 		}
 
-
 		// Button listen text.
-		$listen_text = __( "Listen", 'text-to-audio' );
+		$listen_text = __( 'Listen', 'text-to-audio' );
 		$pause_text  = __( 'Pause', 'text-to-audio' );
 		$resume_text = __( 'Resume', 'text-to-audio' );
 		$replay_text = __( 'Replay', 'text-to-audio' );
@@ -219,62 +227,72 @@ class TTA_Activator {
 		$stop_text   = __( 'Stop', 'text-to-audio' );
 
 		if ( $renew_all_settings || ! get_option( 'tta__button_text_arr' ) ) {
-			update_option( 'tta__button_text_arr', [
-				'listen_text' => $listen_text,
-				'pause_text'  => $pause_text,
-				'resume_text' => $resume_text,
-				'replay_text' => $replay_text,
-				'start_text'  => $start_text,
-				'stop_text'   => $stop_text,
-			] );
+			update_option(
+				'tta__button_text_arr',
+				array(
+					'listen_text' => $listen_text,
+					'pause_text'  => $pause_text,
+					'resume_text' => $resume_text,
+					'replay_text' => $replay_text,
+					'start_text'  => $start_text,
+					'stop_text'   => $stop_text,
+				)
+			);
 		}
 
-//		if ( get_transient( 'tts_all_settings' ) ) {
-//			\TTA_Cache::delete( 'all_settings' );
-//		}
+		// if ( get_transient( 'tts_all_settings' ) ) {
+		// \TTA_Cache::delete( 'all_settings' );
+		// }
 
 		/**
 		 * analytics settings.
 		 */
 		if ( $renew_all_settings || ! get_option( 'tta_analytics_settings' ) ) {
-			update_option( 'tta_analytics_settings', array(
-				"tts_enable_analytics"       => true,
-				// TTS-250: track every post by default (the "all" sentinel). The
-				// free plugin used to default to the latest 20 posts and could
-				// not track more — an artificial cap on a shipped feature
-				// (wp.org Guideline 5). Free now honours "all".
-				"tts_trackable_post_ids"     => array( 'all' ),
-				// TTS-247: third-party IP geolocation (ip-api / ipinfo /
-				// icanhazip) is opt-in per wp.org Guideline 7; default off.
-				"tts_show_listener_location" => false,
-			), false );
+			update_option(
+				'tta_analytics_settings',
+				array(
+					'tts_enable_analytics'       => true,
+					// TTS-250: track every post by default (the "all" sentinel). The
+					// free plugin used to default to the latest 20 posts and could
+					// not track more — an artificial cap on a shipped feature
+					// (wp.org Guideline 5). Free now honours "all".
+					'tts_trackable_post_ids'     => array( 'all' ),
+					// TTS-247: third-party IP geolocation (ip-api / ipinfo /
+					// icanhazip) is opt-in per wp.org Guideline 7; default off.
+					'tts_show_listener_location' => false,
+				),
+				false
+			);
 		}
-
 
 		/**
 		 * TTS-256 — read-along highlight settings (speechSynthesis players 1 & 2).
 		 */
 		if ( $renew_all_settings || ! get_option( 'tta_highlight_settings' ) ) {
-			update_option( 'tta_highlight_settings', array(
-				'tta__highlight_enabled'     => false,
-				// Default to sentence — works with any voice/browser. Word-level
-				// modes need a local voice that fires speechSynthesis boundaries.
-				'tta__highlight_mode'        => 'sentence', // sentence | word | word_sentence
-				'tta__highlight_word_bg'     => '#a5abf0',
-				'tta__highlight_word_color'  => '#202124',
-				'tta__highlight_sentence_bg' => '#e8e7fe',
-				'tta__highlight_dim_enabled' => true,
-				'tta__highlight_dim_opacity' => 0.7, // a11y: keep dimmed text near 4.5:1
+			update_option(
+				'tta_highlight_settings',
+				array(
+					'tta__highlight_enabled'        => false,
+					// Default to sentence — works with any voice/browser. Word-level
+					// modes need a local voice that fires speechSynthesis boundaries.
+					'tta__highlight_mode'           => 'sentence', // sentence | word | word_sentence
+					'tta__highlight_word_bg'        => '#a5abf0',
+					'tta__highlight_word_color'     => '#202124',
+					'tta__highlight_sentence_bg'    => '#e8e7fe',
+					'tta__highlight_dim_enabled'    => true,
+					'tta__highlight_dim_opacity'    => 0.7, // a11y: keep dimmed text near 4.5:1
 
-				'tta__highlight_autoscroll'  => true,
-				// TTS-263 — "Listen to selected text" floating control. Off by
-				// default, like highlighting: strictly opt-in.
-				'tta__selection_listen_enabled' => false,
-				// TTS-263 — how visitors learn the feature exists: one-time tip
-				// after first play (least intrusive, the default), a floating
-				// side badge, both, or nothing.
-				'tta__selection_announce'       => 'tip', // tip | badge | both | off
-			), false );
+					'tta__highlight_autoscroll'     => true,
+					// TTS-263 — "Listen to selected text" floating control. Off by
+					// default, like highlighting: strictly opt-in.
+					'tta__selection_listen_enabled' => false,
+					// TTS-263 — how visitors learn the feature exists: one-time tip
+					// after first play (least intrusive, the default), a floating
+					// side badge, both, or nothing.
+					'tta__selection_announce'       => 'tip', // tip | badge | both | off
+				),
+				false
+			);
 		}
 
 		self::create_analytics_table_if_not_exists();
@@ -331,7 +349,7 @@ class TTA_Activator {
 	public static function create_analytics_table_if_not_exists() {
 
 		global $wpdb;
-		$table_name = $wpdb->prefix . 'atlasvoice_analytics';
+		$table_name      = $wpdb->prefix . 'atlasvoice_analytics';
 		$charset_collate = $wpdb->get_charset_collate();
 
 		// TTS-236: Table schema now includes play_count column + index.
@@ -352,7 +370,7 @@ class TTA_Activator {
 	        KEY idx_play_count (play_count)
 	    ) $charset_collate;";
 
-		require_once( ABSPATH . 'wp-admin/includes/upgrade.php' );
+		require_once ABSPATH . 'wp-admin/includes/upgrade.php';
 		dbDelta( $sql );
 		update_option( 'atlasvoice_analytics_table_is_created', true, false );
 
@@ -453,10 +471,12 @@ class TTA_Activator {
 		}
 
 		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared,WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,PluginCheck.Security.DirectDB.UnescapedDBParameter
-		$column = $wpdb->get_results( $wpdb->prepare(
-			"SHOW COLUMNS FROM {$table} LIKE %s",
-			'play_count'
-		) );
+		$column = $wpdb->get_results(
+			$wpdb->prepare(
+				"SHOW COLUMNS FROM {$table} LIKE %s",
+				'play_count'
+			)
+		);
 		// phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared,WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,PluginCheck.Security.DirectDB.UnescapedDBParameter
 		$exists = ! empty( $column );
 		return $exists;
@@ -517,11 +537,13 @@ class TTA_Activator {
 
 		// Read next chunk by ID (not OFFSET — OFFSET is O(N) on large tables).
 		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared,WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,PluginCheck.Security.DirectDB.UnescapedDBParameter
-		$rows = $wpdb->get_results( $wpdb->prepare(
-			"SELECT id, analytics FROM {$table} WHERE id > %d AND play_count = 0 ORDER BY id ASC LIMIT %d",
-			$last_id,
-			$batch_size
-		) );
+		$rows = $wpdb->get_results(
+			$wpdb->prepare(
+				"SELECT id, analytics FROM {$table} WHERE id > %d AND play_count = 0 ORDER BY id ASC LIMIT %d",
+				$last_id,
+				$batch_size
+			)
+		);
 		// phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared,WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,PluginCheck.Security.DirectDB.UnescapedDBParameter
 
 		if ( empty( $rows ) ) {
@@ -553,7 +575,7 @@ class TTA_Activator {
 				array( '%d' )
 			);
 
-			$batch_total += $count;
+			$batch_total    += $count;
 			$max_id_in_batch = max( $max_id_in_batch, (int) $row->id );
 		}
 
@@ -594,7 +616,7 @@ class TTA_Activator {
 		// Retrieve existing indexes on the table.
 		$existing_indexes = array();
 		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared,WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,PluginCheck.Security.DirectDB.UnescapedDBParameter
-		$index_results    = $wpdb->get_results( "SHOW INDEX FROM `{$table_name}`", ARRAY_A );
+		$index_results = $wpdb->get_results( "SHOW INDEX FROM `{$table_name}`", ARRAY_A );
 		if ( is_array( $index_results ) ) {
 			foreach ( $index_results as $row ) {
 				$existing_indexes[] = $row['Key_name'];
@@ -631,6 +653,4 @@ class TTA_Activator {
 
 		return true;
 	}
-
-
 }

@@ -5,7 +5,7 @@ Tags: accessibility, speech, tts, text to speech, text to audio
 Requires at least: 5.6
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 2.3.18
+Stable tag: 2.3.19
 License: GPLv3 or later
 License URI: https://www.gnu.org/licenses/gpl-3.0.txt
 
@@ -401,6 +401,10 @@ We are looking for people to help translate this plugin. If you can help, we wou
 Help us and the WordPress community translate the plugin. [Contact us](http://atlasaidev.com/contact-us/) and we'll guide you through the process.
 
 
+= 2.4.0-beta.4 ( 12 Oct 2026 ) =
+Beta: for testing before the 2.4.0 release. Use it with AtlasVoice Pro 3.5.0-beta.4.
+Improved : Includes every fix from the released 2.3.18 and 2.3.19.
+
 = 2.4.0-beta.3 ( 7 Oct 2026 ) =
 Beta: for testing before the 2.4.0 release.
 Fixed : Saving the Listening settings or finishing the setup wizard no longer clears the AtlasVoice Pro voice and language choices.
@@ -418,6 +422,9 @@ Added : An audio box in the post editor to listen to, replace or delete a post's
 Added : A Versions screen to go back to an earlier version if an update causes trouble. Settings, audio and statistics are kept.
 Added : A voice step in the setup wizard, a "What's New" panel, and your AtlasVoice TTS usage in Listening and on the Dashboard, with a warning before the monthly allowance runs out.
 Changed : When AtlasVoice TTS cannot make audio (for example, the allowance is used up), the post is read by the browser voice with your usual player button and settings.
+= 2.3.19 ( 11 Oct 2026 ) =
+Changed : Code tidy-up to follow the WordPress coding standards. Nothing changes in how the plugin works.
+
 = 2.3.18 ( 08 Oct 2026 ) =
 Changed : Behind-the-scenes tidy-up and a compatibility check with WordPress 7.1. Nothing changes in how the plugin works.
 
@@ -569,6 +576,9 @@ Fixed : Removed external sample-audio requests from the dashboard; previews now 
 
 
 == Upgrade Notice ==
+
+= 2.3.19 =
+Routine maintenance release with a code tidy-up. Safe to update; nothing changes in how the plugin works.
 
 = 2.3.18 =
 Routine maintenance release with a behind-the-scenes tidy-up. Safe to update; nothing changes in how the plugin works.
