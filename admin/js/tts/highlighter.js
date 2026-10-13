@@ -160,6 +160,42 @@ function readConfig() {
 }
 
 /**
+ * TTS-340 — one CSS selector for everything the speech path never speaks: the
+ * PHP-filtered excluded tags (TTA_Speech::payload(), the list Pro's DOM path
+ * uses) plus "Exclude content by CSS selectors". Text inside them must not be
+ * a match target, or a heading repeated in a table of contents (inside <nav>)
+ * is painted there instead of on the heading being read. '' while the data
+ * isn't on the page yet (delayed-JS optimizers) — the painter re-indexes later.
+ */
+function speechExclusionSelector() {
+    const speech = (window.TTS && window.TTS.settings && window.TTS.settings.speech) || {};
+    const s = (window.ttsObj && window.ttsObj.settings && window.ttsObj.settings.settings) || {};
+    let tags = speech.excluded_tags || s.tta__settings_exclude_tags || [];
+    if (typeof tags === 'string') {
+        tags = tags.split('|');
+    }
+    let css = s.tta__settings_exclude_content_by_css_selectors || [];
+    if (typeof css === 'string') {
+        css = css.split('\n');
+    }
+    const probe = document.createDocumentFragment();
+    return [...(Array.isArray(tags) ? tags : []), ...(Array.isArray(css) ? css : [])]
+        .map((sel) => String(sel).trim())
+        .filter((sel) => {
+            if (!sel) {
+                return false;
+            }
+            try {
+                probe.querySelector(sel); // drop a malformed user selector, keep the rest
+                return true;
+            } catch (e) {
+                return false;
+            }
+        })
+        .join(', ');
+}
+
+/**
  * Inject the highlight stylesheet once. Done from JS (not a PHP-enqueued .css)
  * because the rules must exist on BOTH player pages, and Free's button CSS is
  * not loaded on Pro player-2 pages. Colors come from the CSS variables set by
@@ -322,10 +358,21 @@ class WrapperHighlighter {
     _index() {
         this.nodes = [];
         let offset = 0;
+        this._excluded = speechExclusionSelector();
+        const excluded = this._excluded;
         const walker = document.createTreeWalker(this.root, NodeFilter.SHOW_TEXT, {
             acceptNode: (n) => {
                 if (n.parentElement && n.parentElement.closest('tts-play-button, .tts__listent_content, script, style')) {
                     return NodeFilter.FILTER_REJECT;
+                }
+                // TTS-340: skip text the voice never reads. Only ancestors INSIDE
+                // the wrapper count — an excluded tag around the whole wrapper
+                // (some themes nest content in <header>/<aside>) must not hide it.
+                if (excluded && n.parentElement) {
+                    const hit = n.parentElement.closest(excluded);
+                    if (hit && hit !== this.root && this.root.contains(hit)) {
+                        return NodeFilter.FILTER_REJECT;
+                    }
                 }
                 if (!n.nodeValue) {
                     return NodeFilter.FILTER_REJECT;
@@ -453,6 +500,12 @@ class WrapperHighlighter {
         // was constructed, so this.title could still be empty on the first calls.
         if (!this.title) {
             this.title = this._resolveTitle();
+        }
+        // TTS-340: same delayed-JS case for the exclusion rules — index again
+        // (once) when they arrive, so never-spoken text stops being a match target.
+        if (!this._excluded && speechExclusionSelector()) {
+            this._index();
+            this.cursor = 0;
         }
         if (this.title && normalizedSentence.replace(/[^\p{L}\p{N})\]]+$/u, '') === this.title) {
             this._lastSentence = null;
