@@ -388,7 +388,12 @@ class WrapperHighlighter {
      * builder heading) is not the spoken title.
      */
     _titleIsSpoken() {
-        const contents = window.TTS && window.TTS.contents && window.TTS.contents[this.buttonId];
+        // The text THIS painter is driven by: Pro's MP3 drivers keep their own
+        // sentence list (built without the title), the browser players speak
+        // window.TTS.contents (with it, when the setting is on).
+        const contents = Array.isArray(this.sentences) && this.sentences.length
+            ? this.sentences.join(' ')
+            : window.TTS && window.TTS.contents && window.TTS.contents[this.buttonId];
         if (typeof contents !== 'string' || !contents.trim()) {
             return titleSettingOn();
         }
