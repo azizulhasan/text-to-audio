@@ -160,6 +160,30 @@ function readConfig() {
 }
 
 /**
+ * TTS-340 — the "read the post title" setting; absent keeps the old assumption
+ * (yes). Only the fallback for _titleIsSpoken() when no spoken text is on hand.
+ */
+function titleSettingOn() {
+    const s = (window.ttsObj && window.ttsObj.settings && window.ttsObj.settings.settings) || {};
+    const v = s.tta__settings_add_post_title_to_read;
+    return v === undefined || v === null ? true : !(v === false || v === 0 || v === '0' || v === '' || v === 'false');
+}
+
+/** TTS-340 — how many times `text` starts with `title` (punctuation/space between). */
+function leadingCopies(text, title) {
+    let rest = text;
+    let count = 0;
+    for (;;) {
+        rest = rest.replace(/^[^\p{L}\p{N}]+/u, '');
+        if (!title || !rest.startsWith(title)) {
+            return count;
+        }
+        count++;
+        rest = rest.slice(title.length);
+    }
+}
+
+/**
  * TTS-340 — one CSS selector for everything the speech path never speaks: the
  * PHP-filtered excluded tags (TTA_Speech::payload(), the list Pro's DOM path
  * uses) plus "Exclude content by CSS selectors". Text inside them must not be
@@ -326,6 +350,8 @@ class WrapperHighlighter {
         this.fallbackTimer = null;
         this._lastSentence = null; // {start, end} of the located sentence in flat text
         this._wordCursor = 0;      // forward search position WITHIN the located sentence
+        this._bodyStarted = false; // TTS-340: a body sentence was located this playback
+        this._titleSkipped = false; // TTS-340: the spoken title was already skipped
 
         if (this.cfg.enabled) {
             injectStyles();
@@ -352,6 +378,21 @@ class WrapperHighlighter {
         const extra = (window.TTS && window.TTS.extra && window.TTS.extra[this.buttonId]) || {};
         return stripButtonLabel(canonicalize((extra.title || '').trim()))
             .replace(/[^\p{L}\p{N})\]]+$/u, '');
+    }
+
+    /**
+     * TTS-340 — was the title prepended to the spoken text? Only if the spoken
+     * text opens with more copies of the title than the page text does; a body
+     * that merely starts with the title's words (title repeated in the content,
+     * builder heading) is not the spoken title.
+     */
+    _titleIsSpoken() {
+        const contents = window.TTS && window.TTS.contents && window.TTS.contents[this.buttonId];
+        if (typeof contents !== 'string' || !contents.trim()) {
+            return titleSettingOn();
+        }
+        const spoken = stripButtonLabel(canonicalize(contents.trim()));
+        return leadingCopies(spoken, this.title) > leadingCopies(this.lower, this.title);
     }
 
     /** Build a flat index of the wrapper's text nodes with cumulative offsets. */
@@ -507,7 +548,13 @@ class WrapperHighlighter {
             this._index();
             this.cursor = 0;
         }
-        if (this.title && normalizedSentence.replace(/[^\p{L}\p{N})\]]+$/u, '') === this.title) {
+        // TTS-340: the title is spoken once, first — skip only that utterance.
+        // Any later identical text is a body sentence (a title copied into the
+        // content, even straight after it) and must be painted, not skipped.
+        if (this.title && !this._titleSkipped && !this._bodyStarted
+            && normalizedSentence.replace(/[^\p{L}\p{N})\]]+$/u, '') === this.title
+            && this._titleIsSpoken()) {
+            this._titleSkipped = true;
             this._lastSentence = null;
             this.clear();
             return;
@@ -532,6 +579,7 @@ class WrapperHighlighter {
             return;
         }
         this.cursor = idx;
+        this._bodyStarted = true;
         // Exact sentence end — no padding, or the sentence highlight bleeds into
         // the next sentence. Word-search tolerance (below) handles whitespace drift.
         this._lastSentence = { start: idx, end: Math.min(idx + normalizedSentence.length, this.text.length) };
@@ -675,6 +723,8 @@ class WrapperHighlighter {
         }
         this._lastSentence = null;
         this._wordCursor = 0;
+        this._bodyStarted = false; // TTS-340: next playback starts with the title again
+        this._titleSkipped = false;
     }
 }
 
