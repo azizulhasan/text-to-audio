@@ -359,6 +359,7 @@ class WrapperHighlighter {
         }
         if (this.root) {
             this._index();
+            this._watchContent();
         }
         if (this.supported) {
             this._word = CSS.highlights.get(HL_WORD) || new Highlight();
@@ -393,6 +394,46 @@ class WrapperHighlighter {
         }
         const spoken = stripButtonLabel(canonicalize(contents.trim()));
         return leadingCopies(spoken, this.title) > leadingCopies(this.lower, this.title);
+    }
+
+    /**
+     * TTS-340 — a page translator (GTranslate) or any script that rewrites the
+     * content replaces the text nodes indexed at load, so sentences in the new
+     * language were searched in the old text. Mark the index stale on any TEXT
+     * change; _refreshIfStale() rebuilds it before the next lookup. Pro's
+     * overlay bands (no text) never trigger it.
+     */
+    _watchContent() {
+        if (typeof MutationObserver === 'undefined') {
+            return;
+        }
+        const hasText = (n) => (n.nodeType === Node.TEXT_NODE
+            ? !!n.nodeValue.trim()
+            : n.nodeType === Node.ELEMENT_NODE
+                && !(n.closest && n.closest('.atlasvoice-sentence-overlay'))
+                && !!(n.textContent || '').trim());
+        this._observer = new MutationObserver((mutations) => {
+            if (this._stale) {
+                return;
+            }
+            this._stale = mutations.some((m) => m.type === 'characterData'
+                || Array.prototype.some.call(m.addedNodes, hasText)
+                || Array.prototype.some.call(m.removedNodes, hasText));
+        });
+        this._observer.observe(this.root, { childList: true, subtree: true, characterData: true });
+    }
+
+    /** TTS-340 — rebuild a stale index, keeping the reading position proportionally. */
+    _refreshIfStale() {
+        if (!this._stale) {
+            return;
+        }
+        this._stale = false;
+        const ratio = this.text.length ? this.cursor / this.text.length : 0;
+        this._index();
+        this.cursor = Math.round(ratio * this.text.length);
+        this._lastSentence = null; // offsets into the old text are meaningless now
+        this._wordCursor = 0;
     }
 
     /** Build a flat index of the wrapper's text nodes with cumulative offsets. */
@@ -441,6 +482,7 @@ class WrapperHighlighter {
      * selection doesn't intersect the indexed text at all.
      */
     spanForRange(range) {
+        this._refreshIfStale();
         if (!range || !this.nodes.length) {
             return null;
         }
@@ -524,6 +566,7 @@ class WrapperHighlighter {
         if (!this.cfg.enabled || !this.root) {
             return;
         }
+        this._refreshIfStale();
         if (this.cfg.dimEnabled) {
             this.root.classList.add(DIM_CLASS);
         }
@@ -661,6 +704,7 @@ class WrapperHighlighter {
         if (!cleanWord) {
             return;
         }
+        this._refreshIfStale(); // TTS-340: never paint into replaced (detached) text
         // Only paint words belonging to the currently-located sentence. If the
         // active sentence isn't in the readable area (e.g. the title), skip —
         // never scan the whole body (that made title words like "the"/"City"
