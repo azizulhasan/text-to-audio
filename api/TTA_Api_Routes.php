@@ -7,6 +7,7 @@ defined( 'ABSPATH' ) || exit;
 
 use TTA\TTA_Cache;
 use TTA\TTA_Helper;
+use TTA\TTA_Rest_Schema as Schema;
 
 /**
  * This class is for getting all plugin's data  through api.
@@ -46,7 +47,11 @@ class TTA_Api_Routes {
 					'methods'             => \WP_REST_Server::ALLMETHODS,
 					'callback'            => array( $this, 'tta_manage_listening_data' ),
 					'permission_callback' => array( $this, 'get_route_access' ),
-					'args'                => array(),
+					'description'         => __( 'Reads or saves the listening settings: the voice language, voice, speed, pitch and volume the audio player uses (the Pro add-on adds per-player voice models and a per-language voice mapping). Saving a different language or voice clears stored audio so posts are read with the new voice. Administrators only (manage_options).', 'text-to-audio' ),
+					'args'                => Schema::envelope_args(
+						__( 'the listening settings', 'text-to-audio' ),
+						__( 'Main keys: tta__listening_lang (language code, e.g. "en-US"), tta__listening_voice (voice name for the active player), tta__listening_rate, tta__listening_pitch, tta__listening_volume (numbers, 1 = normal).', 'text-to-audio' )
+					),
 				),
 			)
 		);
@@ -60,7 +65,11 @@ class TTA_Api_Routes {
 					'methods'             => \WP_REST_Server::ALLMETHODS,
 					'callback'            => array( $this, 'tta_manage_customize_data' ),
 					'permission_callback' => array( $this, 'get_route_access' ),
-					'args'                => array(),
+					'description'         => __( 'Reads or saves the player customization: which player is used, where it is placed, how it floats, who sees it and how it looks (colors, size, margins, border, custom CSS, button labels). Switching to a different player clears stored audio. Administrators only (manage_options).', 'text-to-audio' ),
+					'args'                => Schema::envelope_args(
+						__( 'the player customization', 'text-to-audio' ),
+						__( 'Main keys: buttonSettings (object: id = player number 1-6, button_position "before_content" or "after_content", float_position "bottom_fixed", "bottom_left", "bottom_right" or "sticky_top", display_player_to = list of user roles or "all", who_can_download_mp3_file), backgroundColor, color, hoverBackgroundColor, hoverTextColor (hex colors), marginTop/Bottom/Left/Right, height, width (percent), border, borderRadius, fontSize, custom_css, button_texts (labels such as Listen, Pause, Resume, Replay).', 'text-to-audio' )
+					),
 				),
 			)
 		);
@@ -80,7 +89,13 @@ class TTA_Api_Routes {
 						'methods'             => \WP_REST_Server::ALLMETHODS,
 						'callback'            => array( $this, 'tta_manage_settings_data' ),
 						'permission_callback' => array( $this, 'get_route_access' ),
-						'args'                => array(),
+						'description'         => '/settings' === $settings_route
+							? __( 'Same as /settings-data, kept for older clients: reads or saves the general AtlasVoice settings. Administrators only (manage_options).', 'text-to-audio' )
+							: __( 'Reads or saves the general AtlasVoice settings: whether the player is added automatically, which post types and statuses get it, what is read aloud (CSS selectors, excluded tags, texts, categories, tags and posts), title reading, number formatting, floating behaviour and staging/production mode (mode is changed through /mode, not here). Administrators only (manage_options).', 'text-to-audio' ),
+						'args'                => Schema::envelope_args(
+							__( 'the general settings', 'text-to-audio' ),
+							__( 'Main keys (all prefixed tta__settings_): enable_button_add (boolean), allow_listening_for_post_types (list of post type slugs), allow_listening_for_posts_status, css_selectors, exclude_content_by_css_selectors (one selector per line), exclude_tags (tag names separated by "|"), exclude_texts, exclude_post_ids, add_post_title_to_read, apply_number_format, stop_floating_button, atlasvoice_per_type_overrides, clear_all_cache (true clears AtlasVoice caches once).', 'text-to-audio' )
+						),
 					),
 				)
 			);
@@ -95,7 +110,11 @@ class TTA_Api_Routes {
 					'methods'             => \WP_REST_Server::ALLMETHODS,
 					'callback'            => array( $this, 'tta_manage_highlight_settings' ),
 					'permission_callback' => array( $this, 'get_route_access' ),
-					'args'                => array(),
+					'description'         => __( 'Reads or saves the read-along highlight settings (highlighting the word and/or sentence being read) and the "listen to selected text" option. Values are validated on save: unknown modes fall back to "sentence", colors must be hex, dim opacity is limited to 0.1-0.85. Administrators only (manage_options).', 'text-to-audio' ),
+					'args'                => Schema::envelope_args(
+						__( 'the highlight settings', 'text-to-audio' ),
+						__( 'Keys: tta__highlight_enabled (boolean), tta__highlight_mode ("sentence", "word" or "word_sentence"), tta__highlight_word_bg, tta__highlight_word_color, tta__highlight_sentence_bg (hex colors such as "#a5abf0"), tta__highlight_dim_enabled (boolean), tta__highlight_dim_opacity (0.1-0.85), tta__highlight_autoscroll (boolean), tta__selection_listen_enabled (boolean), tta__selection_announce ("tip", "badge", "both" or "off").', 'text-to-audio' )
+					),
 				),
 			)
 		);
@@ -109,7 +128,12 @@ class TTA_Api_Routes {
 					'methods'             => \WP_REST_Server::CREATABLE,
 					'callback'            => array( $this, 'tta_browser_settings' ),
 					'permission_callback' => array( $this, 'get_route_access' ),
-					'args'                => array(),
+					'description'         => __( 'Stores which browser the administrator uses and whether it supports speech synthesis and speech recognition, so the dashboard can warn about browser voice limits. Returns the stored values. Administrators only (manage_options).', 'text-to-audio' ),
+					'args'                => array(
+						'browserName'       => Schema::doc_arg( 'string', __( 'Browser name, e.g. "Chrome", "Firefox" or "Safari". Defaults to "Mozilla".', 'text-to-audio' ) ),
+						'SpeechRecognition' => Schema::doc_arg( 'string', __( 'Whether the browser supports speech recognition, as reported by the browser (e.g. "function" or "undefined").', 'text-to-audio' ) ),
+						'speechSynthesis'   => Schema::doc_arg( 'string', __( 'Whether the browser supports speech synthesis, as reported by the browser (e.g. "object" or "undefined").', 'text-to-audio' ) ),
+					),
 				),
 			)
 		);
@@ -123,7 +147,13 @@ class TTA_Api_Routes {
 					'methods'             => \WP_REST_Server::CREATABLE,
 					'callback'            => array( $this->analytics, 'track' ),
 					'permission_callback' => array( $this, 'get_route_access' ),
-					'args'                => array(),
+					'description'         => __( 'Records listening analytics for one post (plays, pauses, completion, time listened) sent by the front-end player. Called by visitors, so it needs a valid wp_rest nonce in the X-WP-Nonce header (or a rest_nonce field) instead of a login. The body is JSON.', 'text-to-audio' ),
+					'args'                => array(
+						'post_id'    => Schema::doc_arg( 'integer', __( 'ID of the post that was listened to.', 'text-to-audio' ) ),
+						'user_id'    => Schema::doc_arg( 'string', __( 'Anonymous visitor identifier generated by the player (not a WordPress user ID).', 'text-to-audio' ) ),
+						'analytics'  => Schema::doc_arg( 'object', __( 'Event counters to add, keyed by event name (e.g. play, pause, end) each with a count and timing data.', 'text-to-audio' ) ),
+						'other_data' => Schema::doc_arg( 'object', __( 'Optional context such as device, browser and location of the listener.', 'text-to-audio' ) ),
+					),
 				),
 			)
 		);
@@ -137,6 +167,7 @@ class TTA_Api_Routes {
 					'methods'             => \WP_REST_Server::READABLE,
 					'callback'            => array( $this->analytics, 'get_geolocation' ),
 					'permission_callback' => array( $this, 'get_route_access' ),
+					'description'         => __( 'Returns the city and country of the current visitor from their IP address, for listener analytics. Only looks up a location when the site owner enabled location tracking; otherwise returns "Unknown" without any outside request. Called by visitors with a valid wp_rest nonce. Takes no parameters.', 'text-to-audio' ),
 					'args'                => array(),
 				),
 			)
@@ -151,20 +182,23 @@ class TTA_Api_Routes {
                     'methods'             => \WP_REST_Server::READABLE,
                     'callback'            => array( $this->analytics, 'insights' ),
                     'permission_callback' => array( $this, 'get_route_access' ),
+                    'description'         => __( 'Returns listening analytics for one post (plays, pauses, completions, listening time, devices, locations) within an optional date range. Administrators only (manage_options).', 'text-to-audio' ),
                     'args'                => array(
+                        // TTS-342: the handler reads post_id; 'id' is kept as declared before.
+                        'post_id' => Schema::doc_arg( 'integer', __( 'ID of the post to report on.', 'text-to-audio' ) ),
                         'id' => array(
                             'type'        => 'number',
-                            'description' => 'post ID',
+                            'description' => __( 'Legacy alias of post_id. Use post_id.', 'text-to-audio' ),
                             'required'    => false,
                         ),
                         'from_date' => array(
                             'type'        => 'string',
-                            'description' => 'Start date in Y-m-d format',
+                            'description' => __( 'Start date, format Y-m-d (e.g. "2026-10-01").', 'text-to-audio' ),
                             'required'    => false,
                         ),
                         'to_date'   => array(
                             'type'        => 'string',
-                            'description' => 'End date in Y-m-d format',
+                            'description' => __( 'End date, format Y-m-d (e.g. "2026-10-31").', 'text-to-audio' ),
                             'required'    => false,
                         ),
                     ),
@@ -182,6 +216,7 @@ class TTA_Api_Routes {
 					'methods'             => \WP_REST_Server::CREATABLE,
 					'callback'            => array( $this->analytics, 'all_insights' ),
 					'permission_callback' => array( $this, 'get_route_access' ),
+					'description'         => __( 'Returns every stored listening-analytics row for all posts (raw data, can be large). Prefer /aggregated_insights or /filtered_insights for summaries. Administrators only (manage_options). Takes no parameters.', 'text-to-audio' ),
 					'args'                => array(),
 				),
 			)
@@ -196,7 +231,10 @@ class TTA_Api_Routes {
 					'methods'             => \WP_REST_Server::CREATABLE,
 					'callback'            => array( $this->analytics, 'latest_posts' ),
 					'permission_callback' => array( $this, 'get_route_access' ),
-					'args'                => array(),
+					'description'         => __( 'Returns posts for the analytics post picker: the given post IDs, or the latest posts when none are given. Administrators only (manage_options).', 'text-to-audio' ),
+					'args'                => array(
+						'ids' => Schema::doc_arg( 'string', __( 'Optional JSON array of post IDs to return, e.g. "[12, 45]".', 'text-to-audio' ) ),
+					),
 				),
 			)
 		);
@@ -210,7 +248,10 @@ class TTA_Api_Routes {
 					'methods'             => \WP_REST_Server::CREATABLE,
 					'callback'            => array( $this->analytics, 'save_analytics_settings' ),
 					'permission_callback' => array( $this, 'get_route_access' ),
-					'args'                => array(),
+					'description'         => __( 'Saves the analytics settings: whether listening analytics are collected and which posts are tracked. Returns the saved settings. Administrators only (manage_options).', 'text-to-audio' ),
+					'args'                => array(
+						'analytics' => Schema::doc_arg( 'string', __( 'JSON-encoded object, e.g. {"tts_enable_analytics": true, "tts_trackable_post_ids": [12, 45]}. tts_trackable_post_ids lists the posts to track.', 'text-to-audio' ) ),
+					),
 				),
 			)
 		);
@@ -224,6 +265,7 @@ class TTA_Api_Routes {
 					'methods'             => \WP_REST_Server::CREATABLE,
 					'callback'            => array( $this->analytics, 'get_analytics_settings' ),
 					'permission_callback' => array( $this, 'get_route_access' ),
+					'description'         => __( 'Returns the analytics settings: whether listening analytics are collected (tts_enable_analytics) and which posts are tracked (tts_trackable_post_ids). Read-only despite using POST. Administrators only (manage_options). Takes no parameters.', 'text-to-audio' ),
 					'args'                => array(),
 				),
 			)
@@ -238,20 +280,21 @@ class TTA_Api_Routes {
 					'methods'             => \WP_REST_Server::READABLE,
 					'callback'            => array( $this->analytics, 'aggregated_insights' ),
 					'permission_callback' => array( $this, 'get_route_access' ),
+					'description'         => __( 'Returns site-wide listening totals for the analytics dashboard (plays, completions, listening time, top posts, devices, locations) for a date range. Administrators only (manage_options).', 'text-to-audio' ),
 					'args'                => array(
 						'date_range' => array(
 							'type'        => 'string',
-							'description' => 'Date range preset (Yesterday, Last 7 Days, Last 30 Days, Last 90 Days, Custom)',
+							'description' => __( 'Date range preset: "Yesterday", "Last 7 Days", "Last 30 Days", "Last 90 Days" or "Custom" (then send from_date and to_date).', 'text-to-audio' ),
 							'required'    => false,
 						),
 						'from_date' => array(
 							'type'        => 'string',
-							'description' => 'Start date in Y-m-d format (for Custom range)',
+							'description' => __( 'Start date for a Custom range, format Y-m-d (e.g. "2026-10-01").', 'text-to-audio' ),
 							'required'    => false,
 						),
 						'to_date' => array(
 							'type'        => 'string',
-							'description' => 'End date in Y-m-d format (for Custom range)',
+							'description' => __( 'End date for a Custom range, format Y-m-d (e.g. "2026-10-31").', 'text-to-audio' ),
 							'required'    => false,
 						),
 					),
@@ -277,25 +320,26 @@ class TTA_Api_Routes {
 					'methods'             => \WP_REST_Server::READABLE,
 					'callback'            => array( $this->analytics, 'filtered_insights' ),
 					'permission_callback' => array( $this, 'get_route_access' ),
+					'description'         => __( 'Returns listening totals limited to chosen posts and a date range, for the analytics filters. Administrators only (manage_options).', 'text-to-audio' ),
 					'args'                => array(
 						'post_ids' => array(
 							'type'        => 'string',
-							'description' => 'JSON array of post IDs to filter',
+							'description' => __( 'JSON array of post IDs to include, e.g. "[12, 45]". Empty means all posts.', 'text-to-audio' ),
 							'required'    => false,
 						),
 						'date_range' => array(
 							'type'        => 'string',
-							'description' => 'Date range preset',
+							'description' => __( 'Date range preset: "Yesterday", "Last 7 Days", "Last 30 Days", "Last 90 Days" or "Custom" (then send from_date and to_date).', 'text-to-audio' ),
 							'required'    => false,
 						),
 						'from_date' => array(
 							'type'        => 'string',
-							'description' => 'Start date in Y-m-d format',
+							'description' => __( 'Start date, format Y-m-d (e.g. "2026-10-01").', 'text-to-audio' ),
 							'required'    => false,
 						),
 						'to_date' => array(
 							'type'        => 'string',
-							'description' => 'End date in Y-m-d format',
+							'description' => __( 'End date, format Y-m-d (e.g. "2026-10-31").', 'text-to-audio' ),
 							'required'    => false,
 						),
 					),
@@ -316,7 +360,11 @@ class TTA_Api_Routes {
 					'methods'             => \WP_REST_Server::CREATABLE,
 					'callback'            => array( $this->compatibility, 'compatible_data' ),
 					'permission_callback' => array( $this, 'get_route_access' ),
-					'args'                => array(),
+					'description'         => __( 'Reads or saves the integration settings on the Compatibility screen, currently which Advanced Custom Fields (ACF) fields are read aloud with the post and in what order. Administrators only (manage_options).', 'text-to-audio' ),
+					'args'                => Schema::envelope_args(
+						__( 'the integration settings', 'text-to-audio' ),
+						__( 'Keys: tts_acf_fields (list of ACF field names to read, from /acf_fields), tts_acf_custom_order (boolean: read them in the listed order).', 'text-to-audio' )
+					),
 				),
 			)
 		);
@@ -330,19 +378,23 @@ class TTA_Api_Routes {
 					'methods'             => \WP_REST_Server::CREATABLE,
 					'callback'            => array( $this, 'handle_onboarding_event' ),
 					'permission_callback' => array( $this, 'get_route_access' ),
+					'description'         => __( 'Records a setup-wizard event (started, step completed, completed or skipped) in the site\'s own options, to show setup progress. Nothing is sent off the site. Administrators only (manage_options).', 'text-to-audio' ),
 					'args'                => array(
 						'event' => array(
 							'type'        => 'string',
 							'required'    => true,
 							'enum'        => array( 'wizard_started', 'step_completed', 'wizard_completed', 'wizard_skipped' ),
+							'description' => __( 'Which wizard event happened.', 'text-to-audio' ),
 						),
 						'step' => array(
 							'type'        => 'integer',
 							'required'    => false,
+							'description' => __( 'Wizard step number the event belongs to (for step_completed).', 'text-to-audio' ),
 						),
 						'data' => array(
 							'type'        => 'object',
 							'required'    => false,
+							'description' => __( 'Optional choices made in that step, e.g. the selected player or post types.', 'text-to-audio' ),
 						),
 					),
 				),
@@ -358,7 +410,18 @@ class TTA_Api_Routes {
 					'methods'             => \WP_REST_Server::CREATABLE,
 					'callback'            => array( $this, 'text_alias' ),
 					'permission_callback' => array( $this, 'get_route_access' ),
-					'args'                => array(),
+					'description'         => __( 'Reads or replaces the pronunciation aliases: words the player should read differently (e.g. "WP" read as "WordPress"). Saving replaces the whole list. Administrators only (manage_options).', 'text-to-audio' ),
+					'args'                => array(
+						'method'  => Schema::doc_arg(
+							'string',
+							__( 'Action to run: "get" returns the aliases, "post" replaces them with the "aliases" value.', 'text-to-audio' ),
+							array( 'enum' => array( 'get', 'post' ) )
+						),
+						'aliases' => Schema::doc_arg(
+							'string',
+							__( 'Only for method "post": JSON array of aliases, each {"actual_text": "WP", "to_read": "WordPress", "apply_to_numbers": false}. Rows with an empty actual_text are dropped. Send the full list; it replaces the stored one.', 'text-to-audio' )
+						),
+					),
 				),
 			)
 		);
@@ -373,6 +436,7 @@ class TTA_Api_Routes {
 					'methods'             => \WP_REST_Server::READABLE,
 					'callback'            => array( $this, 'get_all_user_roles' ),
 					'permission_callback' => array( $this, 'get_route_access' ),
+					'description'         => __( 'Lists the site\'s user roles (slug and name), used to choose who may see the player and who may download audio. Administrators only (manage_options). Takes no parameters.', 'text-to-audio' ),
 					'args'                => array(),
 				),
 			)
@@ -387,6 +451,7 @@ class TTA_Api_Routes {
 					'methods'             => \WP_REST_Server::CREATABLE,
 					'callback'            => array( $this, 'acf_fields' ),
 					'permission_callback' => array( $this, 'get_route_access' ),
+					'description'         => __( 'Lists the Advanced Custom Fields (ACF) fields that can be read aloud with a post. Returns an empty list when ACF is not active. Read-only despite using POST. Administrators only (manage_options). Takes no parameters.', 'text-to-audio' ),
 					'args'                => array(),
 				),
 			)
@@ -401,6 +466,7 @@ class TTA_Api_Routes {
 					'methods'             => \WP_REST_Server::CREATABLE,
 					'callback'            => array( $this, 'categories_and_tags' ),
 					'permission_callback' => array( $this, 'get_route_access' ),
+					'description'         => __( 'Lists the site\'s categories, tags, public post types and post statuses, used by the settings screens to choose where the player appears and what is excluded. Read-only despite using POST. Administrators only (manage_options). Takes no parameters.', 'text-to-audio' ),
 					'args'                => array(),
 				),
 			)
@@ -422,7 +488,10 @@ class TTA_Api_Routes {
 					'methods'             => \WP_REST_Server::CREATABLE,
 					'callback'            => array( $this, 'cors_alert' ),
 					'permission_callback' => '__return_true',
-					'args'                => array(),
+					'description'         => __( 'Public on purpose: the front-end player reports here when one of AtlasVoice\'s own scripts failed to load from another domain (a CDN missing CORS headers), so the dashboard can show a fix-it notice. Only accepts AtlasVoice script URLs on a different host and records at most one report per hour. JSON body.', 'text-to-audio' ),
+					'args'                => array(
+						'url' => Schema::doc_arg( 'string', __( 'Full URL of the AtlasVoice script that failed to load, e.g. "https://cdn.example.com/wp-content/plugins/text-to-audio/admin/js/build/text-to-audio-button.min.js".', 'text-to-audio' ), array( 'format' => 'uri' ) ),
+					),
 				),
 			)
 		);
@@ -444,7 +513,14 @@ class TTA_Api_Routes {
 					'methods'             => \WP_REST_Server::CREATABLE,
 					'callback'            => array( $this, 'reset_plugin_data' ),
 					'permission_callback' => array( $this, 'get_route_access' ),
-					'args'                => array(),
+					'description'         => __( 'DESTRUCTIVE: deletes all AtlasVoice settings, analytics, stored audio links and caches, then restores the defaults of a fresh install. Disabled unless the site defines TTA_ENABLE_RESET_UI. Administrators only (manage_options). JSON body.', 'text-to-audio' ),
+					'args'                => array(
+						'confirm' => Schema::doc_arg(
+							'string',
+							__( 'Required: must be exactly "DELETE" or nothing is reset.', 'text-to-audio' ),
+							array( 'enum' => array( 'DELETE' ) )
+						),
+					),
 				),
 			)
 		);
