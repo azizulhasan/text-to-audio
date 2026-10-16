@@ -160,6 +160,66 @@ function readConfig() {
 }
 
 /**
+ * TTS-340 — the "read the post title" setting; absent keeps the old assumption
+ * (yes). Only the fallback for _titleIsSpoken() when no spoken text is on hand.
+ */
+function titleSettingOn() {
+    const s = (window.ttsObj && window.ttsObj.settings && window.ttsObj.settings.settings) || {};
+    const v = s.tta__settings_add_post_title_to_read;
+    return v === undefined || v === null ? true : !(v === false || v === 0 || v === '0' || v === '' || v === 'false');
+}
+
+/** TTS-340 — how many times `text` starts with `title` (punctuation/space between). */
+function leadingCopies(text, title) {
+    let rest = text;
+    let count = 0;
+    for (;;) {
+        rest = rest.replace(/^[^\p{L}\p{N}]+/u, '');
+        if (!title || !rest.startsWith(title)) {
+            return count;
+        }
+        count++;
+        rest = rest.slice(title.length);
+    }
+}
+
+/**
+ * TTS-340 — one CSS selector for everything the speech path never speaks: the
+ * PHP-filtered excluded tags (TTA_Speech::payload(), the list Pro's DOM path
+ * uses) plus "Exclude content by CSS selectors". Text inside them must not be
+ * a match target, or a heading repeated in a table of contents (inside <nav>)
+ * is painted there instead of on the heading being read. '' while the data
+ * isn't on the page yet (delayed-JS optimizers) — the painter re-indexes later.
+ */
+function speechExclusionSelector() {
+    const speech = (window.TTS && window.TTS.settings && window.TTS.settings.speech) || {};
+    const s = (window.ttsObj && window.ttsObj.settings && window.ttsObj.settings.settings) || {};
+    let tags = speech.excluded_tags || s.tta__settings_exclude_tags || [];
+    if (typeof tags === 'string') {
+        tags = tags.split('|');
+    }
+    let css = s.tta__settings_exclude_content_by_css_selectors || [];
+    if (typeof css === 'string') {
+        css = css.split('\n');
+    }
+    const probe = document.createDocumentFragment();
+    return [...(Array.isArray(tags) ? tags : []), ...(Array.isArray(css) ? css : [])]
+        .map((sel) => String(sel).trim())
+        .filter((sel) => {
+            if (!sel) {
+                return false;
+            }
+            try {
+                probe.querySelector(sel); // drop a malformed user selector, keep the rest
+                return true;
+            } catch (e) {
+                return false;
+            }
+        })
+        .join(', ');
+}
+
+/**
  * Inject the highlight stylesheet once. Done from JS (not a PHP-enqueued .css)
  * because the rules must exist on BOTH player pages, and Free's button CSS is
  * not loaded on Pro player-2 pages. Colors come from the CSS variables set by
@@ -290,6 +350,8 @@ class WrapperHighlighter {
         this.fallbackTimer = null;
         this._lastSentence = null; // {start, end} of the located sentence in flat text
         this._wordCursor = 0;      // forward search position WITHIN the located sentence
+        this._bodyStarted = false; // TTS-340: a body sentence was located this playback
+        this._titleSkipped = false; // TTS-340: the spoken title was already skipped
 
         if (this.cfg.enabled) {
             injectStyles();
@@ -297,6 +359,7 @@ class WrapperHighlighter {
         }
         if (this.root) {
             this._index();
+            this._watchContent();
         }
         if (this.supported) {
             this._word = CSS.highlights.get(HL_WORD) || new Highlight();
@@ -318,14 +381,85 @@ class WrapperHighlighter {
             .replace(/[^\p{L}\p{N})\]]+$/u, '');
     }
 
+    /**
+     * TTS-340 — was the title prepended to the spoken text? Only if the spoken
+     * text opens with more copies of the title than the page text does; a body
+     * that merely starts with the title's words (title repeated in the content,
+     * builder heading) is not the spoken title.
+     */
+    _titleIsSpoken() {
+        // The text THIS painter is driven by: Pro's MP3 drivers keep their own
+        // sentence list (built without the title), the browser players speak
+        // window.TTS.contents (with it, when the setting is on).
+        const contents = Array.isArray(this.sentences) && this.sentences.length
+            ? this.sentences.join(' ')
+            : window.TTS && window.TTS.contents && window.TTS.contents[this.buttonId];
+        if (typeof contents !== 'string' || !contents.trim()) {
+            return titleSettingOn();
+        }
+        const spoken = stripButtonLabel(canonicalize(contents.trim()));
+        return leadingCopies(spoken, this.title) > leadingCopies(this.lower, this.title);
+    }
+
+    /**
+     * TTS-340 — a page translator (GTranslate) or any script that rewrites the
+     * content replaces the text nodes indexed at load, so sentences in the new
+     * language were searched in the old text. Mark the index stale on any TEXT
+     * change; _refreshIfStale() rebuilds it before the next lookup. Pro's
+     * overlay bands (no text) never trigger it.
+     */
+    _watchContent() {
+        if (typeof MutationObserver === 'undefined') {
+            return;
+        }
+        const hasText = (n) => (n.nodeType === Node.TEXT_NODE
+            ? !!n.nodeValue.trim()
+            : n.nodeType === Node.ELEMENT_NODE
+                && !(n.closest && n.closest('.atlasvoice-sentence-overlay'))
+                && !!(n.textContent || '').trim());
+        this._observer = new MutationObserver((mutations) => {
+            if (this._stale) {
+                return;
+            }
+            this._stale = mutations.some((m) => m.type === 'characterData'
+                || Array.prototype.some.call(m.addedNodes, hasText)
+                || Array.prototype.some.call(m.removedNodes, hasText));
+        });
+        this._observer.observe(this.root, { childList: true, subtree: true, characterData: true });
+    }
+
+    /** TTS-340 — rebuild a stale index, keeping the reading position proportionally. */
+    _refreshIfStale() {
+        if (!this._stale) {
+            return;
+        }
+        this._stale = false;
+        const ratio = this.text.length ? this.cursor / this.text.length : 0;
+        this._index();
+        this.cursor = Math.round(ratio * this.text.length);
+        this._lastSentence = null; // offsets into the old text are meaningless now
+        this._wordCursor = 0;
+    }
+
     /** Build a flat index of the wrapper's text nodes with cumulative offsets. */
     _index() {
         this.nodes = [];
         let offset = 0;
+        this._excluded = speechExclusionSelector();
+        const excluded = this._excluded;
         const walker = document.createTreeWalker(this.root, NodeFilter.SHOW_TEXT, {
             acceptNode: (n) => {
                 if (n.parentElement && n.parentElement.closest('tts-play-button, .tts__listent_content, script, style')) {
                     return NodeFilter.FILTER_REJECT;
+                }
+                // TTS-340: skip text the voice never reads. Only ancestors INSIDE
+                // the wrapper count — an excluded tag around the whole wrapper
+                // (some themes nest content in <header>/<aside>) must not hide it.
+                if (excluded && n.parentElement) {
+                    const hit = n.parentElement.closest(excluded);
+                    if (hit && hit !== this.root && this.root.contains(hit)) {
+                        return NodeFilter.FILTER_REJECT;
+                    }
                 }
                 if (!n.nodeValue) {
                     return NodeFilter.FILTER_REJECT;
@@ -353,6 +487,7 @@ class WrapperHighlighter {
      * selection doesn't intersect the indexed text at all.
      */
     spanForRange(range) {
+        this._refreshIfStale();
         if (!range || !this.nodes.length) {
             return null;
         }
@@ -436,6 +571,7 @@ class WrapperHighlighter {
         if (!this.cfg.enabled || !this.root) {
             return;
         }
+        this._refreshIfStale();
         if (this.cfg.dimEnabled) {
             this.root.classList.add(DIM_CLASS);
         }
@@ -454,7 +590,19 @@ class WrapperHighlighter {
         if (!this.title) {
             this.title = this._resolveTitle();
         }
-        if (this.title && normalizedSentence.replace(/[^\p{L}\p{N})\]]+$/u, '') === this.title) {
+        // TTS-340: same delayed-JS case for the exclusion rules — index again
+        // (once) when they arrive, so never-spoken text stops being a match target.
+        if (!this._excluded && speechExclusionSelector()) {
+            this._index();
+            this.cursor = 0;
+        }
+        // TTS-340: the title is spoken once, first — skip only that utterance.
+        // Any later identical text is a body sentence (a title copied into the
+        // content, even straight after it) and must be painted, not skipped.
+        if (this.title && !this._titleSkipped && !this._bodyStarted
+            && normalizedSentence.replace(/[^\p{L}\p{N})\]]+$/u, '') === this.title
+            && this._titleIsSpoken()) {
+            this._titleSkipped = true;
             this._lastSentence = null;
             this.clear();
             return;
@@ -479,6 +627,7 @@ class WrapperHighlighter {
             return;
         }
         this.cursor = idx;
+        this._bodyStarted = true;
         // Exact sentence end — no padding, or the sentence highlight bleeds into
         // the next sentence. Word-search tolerance (below) handles whitespace drift.
         this._lastSentence = { start: idx, end: Math.min(idx + normalizedSentence.length, this.text.length) };
@@ -560,6 +709,7 @@ class WrapperHighlighter {
         if (!cleanWord) {
             return;
         }
+        this._refreshIfStale(); // TTS-340: never paint into replaced (detached) text
         // Only paint words belonging to the currently-located sentence. If the
         // active sentence isn't in the readable area (e.g. the title), skip —
         // never scan the whole body (that made title words like "the"/"City"
@@ -622,6 +772,8 @@ class WrapperHighlighter {
         }
         this._lastSentence = null;
         this._wordCursor = 0;
+        this._bodyStarted = false; // TTS-340: next playback starts with the title again
+        this._titleSkipped = false;
     }
 }
 
