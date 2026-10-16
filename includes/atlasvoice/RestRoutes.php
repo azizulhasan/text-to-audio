@@ -91,7 +91,8 @@ class RestRoutes {
 					'methods'             => \WP_REST_Server::CREATABLE,
 					'callback'            => array( __CLASS__, 'save_rule_by_scope' ),
 					'permission_callback' => array( __CLASS__, 'admin_guard' ),
-					'args'                => array(
+					'description'         => __( 'Saves the reading rule (which part of the page is read aloud and what is left out) for the whole site, one post type or one post. Administrators only (manage_options) with a wp_rest nonce.', 'text-to-audio' ),
+					'args'                => \TTA\TTA_Rest_Schema::describe( array(
 						'scope_kind' => array(
 							'type'        => 'string',
 							'required'    => true,
@@ -105,7 +106,15 @@ class RestRoutes {
 						'tta__settings_exclude_content_by_css_selectors' => array( 'type' => 'string', 'required' => false ),
 						'tta__settings_exclude_texts'                    => array( 'type' => array( 'array', 'string' ), 'required' => false ),
 						'tta__settings_exclude_tags'                     => array( 'type' => array( 'array', 'string' ), 'required' => false ),
-					),
+					), array(
+						'scope_kind'                                     => __( 'Where the rule applies: "global" (whole site), "post_type" (one post type, send post_type) or "post" (one post, send post_id).', 'text-to-audio' ),
+						'post_type'                                      => __( 'Post type slug for scope_kind "post_type", e.g. "post" or "page".', 'text-to-audio' ),
+						'post_id'                                        => __( 'Post ID for scope_kind "post".', 'text-to-audio' ),
+						'tta__settings_css_selectors'                    => __( 'CSS selector of the content to read, e.g. ".entry-content".', 'text-to-audio' ),
+						'tta__settings_exclude_content_by_css_selectors' => __( 'CSS selectors of parts to skip inside that content, one per line, e.g. ".ez-toc-container".', 'text-to-audio' ),
+						'tta__settings_exclude_texts'                    => __( 'Exact texts never to read, as a list or separated by "|".', 'text-to-audio' ),
+						'tta__settings_exclude_tags'                     => __( 'HTML tags whose text is never read, as a list or separated by "|", e.g. "nav|figure|table".', 'text-to-audio' ),
+					) ),
 				),
 			)
 		);
@@ -122,12 +131,18 @@ class RestRoutes {
 					'methods'             => \WP_REST_Server::READABLE,
 					'callback'            => array( __CLASS__, 'get_step_rail_scope_rule' ),
 					'permission_callback' => array( __CLASS__, 'admin_guard' ),
-					'args'                => array(
+					'description'         => __( 'Returns the reading rule saved at exactly one scope (no fallback to wider scopes), so the content picker can show what is stored there. Administrators only (manage_options) with a wp_rest nonce.', 'text-to-audio' ),
+					'args'                => \TTA\TTA_Rest_Schema::describe( array(
 						'post_id'   => array( 'type' => 'integer', 'required' => true ),
 						'scope'     => array( 'type' => 'string',  'required' => true ),
 						'post_type' => array( 'type' => 'string',  'required' => false ),
 						'language'  => array( 'type' => 'string',  'required' => false ),
-					),
+					), array(
+						'post_id'   => __( 'Post being edited in the picker; used for the "post" scope.', 'text-to-audio' ),
+						'scope'     => __( 'Scope to read: "global", "post_type", "language", "post_type_language" or "post".', 'text-to-audio' ),
+						'post_type' => __( 'Post type slug for post-type scopes, e.g. "post".', 'text-to-audio' ),
+						'language'  => __( 'Language code for language scopes on multilingual sites, e.g. "fr".', 'text-to-audio' ),
+					) ),
 				),
 			)
 		);
@@ -144,7 +159,8 @@ class RestRoutes {
 					'methods'             => \WP_REST_Server::READABLE,
 					'callback'            => array( __CLASS__, 'get_step_rail_verify_sample' ),
 					'permission_callback' => array( __CLASS__, 'admin_guard' ),
-					'args'                => array(
+					'description'         => __( 'Returns a sample of published posts (ID, title, URL) of a post type, so the content picker can check that the saved reading rule still finds the content on each of them. Administrators only (manage_options) with a wp_rest nonce.', 'text-to-audio' ),
+					'args'                => \TTA\TTA_Rest_Schema::describe( array(
 						'post_type'       => array( 'type' => 'string',  'required' => false ),
 						'language'        => array( 'type' => 'string',  'required' => false ),
 						'sample_size'     => array( 'type' => 'integer', 'required' => false ),
@@ -156,7 +172,12 @@ class RestRoutes {
 							'default'     => 'rand',
 							'description' => 'Sort order for the sample. rand = random, date_desc = newest first, date_asc = oldest first.',
 						),
-					),
+					), array(
+						'post_type'       => __( 'Post type slug to sample, e.g. "post".', 'text-to-audio' ),
+						'language'        => __( 'Only posts in this language (multilingual sites), e.g. "fr".', 'text-to-audio' ),
+						'sample_size'     => __( 'How many posts to return.', 'text-to-audio' ),
+						'exclude_post_id' => __( 'A post ID to leave out of the sample, usually the one already open.', 'text-to-audio' ),
+					) ),
 				),
 			)
 		);
@@ -169,12 +190,18 @@ class RestRoutes {
 					'methods'             => \WP_REST_Server::READABLE,
 					'callback'            => array( __CLASS__, 'get_step_rail_sample_url' ),
 					'permission_callback' => array( __CLASS__, 'admin_guard' ),
-					'args'                => array(
+					'description'         => __( 'Returns the URL of one published post matching a scope, to open the visual content picker on a representative page. Administrators only (manage_options) with a wp_rest nonce.', 'text-to-audio' ),
+					'args'                => \TTA\TTA_Rest_Schema::describe( array(
 						'scope'     => array( 'type' => 'string',  'required' => false ),
 						'post_type' => array( 'type' => 'string',  'required' => false ),
 						'language'  => array( 'type' => 'string',  'required' => false ),
 						'post_id'   => array( 'type' => 'integer', 'required' => false ),
-					),
+					), array(
+						'scope'     => __( 'Scope to find a page for: "global", "post_type", "language", "post_type_language" or "post".', 'text-to-audio' ),
+						'post_type' => __( 'Post type slug for post-type scopes, e.g. "post".', 'text-to-audio' ),
+						'language'  => __( 'Language code for language scopes, e.g. "fr".', 'text-to-audio' ),
+						'post_id'   => __( 'Post ID for the "post" scope.', 'text-to-audio' ),
+					) ),
 				),
 			)
 		);
@@ -192,22 +219,24 @@ class RestRoutes {
 					'methods'             => \WP_REST_Server::READABLE,
 					'callback'            => array( __CLASS__, 'get_mode' ),
 					'permission_callback' => array( __CLASS__, 'admin_guard' ),
+					'description'         => __( 'Returns whether AtlasVoice is in staging (only administrators see the player) or production (visitors see it), with the data for the admin-bar status pill. Administrators only (manage_options). Takes no parameters.', 'text-to-audio' ),
 					'args'                => array(),
 				),
 				array(
 					'methods'             => \WP_REST_Server::CREATABLE,
 					'callback'            => array( __CLASS__, 'post_mode' ),
 					'permission_callback' => array( __CLASS__, 'admin_guard' ),
+					'description'         => __( 'Switches AtlasVoice between staging and production. "go-live" shows the player to all visitors and needs the typed confirmation "GO LIVE"; "revert" goes back to staging (administrators only see it). Administrators only (manage_options) with a wp_rest nonce.', 'text-to-audio' ),
 					'args'                => array(
 						'action'  => array(
 							'type'        => 'string',
 							'required'    => true,
-							'description' => 'One of: go-live | revert.',
+							'description' => __( 'What to do: "go-live" (staging to production) or "revert" (production to staging).', 'text-to-audio' ),
 						),
 						'confirm' => array(
 							'type'        => 'string',
 							'required'    => false,
-							'description' => 'Typed confirmation phrase. Required for action=go-live and must equal "GO LIVE" exactly.',
+							'description' => __( 'Typed confirmation. Required for action "go-live" and must equal "GO LIVE" exactly.', 'text-to-audio' ),
 						),
 					),
 				),
