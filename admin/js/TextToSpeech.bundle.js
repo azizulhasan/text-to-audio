@@ -8,5 +8,8 @@
  */
 import TextToSpeech from './TextToSpeech';
 import AtlasVoiceProgressivePlayer from './tts/AtlasVoiceProgressivePlayer';
+import RestNonce from './tts/RestNonce';
 
 TextToSpeech.ProgressivePlayer = AtlasVoiceProgressivePlayer;
+// TTS-343: Pro's player renews an expired nonce from a cached page with this.
+TextToSpeech.RestNonce = RestNonce;

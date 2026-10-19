@@ -13,6 +13,7 @@
 import Plyr from 'plyr';
 import AtlasVoiceAnalytics from './AtlasVoiceAnalytics';
 import AtlasVoiceProgressivePlayer from './tts/AtlasVoiceProgressivePlayer';
+import RestNonce from './tts/RestNonce';
 
 const { __, sprintf } = wp.i18n;
 
@@ -297,7 +298,7 @@ export class AtlasVoiceMp3Player extends AtlasVoiceProgressivePlayer {
         return { code: 'locked' };
     }
 
-    async send(body) {
+    async send(body, retried = false) {
         try {
             const res = await fetch(AtlasVoiceMp3Player.route('gtts'), {
                 method: 'POST',
@@ -308,7 +309,14 @@ export class AtlasVoiceMp3Player extends AtlasVoiceProgressivePlayer {
                 },
                 body: JSON.stringify(body),
             });
-            return await res.json();
+            const data = await res.json().catch(() => null);
+
+            // TTS-343: the page came from a page cache with an expired nonce.
+            if (!retried && RestNonce.isExpired(res.status, data) && await RestNonce.renew()) {
+                return this.send(body, true);
+            }
+
+            return data || { status: false, data: { message: 'service_unreachable' } };
         } catch (e) {
             return { status: false, data: { message: 'service_unreachable' } };
         }
