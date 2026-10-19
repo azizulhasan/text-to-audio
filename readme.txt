@@ -5,7 +5,7 @@ Tags: accessibility, speech, tts, text to speech, text to audio
 Requires at least: 5.6
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 2.3.20
+Stable tag: 2.3.21
 License: GPLv3 or later
 License URI: https://www.gnu.org/licenses/gpl-3.0.txt
 
@@ -395,6 +395,10 @@ We are looking for people to help translate this plugin. If you can help, we wou
 Help us and the WordPress community translate the plugin. [Contact us](http://atlasaidev.com/contact-us/) and we'll guide you through the process.
 
 
+= 2.3.21 ( 19 Oct 2026 ) =
+Fixed : On sites with a page cache, audio could stop at "You are almost there" on older cached pages. The player now refreshes its security check and carries on.
+Fixed : Listening statistics are recorded again for visitors who open an older cached page.
+
 = 2.3.20 ( 16 Oct 2026 ) =
 Fixed : Read-along highlighting no longer highlights text the voice skips, such as a table of contents.
 Fixed : Sentences that repeat the post title are highlighted again when they are read.
@@ -555,6 +559,9 @@ Fixed : Removed external sample-audio requests from the dashboard; previews now 
 
 
 == Upgrade Notice ==
+
+= 2.3.21 =
+Fixes audio stopping at "You are almost there" and missing listening statistics on sites with a page cache. Recommended for sites using LiteSpeed Cache, WP Rocket or a CDN.
 
 = 2.3.20 =
 Read-along highlighting now skips text the voice does not read, highlights sentences that repeat the title, and keeps working on translated pages. Recommended for sites using highlighting.

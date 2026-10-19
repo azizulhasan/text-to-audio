@@ -138,6 +138,27 @@ class TTA_Api_Routes {
 			)
 		);
 
+		/*
+		 * TTS-343: a page served from a page cache (LiteSpeed, WP Rocket, a CDN)
+		 * can carry a wp_rest nonce WordPress has already expired, and every
+		 * player request then fails with 403. The player asks here for a fresh
+		 * one: POST is never page-cached. Public on purpose: it returns only the
+		 * nonce the current visitor's page would carry anyway.
+		 */
+		register_rest_route(
+			$this->namespace,
+			'/rest-nonce',
+			array(
+				array(
+					'methods'             => \WP_REST_Server::CREATABLE,
+					'callback'            => array( $this, 'fresh_rest_nonce' ),
+					'permission_callback' => '__return_true',
+					'description'         => __( 'Returns a fresh wp_rest nonce for the current visitor, for players on pages served from a page cache whose nonce has expired. Public on purpose: it returns only the nonce the visitor\'s own page would carry. Takes no parameters.', 'text-to-audio' ),
+					'args'                => array(),
+				),
+			)
+		);
+
 		// register track route.
 		register_rest_route(
 			$this->namespace,
@@ -525,6 +546,25 @@ class TTA_Api_Routes {
 			)
 		);
 
+	}
+
+	/**
+	 * TTS-343: a fresh wp_rest nonce for a player whose cached page carried an
+	 * expired one. Marked uncacheable so no proxy or CDN can store the answer.
+	 *
+	 * Called without a nonce, so core's cookie check has already reset the user
+	 * to 0: this only ever hands out a logged-out nonce, never a logged-in
+	 * user's, which REST's credentialed CORS would otherwise expose.
+	 *
+	 * @return \WP_REST_Response
+	 */
+	public function fresh_rest_nonce() {
+		$response = rest_ensure_response( array( 'nonce' => wp_create_nonce( 'wp_rest' ) ) );
+		foreach ( wp_get_nocache_headers() as $name => $value ) {
+			$response->header( $name, $value );
+		}
+
+		return $response;
 	}
 
 	/**
