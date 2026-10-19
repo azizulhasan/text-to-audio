@@ -401,6 +401,10 @@ We are looking for people to help translate this plugin. If you can help, we wou
 Help us and the WordPress community translate the plugin. [Contact us](http://atlasaidev.com/contact-us/) and we'll guide you through the process.
 
 
+= 2.4.0-beta.6 ( 19 Oct 2026 ) =
+Beta: for testing before the 2.4.0 release. Use it with AtlasVoice Pro 3.5.0-beta.6.
+Fixed : On sites with a page cache, audio could stop being made after a day, because the cached page carried an expired security code. The player now gets a fresh code and carries on.
+
 = 2.4.0-beta.5 ( 18 Oct 2026 ) =
 Beta: for testing before the 2.4.0 release. Use it with AtlasVoice Pro 3.5.0-beta.5.
 Improved : Includes every fix from the released 2.3.20: read-along highlighting skips text the voice does not read, highlights sentences that repeat the title, and follows pages a translation plugin has translated.
