@@ -9,6 +9,8 @@ import AliasEngine from "./AliasEngine";
 // TTS-256: read-along highlighter — registers wp.hooks listeners on import
 // (tts_high_light_text / tts_highlight_word / tts_highlight_clear).
 import "./tts/highlighter.js";
+// TTS-344: Pro's MP3 players renew an expired nonce from a cached page with this.
+import RestNonce from './tts/RestNonce.js';
 
 export default class TextToSpeech {
     /**
@@ -703,6 +705,10 @@ if (typeof window !== 'undefined' && window.wp && window.wp.hooks && !window.__t
         }
     });
 }
+
+// TTS-344: one shared surface for Pro. window.TextToSpeech is sometimes this
+// class and sometimes an instance (getData), so Pro also reads .constructor.
+TextToSpeech.RestNonce = RestNonce;
 
 /**
  * Load text to speech after DOMContentLoaded in free version.

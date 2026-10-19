@@ -1,5 +1,7 @@
 import * as FingerprintJS from './analytics/fingerprint.js';
 import {getUserAddress} from "./tts/utilities";
+// TTS-345: renew an expired nonce from a page-cached post before /track is sent.
+import RestNonce from './tts/RestNonce.js';
 
 class AtlasVoiceAnalytics {
     constructor(postId = '') {
@@ -71,7 +73,27 @@ class AtlasVoiceAnalytics {
 
     trackPlay() {
         this.startTimeTracking = true;
+        this.#refreshNonceBeforeUnload();
         this.addEvent('play');
+    }
+
+    /**
+     * TTS-345: /track is only sent when the page closes (sendBeacon or a
+     * keepalive fetch), which can neither read a 403 nor retry. A page served
+     * from a page cache can carry a nonce WordPress has already expired, so
+     * renew it once per page while the visitor is still here; both senders
+     * read ttsObj.rest_nonce at send time.
+     *
+     * Logged-out visitors only: the renewal route hands out a logged-out
+     * nonce, which would break a logged-in user's requests, and logged-in
+     * users are not served cached pages anyway.
+     */
+    #refreshNonceBeforeUnload() {
+        if (AtlasVoiceAnalytics.nonceRefreshed || window?.ttsObj?.is_logged_in || !this.shouldTrackAnalyticsData()) {
+            return;
+        }
+        AtlasVoiceAnalytics.nonceRefreshed = true;
+        RestNonce.renew();
     }
 
     trackPause() {
@@ -653,16 +675,23 @@ class AtlasVoiceAnalytics {
      */
     async #fetchGeolocation() {
         try {
-            const response = await fetch(
-                `${ttsObj.api_url}${ttsObj.api_namespace}/${ttsObj.api_version}/geolocation`,
-                {
-                    method: 'GET',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-WP-NONCE': window?.ttsObj?.rest_nonce || '',
-                    },
+            const url = `${ttsObj.api_url}${ttsObj.api_namespace}/${ttsObj.api_version}/geolocation`;
+            const request = () => fetch(url, {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-WP-NONCE': window?.ttsObj?.rest_nonce || '',
+                },
+            });
+            let response = await request();
+
+            // TTS-345: an expired nonce from a page-cached post; renew it and retry once.
+            if (403 === response.status && !window?.ttsObj?.is_logged_in) {
+                const body = await response.clone().json().catch(() => null);
+                if (RestNonce.isExpired(response.status, body) && await RestNonce.renew()) {
+                    response = await request();
                 }
-            );
+            }
 
             if (!response.ok) {
                 throw new Error('Geolocation API request failed');
