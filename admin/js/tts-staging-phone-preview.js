@@ -109,6 +109,31 @@ async function showPreview(postId) {
     openDialog(wrap);
 }
 
+/**
+ * Pro's MP3 players draw their own staging line inside the player (TTS-282),
+ * after load. With this note under the same player that said it twice, so hide
+ * Pro's copy. Done here (Free) so it also works with older Pro versions.
+ */
+function hideProStagingDuplicate() {
+    document.querySelectorAll(".atlasvoice-staging-note").forEach((note) => {
+        const player = note.previousElementSibling;
+        if (!player) {
+            return;
+        }
+        const hide = () => player.querySelectorAll(".tts-staging-note").forEach((el) => {
+            el.style.display = "none";
+        });
+        hide();
+        new MutationObserver(hide).observe(player, { childList: true, subtree: true });
+    });
+}
+
+if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", hideProStagingDuplicate);
+} else {
+    hideProStagingDuplicate();
+}
+
 document.addEventListener("click", (e) => {
     const link = e.target.closest ? e.target.closest(".atlasvoice-staging-note__phone") : null;
     if (!link) {
