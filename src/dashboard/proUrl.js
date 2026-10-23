@@ -47,6 +47,37 @@ export const proUrl = (content = '', page = 'pricing') => {
 };
 
 /**
+ * TTS-352 — 2.4 beta landing page (it serves both editions) and its feedback form.
+ *
+ * @param {'free'|'pro'} edition - preselects the edition on the beta page.
+ * @param {string} [content] - utm_content slug for this call site.
+ * @returns {string}
+ */
+export const betaUrl = (edition = 'free', content = '') => {
+    const params = new URLSearchParams({
+        src: 'plugin',
+        edition: edition === 'pro' ? 'pro' : 'free',
+        utm_source: cfg.source || 'text-to-audio',
+        utm_medium: cfg.medium || 'plugin_admin',
+        utm_campaign: 'atlasvoice_2_4_beta',
+    });
+    if (content) {
+        params.set('utm_content', content);
+    }
+    return 'https://atlasvoice.cloud/atlasvoice-beta/?' + params.toString();
+};
+
+export const betaFeedbackUrl = (content = 'beta_feedback') => {
+    const params = new URLSearchParams({
+        utm_source: cfg.source || 'text-to-audio',
+        utm_medium: cfg.medium || 'plugin_admin',
+        utm_campaign: 'atlasvoice_2_4_beta',
+        utm_content: content,
+    });
+    return 'https://atlasaidev.com/contact-us/?' + params.toString();
+};
+
+/**
  * TTS-264 — URL of the internal (in-admin) Pro pricing page.
  *
  * Upgrade CTAs target this in-context page (lower friction, one-click Freemius

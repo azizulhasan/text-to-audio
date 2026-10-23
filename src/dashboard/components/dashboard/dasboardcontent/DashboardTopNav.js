@@ -4,6 +4,7 @@ import { Link } from "react-router-dom";
 import Icon from "../../Icon";
 import { pricingPageUrl } from "../../../proUrl";
 import DemoLink from "../../DemoLink";
+import StagingModeControl from "./StagingModeControl";
 
 export default function DashboardTopNav() {
   return (
@@ -53,6 +54,9 @@ export default function DashboardTopNav() {
             overflow: "hidden",
           }}
         >
+          {/* TTS-351: Staging / Live + Go live, first in the group, same style as the rest. */}
+          <StagingModeControl />
+
           {/* What's New → the plugin changelog on the wp.org Developers tab. */}
           <a
             href="https://wordpress.org/plugins/text-to-audio/#developers"

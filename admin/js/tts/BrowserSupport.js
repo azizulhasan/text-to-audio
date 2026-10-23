@@ -31,6 +31,18 @@ export default class BrowserSupport {
         return false
     }
 
+    // TTS-350: iPadOS reports itself as a Mac, so a touch-capable "Macintosh" is an iPad.
+    isIOS() {
+        let ua = navigator.userAgent;
+        return /iPad|iPhone|iPod/.test(ua) || (/Macintosh/.test(ua) && navigator.maxTouchPoints > 1);
+    }
+
+    // TTS-350: the 13-second pause/resume keep-alive is a desktop Chrome workaround.
+    // On iOS a resume often never restarts speech, so reading stopped after ~1 paragraph.
+    needsKeepAliveTimer() {
+        return !this.isAndroid() && !this.isIOS();
+    }
+
 
     getLanguage(selectedVoice = this.#voice, selectedLang = this.#lang) {
         if (this.#lang === selectedLang) {

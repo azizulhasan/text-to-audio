@@ -61,6 +61,16 @@ class Mode {
 	/** Admin-bar node id. Namespaced to avoid colliding with legacy nodes. */
 	const BAR_NODE_ID = 'atlasvoice-mode';
 
+	/** TTS-351: set when a staging note was printed, so the footer ships the Go Live client. */
+	private static $staging_note_rendered = false;
+
+	/** TTS-351: query arg and lifetime of the private phone-preview link. */
+	const PREVIEW_ARG = 'atlasvoice_preview';
+	const PREVIEW_TTL = DAY_IN_SECONDS;
+
+	/** TTS-351: per-request cache of is_preview_request(). */
+	private static $preview_request = null;
+
 	/**
 	 * Register admin-bar + inline style hooks. Idempotent — Bootstrap
 	 * guards repeat calls.
@@ -71,6 +81,77 @@ class Mode {
 		add_action( 'admin_head',       array( __CLASS__, 'render_inline_style' ), 8 );
 		add_action( 'wp_footer',        array( __CLASS__, 'render_inline_script' ), 99 );
 		add_action( 'admin_footer',     array( __CLASS__, 'render_inline_script' ), 99 );
+		add_action( 'template_redirect', array( __CLASS__, 'no_cache_preview' ) );
+	}
+
+	/**
+	 * TTS-351: create a private link that shows the staging player on a phone
+	 * that is not logged in. Owners tested logged in on their computer and saw a
+	 * player their (logged-out) phone never showed. Only a hash of the token is
+	 * stored, for PREVIEW_TTL.
+	 *
+	 * @param string $url Page to preview (defaults to the newest readable post).
+	 * @return array { url: string, expires: int } or empty url when nothing to preview.
+	 */
+	public static function create_preview_link( $url = '' ) {
+		if ( '' === $url && class_exists( '\\TTA\\TTA_Helper' ) ) {
+			$url = \TTA\TTA_Helper::get_latest_post_preview_url();
+		}
+		if ( ! $url ) {
+			$url = home_url( '/' );
+		}
+
+		$token = wp_generate_password( 32, false, false );
+		set_transient( self::preview_key( $token ), get_current_user_id(), self::PREVIEW_TTL );
+
+		return array(
+			'url'     => add_query_arg( self::PREVIEW_ARG, $token, $url ),
+			'expires' => time() + self::PREVIEW_TTL,
+		);
+	}
+
+	/**
+	 * TTS-351: true when this request carries a valid, unexpired preview token
+	 * while the site is in staging.
+	 *
+	 * @return bool
+	 */
+	public static function is_preview_request() {
+		if ( null !== self::$preview_request ) {
+			return self::$preview_request;
+		}
+		self::$preview_request = false;
+
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- read-only token in a shared link, validated against a stored hash.
+		$token = isset( $_GET[ self::PREVIEW_ARG ] ) ? preg_replace( '/[^A-Za-z0-9]/', '', sanitize_text_field( wp_unslash( $_GET[ self::PREVIEW_ARG ] ) ) ) : '';
+		if ( 32 === strlen( $token ) && ! self::is_production() ) {
+			self::$preview_request = false !== get_transient( self::preview_key( $token ) );
+		}
+		return self::$preview_request;
+	}
+
+	/**
+	 * TTS-351: a preview page carries the staging player, so page caches must
+	 * never store it for the same URL.
+	 *
+	 * @return void
+	 */
+	public static function no_cache_preview() {
+		if ( ! self::is_preview_request() ) {
+			return;
+		}
+		nocache_headers();
+		if ( ! defined( 'DONOTCACHEPAGE' ) ) {
+			define( 'DONOTCACHEPAGE', true ); // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedConstantFound -- honoured by WP Rocket, W3TC, LiteSpeed and others.
+		}
+	}
+
+	/**
+	 * @param string $token
+	 * @return string Transient key for a preview token (hash only, never the token).
+	 */
+	private static function preview_key( $token ) {
+		return 'tta_preview_' . substr( hash( 'sha256', $token ), 0, 40 );
 	}
 
 	/**
@@ -173,18 +254,90 @@ class Mode {
 				'label' => __( 'AtlasVoice: off', 'text-to-audio' ),
 			);
 		}
+		// TTS-351: "Live" / "Staging" match the Go live dialog wording; the
+		// 'state' values consumers read are unchanged.
 		if ( self::get() === self::MODE_PRODUCTION ) {
 			return array(
 				'state' => 'production',
 				'color' => '#00a32a',
-				'label' => __( 'AtlasVoice: production', 'text-to-audio' ),
+				'label' => __( 'AtlasVoice: Live', 'text-to-audio' ),
 			);
 		}
 		return array(
 			'state' => 'staging',
 			'color' => '#dba617',
-			'label' => __( 'AtlasVoice: staging', 'text-to-audio' ),
+			'label' => __( 'AtlasVoice: Staging', 'text-to-audio' ),
 		);
+	}
+
+	/**
+	 * TTS-351: admin-only note printed right after the player while in staging.
+	 *
+	 * Owners tested on their own (logged-in) device and read the hidden player as
+	 * "works on my PC, not on my phone". Visitors never get this markup: in
+	 * staging TTA_Helper::should_load_button() renders the player for
+	 * manage_options users only, so it is as cache-safe as the player itself.
+	 *
+	 * @param int $post_id Post the player belongs to; enables "Test on your phone" for it.
+	 * @return string HTML, or '' when live, for non-admins, or when filtered off.
+	 */
+	public static function staging_note_html( $post_id = 0 ) {
+		if ( self::is_production() ) {
+			return '';
+		}
+		if ( ! apply_filters( 'tts_show_staging_note', true ) ) {
+			return '';
+		}
+
+		// Phone opened through the private preview link (not logged in).
+		if ( ! current_user_can( 'manage_options' ) ) {
+			if ( ! self::is_preview_request() ) {
+				return '';
+			}
+			return '<div class="atlasvoice-staging-note" style="display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin:6px 0 12px;padding:6px 10px;border-radius:8px;background:#fff7e0;color:#7a4a00;border:1px dashed #e2b54a;font-size:12px;line-height:1.35;font-weight:500;">'
+				. '<span style="font-weight:800;letter-spacing:.03em;text-transform:uppercase;font-size:10.5px;background:#f5c242;color:#4a2c00;padding:2px 6px;border-radius:4px;">' . esc_html__( 'Preview', 'text-to-audio' ) . '</span>'
+				. '<span>' . esc_html__( 'Private preview link. Visitors can\'t see this player until you go live.', 'text-to-audio' ) . '</span>'
+				. '</div>';
+		}
+
+		self::$staging_note_rendered = true;
+
+		// "Test on your phone": QR code for a private link to THIS post (owner, 2026-10-23).
+		$phone = '';
+		$post_id = absint( $post_id );
+		if ( $post_id && 'publish' === get_post_status( $post_id ) ) {
+			self::enqueue_phone_preview();
+			$phone = '<a class="atlasvoice-staging-note__phone" data-post-id="' . esc_attr( $post_id ) . '" href="#atlasvoice-phone-preview" style="color:#7a4a00;font-weight:700;text-decoration:underline;">' . esc_html__( 'Test on your phone', 'text-to-audio' ) . '</a>';
+		}
+
+		return '<div class="atlasvoice-staging-note" style="display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin:6px 0 12px;padding:6px 10px;border-radius:8px;background:#fff7e0;color:#7a4a00;border:1px dashed #e2b54a;font-size:12px;line-height:1.35;font-weight:500;">'
+			. '<span style="font-weight:800;letter-spacing:.03em;text-transform:uppercase;font-size:10.5px;background:#f5c242;color:#4a2c00;padding:2px 6px;border-radius:4px;">' . esc_html__( 'Staging', 'text-to-audio' ) . '</span>'
+			. '<span>' . esc_html__( 'Only you can see this player. Visitors see it after you go live.', 'text-to-audio' ) . '</span>'
+			// The shared Go Live client opens its dialog for [data-atlasvoice-action];
+			// without that script the link still reaches the dashboard.
+			. '<a class="atlasvoice-staging-note__go-live" data-atlasvoice-action="go-live" href="' . esc_url( admin_url( 'admin.php?page=text-to-audio' ) ) . '" style="color:#7a4a00;font-weight:700;text-decoration:underline;">' . esc_html__( 'Go live…', 'text-to-audio' ) . '</a>'
+			. $phone
+			. '</div>';
+	}
+
+	/**
+	 * TTS-351: the small QR script behind "Test on your phone". Enqueued while the
+	 * content renders, so it prints in the footer, and only for admins in staging.
+	 *
+	 * @return void
+	 */
+	private static function enqueue_phone_preview() {
+		if ( wp_script_is( 'tts-staging-phone-preview', 'enqueued' ) ) {
+			return;
+		}
+		$rel = 'admin/js/build/tts-staging-phone-preview.min.js';
+		$ver = file_exists( TTA_PLUGIN_PATH . $rel ) ? (string) filemtime( TTA_PLUGIN_PATH . $rel ) : TEXT_TO_AUDIO_VERSION;
+		wp_enqueue_script( 'tts-staging-phone-preview', TTA_PLUGIN_URL . $rel, array( 'wp-i18n' ), $ver, true );
+		wp_localize_script( 'tts-staging-phone-preview', 'ttsPhonePreview', array(
+			'endpoint' => esc_url_raw( \TTA\TTA_Cache::get_rest_api_url() . 'tta/v1/preview-link' ),
+			'nonce'    => wp_create_nonce( 'wp_rest' ),
+		) );
+		wp_set_script_translations( 'tts-staging-phone-preview', 'text-to-audio' );
 	}
 
 	/**
@@ -395,6 +548,17 @@ class Mode {
 		// covers both directions (Go Live and Revert) and honours the TTS-255
 		// tta__settings_show_mode_bar setting.
 		if ( self::should_render_bar_node() ) {
+			return true;
+		}
+
+		// TTS-351: the front-end staging note links to the same dialog.
+		if ( self::$staging_note_rendered ) {
+			return true;
+		}
+
+		// TTS-351: the dashboard header's Go live / Back to staging buttons, in both modes.
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- screen check only.
+		if ( is_admin() && isset( $_GET['page'] ) && 'text-to-audio' === sanitize_key( wp_unslash( $_GET['page'] ) ) ) {
 			return true;
 		}
 
