@@ -6,6 +6,7 @@ import toast from "./context/Notify";
 import { copyToClipBoard } from "./context/utilities";
 import DemoLink from "./DemoLink";
 import BetaInviteCard from "./BetaInviteCard";
+import AtlasMcpCard from "./AtlasMcpCard";
 
 export default function UpgradeToPro({ promotionType = "general", showDemoCard = false, extraDocs = [] }) {
   const [activeTab, setActiveTab] = useState("documentation");
@@ -246,6 +247,8 @@ export default function UpgradeToPro({ promotionType = "general", showDemoCard =
     <div style={{ position: "sticky", top: "20px" }}>
       {/* TTS-352 — 2.4 beta invitation, top of the sidebar on every tab (Free and Pro). */}
       <BetaInviteCard />
+      {/* TTS-352 — AtlasMCP promotion, right below the beta card. */}
+      <AtlasMcpCard />
 
       {/* TTS-264 — dedicated live-demo card. UpgradeToPro sits in the right
           column of every tab, but the card is opt-in per tab (showDemoCard) so
@@ -279,15 +282,15 @@ export default function UpgradeToPro({ promotionType = "general", showDemoCard =
       )}
 
       {/* Documentation Section → Accordion with Docs.js content.
-          TTS-319: open by default on every tab so help is visible without a click. */}
-      <Accordion defaultActiveKey="0" className="tta-custom-accordion">
+          Owner 2026-10-23: every sidebar accordion starts closed (replaces TTS-319's open default). */}
+      <Accordion className="tta-custom-accordion">
         <Accordion.Item eventKey="0">
           <Accordion.Header className="tta-custom-orange-accordion">
             {__("Read Documentation", "text-to-audio")}
           </Accordion.Header>
           <Accordion.Body className="p-2" style={{ fontSize: "0.875rem" }}>
             {/* Nested Accordion from Docs.js */}
-            <Accordion flush className="tta-qa-accordion" defaultActiveKey={extraDocs.length ? "extra-0" : undefined}>
+            <Accordion flush className="tta-qa-accordion">
               {/* TTS-319: page-specific help passed by the current tab, shown first. */}
               {extraDocs.map((doc, i) => (
                 <Accordion.Item eventKey={`extra-${i}`} key={`extra-${i}`}>
@@ -945,7 +948,7 @@ function tta__button_text_arr_callback($text_arr) {
 
       {/* Watch Tutorials */}
       {promotionType === "youtube" && (
-        <Accordion defaultActiveKey="0" className="mt-2 tta-custom-accordion">
+        <Accordion className="mt-2 tta-custom-accordion">
           <Accordion.Item eventKey="0">
             <Accordion.Header className="tta-custom-orange-accordion">
               Watch Tutorials
@@ -961,7 +964,7 @@ function tta__button_text_arr_callback($text_arr) {
 
       {/* General Promotion (Pro Features) */}
       {promotionType === "general" && !ttsObj.is_atlasvoice_addon_functional && (
-        <Accordion defaultActiveKey="0" style={{ marginTop: "20px" }}>
+        <Accordion style={{ marginTop: "20px" }}>
           <Accordion.Item eventKey="0">
             <Accordion.Header>⭐ Pro Features</Accordion.Header>
             <Accordion.Body>

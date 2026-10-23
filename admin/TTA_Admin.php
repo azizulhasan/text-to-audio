@@ -282,6 +282,9 @@ class TTA_Admin
             $this->localize_data['latest_post_preview_url'] = TTA_Helper::get_latest_post_preview_url();
         }
 
+        // TTS-352: AtlasMCP sidebar card (needs the current user, so resolved here).
+        $this->localize_data['atlasmcp'] = TTA_Helper::get_atlasmcp_promo();
+
         // TTS-238 v5 §14.2 (D0d) — lazy pass for AtlasVoice fields that
         // can't be computed until the main query resolves (current_post_type,
         // current_post_id, atlasvoice_resolved_rule). The filter callback is in
@@ -383,6 +386,8 @@ class TTA_Admin
                 'is_atlasvoice_addon_functional' => TTA_Helper::is_atlasvoice_addon_functional(),
                 'is_pro_active'     => TTA_Helper::is_atlasvoice_addon_functional(),
                 'is_pro_wizard'     => TTA_Helper::is_atlasvoice_addon_functional() && ! get_option( 'tta_pro_onboarding_completed' ),
+                // TTS-352: AtlasMCP card on the finish screen.
+                'atlasmcp'          => TTA_Helper::get_atlasmcp_promo(),
                 'nonce'             => wp_create_nonce( 'wp_rest' ),
                 'api_url'           => esc_url_raw( rest_url( 'tta/v1/' ) ),
                 // TTS-258: back-compat default + campaign config for the React

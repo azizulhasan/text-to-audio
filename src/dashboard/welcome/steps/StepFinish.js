@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import AtlasMcpWizardCard from '../AtlasMcpWizardCard';
 import { __, sprintf } from '@wordpress/i18n';
 import { proUrl } from '../../proUrl';
 
@@ -426,6 +427,8 @@ const StepFinish = ({ selectedPostType, listening, customize, analytics }) => {
             {/* Section 4: Cross-Promo — AI Agent Hub                         */}
             {/* ============================================================ */}
             <div style={styles.crossSection}>
+                {/* TTS-352: AtlasMCP promotion, above "Explore all AtlasAiDev plugins". */}
+                <AtlasMcpWizardCard promo={wizardData.atlasmcp} />
                 <a
                     href={(wizardData.admin_url || '') + 'admin.php?page=atlasvoice-other-plugins'}
                     style={styles.exploreBtn}

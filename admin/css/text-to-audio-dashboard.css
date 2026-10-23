@@ -441,29 +441,24 @@ My Custom css
   color: white;
 }
 
-/* TTS-352: 2.4 beta invitation card at the top of the dashboard sidebar. */
-.tta-beta-card {
-  background: #fff;
-  border: 2px solid #5646e5;
-  border-radius: 12px;
-  padding: 16px;
-  margin-bottom: 16px;
-}
-.tta-beta-badge {
-  background: #eeedfe;
-  color: #3c3489;
-  font-size: 11px;
-  font-weight: 600;
-  padding: 2px 8px;
-  border-radius: 6px;
-}
-.tta-beta-version { font-size: 12px; color: #6b6b6b; }
-.tta-beta-title { margin: 0 0 6px; font-size: 15px; font-weight: 600; color: #1d2327; }
-.tta-beta-text { font-size: 13px; color: #50575e; line-height: 1.5; margin: 0 0 8px; }
-.tta-beta-list { font-size: 13px; margin: 0 0 12px; padding-left: 18px; line-height: 1.6; list-style: disc; }
-.tta-beta-primary { background: #5646e5; color: #fff; border: none; font-weight: 600; }
-.tta-beta-primary:hover { background: #3c3489; color: #fff; }
-.tta-beta-note { font-size: 11px; color: #8c8f94; margin: 10px 0 0; }
+/* TTS-352: sidebar promotion cards (2.4 beta, then AtlasMCP): label, headline, one line, one button. */
+.tta-promo-card { background: #fff; border-radius: 12px; padding: 16px; margin-bottom: 16px; }
+.tta-promo-tag { display: inline-block; font-size: 11px; font-weight: 600; padding: 2px 8px; border-radius: 6px; }
+.tta-promo-title { margin: 8px 0 4px; font-size: 16px; font-weight: 600; color: #1d2327; line-height: 1.3; }
+.tta-promo-text { font-size: 13px; color: #50575e; line-height: 1.45; margin: 0 0 12px; }
+.tta-promo-btn { color: #fff; border: none; font-weight: 600; }
+.tta-promo-btn:hover { color: #fff; }
+.tta-promo-link { font-size: 12px; font-weight: 600; text-decoration: none; }
+.tta-beta-card { border: 2px solid #5646e5; }
+.tta-beta-tag { background: #eeedfe; color: #3c3489; }
+.tta-beta-btn { background: #5646e5; }
+.tta-beta-btn:hover { background: #3c3489; }
+.tta-beta-link, .tta-beta-link:hover { color: #5646e5; }
+.tta-mcp-card { border: 1px solid #dcdcde; }
+.tta-mcp-tag { background: #fff1ec; color: #b3401f; }
+.tta-mcp-btn { background: #ff7853; }
+.tta-mcp-btn:hover { background: #e5603d; }
+.tta-mcp-link, .tta-mcp-link:hover { color: #e5603d; }
 
 /* TTS-351: status dot inside the Staging / Live header button (buttons reuse .tta-tab-style). */
 .tta-mode-dot { width: 10px; height: 10px; border-radius: 50%; display: inline-block; }
