@@ -9,6 +9,8 @@ import AliasEngine from "./AliasEngine";
 // TTS-256: read-along highlighter — registers wp.hooks listeners on import
 // (tts_high_light_text / tts_highlight_word / tts_highlight_clear).
 import "./tts/highlighter.js";
+// TTS-344: Pro's MP3 players renew an expired nonce from a cached page with this.
+import RestNonce from './tts/RestNonce.js';
 
 export default class TextToSpeech {
     /**
@@ -23,11 +25,19 @@ export default class TextToSpeech {
         return AliasEngine.buildAliasRule(alias, caseInsensitive);
     }
 
+    // TTS-350: in-app browsers and app web views ship without a speech engine.
+    // One shared check for player 1 and Pro's player 2 (which extends this class).
+    static hasSpeechEngine() {
+        return typeof window !== 'undefined'
+            && !!window.speechSynthesis
+            && typeof window.SpeechSynthesisUtterance === 'function';
+    }
+
     TTS = window.TTS
     browser = null
     speech = null
     speechSynthesis = window.speechSynthesis
-    utterence = new SpeechSynthesisUtterance()
+    utterence = TextToSpeech.hasSpeechEngine() ? new SpeechSynthesisUtterance() : null
     speechRecognitionIsActive = true
     speechRecognition = window.speechRecognition || window.webkitSpeechRecognition
     recordStatus = 'record'
@@ -313,8 +323,19 @@ export default class TextToSpeech {
             }
         } catch (e) { /* no-op */ }
 
-        speech.setLanguage(this.browser.getLanguage())
-        speech.setVoice(this.browser.getVoice())
+        // TTS-350: a phone often lacks the site's saved voice (e.g. "Google UK English
+        // Female" on iPhone). setVoice() throws then, and nothing was spoken. Fall back
+        // to the device's own voice for the language instead of staying silent.
+        try {
+            speech.setLanguage(this.browser.getLanguage())
+        } catch (e) {
+            console.warn('AtlasVoice: language not available on this device, using the default.', e);
+        }
+        try {
+            speech.setVoice(this.browser.getVoice())
+        } catch (e) {
+            console.warn('AtlasVoice: saved voice not available on this device, using the default voice.', e);
+        }
         console.log(content)
         /**
          * 1. Microsoft edge browser has same voices(306 voices) for mobile and desktop
@@ -381,7 +402,7 @@ export default class TextToSpeech {
         this.listenStatus = 'pause';
         this.displayButtonText(this.listenStatus, isClicked)
         this.analytics.trackPlay();
-        if (!this.browser.isAndroid()) {
+        if (this.browser.needsKeepAliveTimer()) {
             let thisClass = this;
             this.timer = setTimeout(function pauseResumeTimer() {
                 speech.pause();
@@ -478,7 +499,7 @@ export default class TextToSpeech {
 
         this.listenStatus = 'pause';
         this.displayButtonText(this.listenStatus, isClicked)
-        if (!this.browser.isAndroid()) {
+        if (this.browser.needsKeepAliveTimer()) {
             let thisClass = this;
             this.timer = setTimeout(function pauseResumeTimer() {
                 speech.pause();
@@ -508,6 +529,12 @@ export default class TextToSpeech {
     _init(callBackAfterEnd = null, isClicked = false) { // init speaking,
         this.callBackAfterEnd = callBackAfterEnd
         if (this.ttsListeningSettings === undefined) return;
+
+        // TTS-350: speak-tts rejects silently without an engine; tell the visitor (Pro player 2 path).
+        if (!TextToSpeech.hasSpeechEngine()) {
+            this.displayApiMissing("tts__listent_content_" + this.buttonId);
+            return;
+        }
 
         // TTS-296: a visitor's own choices from the player settings modal beat the
         // admin's Listening defaults. Without this the modal only reached the audio
@@ -703,6 +730,10 @@ if (typeof window !== 'undefined' && window.wp && window.wp.hooks && !window.__t
         }
     });
 }
+
+// TTS-344: one shared surface for Pro. window.TextToSpeech is sometimes this
+// class and sometimes an instance (getData), so Pro also reads .constructor.
+TextToSpeech.RestNonce = RestNonce;
 
 /**
  * Load text to speech after DOMContentLoaded in free version.

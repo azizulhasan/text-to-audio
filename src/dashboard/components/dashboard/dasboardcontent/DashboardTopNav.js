@@ -5,6 +5,7 @@ import Icon from "../../Icon";
 import { pricingPageUrl } from "../../../proUrl";
 import DemoLink from "../../DemoLink";
 import WhatsNew from "../atlasvoice/WhatsNew";
+import StagingModeControl from "./StagingModeControl";
 
 export default function DashboardTopNav() {
   // TTS-320: What's New opens a short panel here instead of leaving for wordpress.org.
@@ -88,6 +89,9 @@ export default function DashboardTopNav() {
             overflow: "hidden",
           }}
         >
+          {/* TTS-351: Staging / Live + Go live, first in the group, same style as the rest. */}
+          <StagingModeControl />
+
           {/* TTS-320: What's New opens an in-plugin panel (the changelog link is inside it). */}
           <button
             type="button"

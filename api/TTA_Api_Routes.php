@@ -655,6 +655,25 @@ class TTA_Api_Routes {
 	}
 
 	/**
+	 * TTS-343: a fresh wp_rest nonce for a player whose cached page carried an
+	 * expired one. Marked uncacheable so no proxy or CDN can store the answer.
+	 *
+	 * Called without a nonce, so core's cookie check has already reset the user
+	 * to 0: this only ever hands out a logged-out nonce, never a logged-in
+	 * user's, which REST's credentialed CORS would otherwise expose.
+	 *
+	 * @return \WP_REST_Response
+	 */
+	public function fresh_rest_nonce() {
+		$response = rest_ensure_response( array( 'nonce' => wp_create_nonce( 'wp_rest' ) ) );
+		foreach ( wp_get_nocache_headers() as $name => $value ) {
+			$response->header( $name, $value );
+		}
+
+		return $response;
+	}
+
+	/**
 	 * TTS-247: Reset every option, transient, post-meta row, cron event and
 	 * the analytics DB table this plugin created. Surfaces a "fresh-install"
 	 * state without uninstalling the plugin itself.
@@ -1307,24 +1326,6 @@ class TTA_Api_Routes {
         return rest_ensure_response( $result );
     }
 
-    /**
-     * TTS-343: a fresh wp_rest nonce for a player whose cached page carried an
-     * expired one. Marked uncacheable so no proxy or CDN can store the answer.
-     *
-     * Called without a nonce, so core's cookie check has already reset the user
-     * to 0: this only ever hands out a logged-out nonce, never a logged-in
-     * user's, which REST's credentialed CORS would otherwise expose.
-     *
-     * @return \WP_REST_Response
-     */
-    public function fresh_rest_nonce() {
-        $response = rest_ensure_response( array( 'nonce' => wp_create_nonce( 'wp_rest' ) ) );
-        foreach ( wp_get_nocache_headers() as $name => $value ) {
-            $response->header( $name, $value );
-        }
-
-        return $response;
-    }
 
     /**
      * TTS-314: service state for the Listening screen (never the key itself).

@@ -484,6 +484,11 @@ function tta_get_button_content($atts, $is_block = false, $tag_content = '')
     do_action('tts_enqueue_button_scripts', $params);
     $data = apply_filters('tts__listening_button', $button, $player_number, $class, $post);
 
+    // TTS-351: after the filter, so Pro's players (2-7) get the staging note too.
+    if (class_exists('\\TTA\\AtlasVoice\\Mode')) {
+        $data .= \TTA\AtlasVoice\Mode::staging_note_html(isset($post->ID) ? (int) $post->ID : 0);
+    }
+
     // TTS-247: escape the filter output before returning so shortcode /
     // block / the_content callers can echo the result safely. Allow-list
     // covers our default markup (<tts-play-button>) plus the common HTML
@@ -502,7 +507,7 @@ function tta_get_button_content($atts, $is_block = false, $tag_content = '')
             'data-id' => true, 'data-state' => true, 'tabindex' => true, 'data-id'    => true,
         ),
         'span'   => array( 'class' => true, 'id' => true, 'style' => true, 'aria-hidden' => true ),
-        'a'      => array( 'class' => true, 'id' => true, 'style' => true, 'href' => true, 'target' => true, 'rel' => true, 'aria-label' => true ),
+        'a'      => array( 'class' => true, 'id' => true, 'style' => true, 'href' => true, 'target' => true, 'rel' => true, 'aria-label' => true, 'data-atlasvoice-action' => true, 'data-post-id' => true ),
         'img'    => array( 'class' => true, 'id' => true, 'style' => true, 'src' => true, 'alt' => true, 'width' => true, 'height' => true ),
         'svg'    => array( 'class' => true, 'xmlns' => true, 'viewbox' => true, 'width' => true, 'height' => true, 'fill' => true, 'stroke' => true, 'aria-hidden' => true ),
         'path'   => array( 'd' => true, 'fill' => true, 'stroke' => true, 'stroke-width' => true ),

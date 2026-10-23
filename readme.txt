@@ -5,7 +5,7 @@ Tags: accessibility, speech, tts, text to speech, text to audio
 Requires at least: 5.6
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 2.3.20
+Stable tag: 2.3.22
 License: GPLv3 or later
 License URI: https://www.gnu.org/licenses/gpl-3.0.txt
 
@@ -401,6 +401,11 @@ We are looking for people to help translate this plugin. If you can help, we wou
 Help us and the WordPress community translate the plugin. [Contact us](http://atlasaidev.com/contact-us/) and we'll guide you through the process.
 
 
+= 2.4.0-beta.7 ( 23 Oct 2026 ) =
+Beta: for testing before the 2.4.0 release. Use it with AtlasVoice Pro 3.5.0-beta.7.
+Improved : Includes every fix from the released 2.3.21 and 2.3.22: the player keeps reading on iPhone, uses the phone's own voice when yours is missing, and no longer stays empty in app browsers.
+Improved : While AtlasVoice is in Staging, admins see a note under the player with Go live and a "Test on your phone" QR code, and the dashboard top bar shows Staging or Live with a Go live button.
+
 = 2.4.0-beta.6 ( 19 Oct 2026 ) =
 Beta: for testing before the 2.4.0 release. Use it with AtlasVoice Pro 3.5.0-beta.6.
 Fixed : On sites with a page cache, audio could stop being made after a day, because the cached page carried an expired security code. The player now gets a fresh code and carries on.
@@ -431,6 +436,18 @@ Added : An audio box in the post editor to listen to, replace or delete a post's
 Added : A Versions screen to go back to an earlier version if an update causes trouble. Settings, audio and statistics are kept.
 Added : A voice step in the setup wizard, a "What's New" panel, and your AtlasVoice TTS usage in Listening and on the Dashboard, with a warning before the monthly allowance runs out.
 Changed : When AtlasVoice TTS cannot make audio (for example, the allowance is used up), the post is read by the browser voice with your usual player button and settings.
+= 2.3.22 ( 23 Oct 2026 ) =
+Fixed : On iPhone the player keeps reading the whole post instead of stopping after the first paragraph.
+Fixed : On phones that don't have the voice chosen in your settings, the player now reads with the phone's own voice instead of staying silent.
+Fixed : The listen button no longer stays empty inside app browsers (for example Facebook or Instagram) or when a speed plugin loads it late. It now says when listening isn't available.
+New : While AtlasVoice is in Staging, admins see a note under the player with Go live and a "Test on your phone" QR code that opens the post on a phone without logging in.
+New : Staging or Live, with the Go live button, is now shown in the top bar of the AtlasVoice dashboard.
+Improved : The dashboard side panel opens with its help sections closed and shows short cards about the 2.4 beta and our free AtlasMCP plugin.
+
+= 2.3.21 ( 19 Oct 2026 ) =
+Fixed : On sites with a page cache, audio could stop at "You are almost there" on older cached pages. The player now refreshes its security check and carries on.
+Fixed : Listening statistics are recorded again for visitors who open an older cached page.
+
 = 2.3.20 ( 16 Oct 2026 ) =
 Fixed : Read-along highlighting no longer highlights text the voice skips, such as a table of contents.
 Fixed : Sentences that repeat the post title are highlighted again when they are read.
@@ -591,6 +608,12 @@ Fixed : Removed external sample-audio requests from the dashboard; previews now 
 
 
 == Upgrade Notice ==
+
+= 2.3.22 =
+Fixes the player on iPhone and Android phones (stopping after the first paragraph, staying silent, or an empty button) and makes Staging and Go live easier to see. Recommended for all sites.
+
+= 2.3.21 =
+Fixes audio stopping at "You are almost there" and missing listening statistics on sites with a page cache. Recommended for sites using LiteSpeed Cache, WP Rocket or a CDN.
 
 = 2.3.20 =
 Read-along highlighting now skips text the voice does not read, highlights sentences that repeat the title, and keeps working on translated pages. Recommended for sites using highlighting.
