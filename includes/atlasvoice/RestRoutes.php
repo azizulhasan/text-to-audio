@@ -242,6 +242,41 @@ class RestRoutes {
 				),
 			)
 		);
+
+		// TTS-351: private 24-hour link to check the staging player on a phone.
+		register_rest_route(
+			$ns,
+			'/preview-link',
+			array(
+				array(
+					'methods'             => \WP_REST_Server::CREATABLE,
+					'callback'            => array( __CLASS__, 'post_preview_link' ),
+					'permission_callback' => array( __CLASS__, 'admin_guard' ),
+					'description'         => __( 'Creates a private link, valid for 24 hours, that shows the staging player on the newest post to anyone who opens it (for example the admin\'s phone, not logged in). Visitors without the link still see nothing. Administrators only (manage_options). Takes no parameters.', 'text-to-audio' ),
+					'args'                => array(),
+				),
+			)
+		);
+	}
+
+	/**
+	 * TTS-351: POST /preview-link — see Mode::create_preview_link().
+	 *
+	 * @return \WP_REST_Response|\WP_Error
+	 */
+	public static function post_preview_link() {
+		if ( ! class_exists( '\\TTA\\AtlasVoice\\Mode' ) ) {
+			return new \WP_Error( 'not_available', 'Mode class not loaded.', array( 'status' => 500 ) );
+		}
+		if ( Mode::is_production() ) {
+			return new \WP_Error( 'already_live', __( 'AtlasVoice is live, so every visitor already sees the player.', 'text-to-audio' ), array( 'status' => 409 ) );
+		}
+		$link = Mode::create_preview_link();
+		return rest_ensure_response( array(
+			'status'  => true,
+			'url'     => $link['url'],
+			'expires' => $link['expires'],
+		) );
 	}
 
 	/**

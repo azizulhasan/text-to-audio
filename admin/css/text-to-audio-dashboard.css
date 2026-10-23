@@ -465,6 +465,26 @@ My Custom css
 .tta-beta-primary:hover { background: #3c3489; color: #fff; }
 .tta-beta-note { font-size: 11px; color: #8c8f94; margin: 10px 0 0; }
 
+/* TTS-351: Staging / Live pill and buttons in the dashboard header (design system colours). */
+.tta-mode-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  font-weight: 600;
+  padding: 4px 12px;
+  border-radius: 999px;
+}
+.tta-mode-pill.is-staging { background: #fff7e0; color: #7a4a00; }
+.tta-mode-pill.is-live { background: #e6f6ea; color: #0a5c22; }
+.tta-mode-dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; }
+.tta-mode-pill.is-staging .tta-mode-dot { background: #dba617; }
+.tta-mode-pill.is-live .tta-mode-dot { background: #00a32a; }
+.tta-mode-btn { background: #fff; color: rgba(25, 69, 72, 1); border: none; font-size: 13px; font-weight: 600; }
+.tta-mode-btn:hover { background: #f0f6f6; color: rgba(25, 69, 72, 1); }
+.tta-mode-btn--ghost { background: transparent; color: #fff; border: 1px solid rgba(255, 255, 255, 0.45); }
+.tta-mode-btn--ghost:hover { background: rgba(255, 255, 255, 0.12); color: #fff; }
+
 .tta-loading-spinner {
   display: flex;
   justify-content: center;

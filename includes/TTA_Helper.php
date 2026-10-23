@@ -286,6 +286,8 @@ class TTA_Helper
             && ! current_user_can('manage_options')
             && class_exists('\\TTA\\AtlasVoice\\Mode')
             && ! \TTA\AtlasVoice\Mode::is_production()
+            // TTS-351: the admin's private phone-preview link shows the staging player.
+            && ! \TTA\AtlasVoice\Mode::is_preview_request()
         ) {
             $should_load_button = false;
             $reason             = __('the site is still in Staging, so only logged-in admins see the player', 'text-to-audio');
