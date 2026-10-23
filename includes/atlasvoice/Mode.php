@@ -278,9 +278,10 @@ class Mode {
 	 * staging TTA_Helper::should_load_button() renders the player for
 	 * manage_options users only, so it is as cache-safe as the player itself.
 	 *
+	 * @param int $post_id Post the player belongs to; enables "Test on your phone" for it.
 	 * @return string HTML, or '' when live, for non-admins, or when filtered off.
 	 */
-	public static function staging_note_html() {
+	public static function staging_note_html( $post_id = 0 ) {
 		if ( self::is_production() ) {
 			return '';
 		}
@@ -301,13 +302,42 @@ class Mode {
 
 		self::$staging_note_rendered = true;
 
+		// "Test on your phone": QR code for a private link to THIS post (owner, 2026-10-23).
+		$phone = '';
+		$post_id = absint( $post_id );
+		if ( $post_id && 'publish' === get_post_status( $post_id ) ) {
+			self::enqueue_phone_preview();
+			$phone = '<a class="atlasvoice-staging-note__phone" data-post-id="' . esc_attr( $post_id ) . '" href="#atlasvoice-phone-preview" style="color:#7a4a00;font-weight:700;text-decoration:underline;">' . esc_html__( 'Test on your phone', 'text-to-audio' ) . '</a>';
+		}
+
 		return '<div class="atlasvoice-staging-note" style="display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin:6px 0 12px;padding:6px 10px;border-radius:8px;background:#fff7e0;color:#7a4a00;border:1px dashed #e2b54a;font-size:12px;line-height:1.35;font-weight:500;">'
 			. '<span style="font-weight:800;letter-spacing:.03em;text-transform:uppercase;font-size:10.5px;background:#f5c242;color:#4a2c00;padding:2px 6px;border-radius:4px;">' . esc_html__( 'Staging', 'text-to-audio' ) . '</span>'
 			. '<span>' . esc_html__( 'Only you can see this player. Visitors see it after you go live.', 'text-to-audio' ) . '</span>'
 			// The shared Go Live client opens its dialog for [data-atlasvoice-action];
 			// without that script the link still reaches the dashboard.
 			. '<a class="atlasvoice-staging-note__go-live" data-atlasvoice-action="go-live" href="' . esc_url( admin_url( 'admin.php?page=text-to-audio' ) ) . '" style="color:#7a4a00;font-weight:700;text-decoration:underline;">' . esc_html__( 'Go live…', 'text-to-audio' ) . '</a>'
+			. $phone
 			. '</div>';
+	}
+
+	/**
+	 * TTS-351: the small QR script behind "Test on your phone". Enqueued while the
+	 * content renders, so it prints in the footer, and only for admins in staging.
+	 *
+	 * @return void
+	 */
+	private static function enqueue_phone_preview() {
+		if ( wp_script_is( 'tts-staging-phone-preview', 'enqueued' ) ) {
+			return;
+		}
+		$rel = 'admin/js/build/tts-staging-phone-preview.min.js';
+		$ver = file_exists( TTA_PLUGIN_PATH . $rel ) ? (string) filemtime( TTA_PLUGIN_PATH . $rel ) : TEXT_TO_AUDIO_VERSION;
+		wp_enqueue_script( 'tts-staging-phone-preview', TTA_PLUGIN_URL . $rel, array( 'wp-i18n' ), $ver, true );
+		wp_localize_script( 'tts-staging-phone-preview', 'ttsPhonePreview', array(
+			'endpoint' => esc_url_raw( \TTA\TTA_Cache::get_rest_api_url() . 'tta/v1/preview-link' ),
+			'nonce'    => wp_create_nonce( 'wp_rest' ),
+		) );
+		wp_set_script_translations( 'tts-staging-phone-preview', 'text-to-audio' );
 	}
 
 	/**

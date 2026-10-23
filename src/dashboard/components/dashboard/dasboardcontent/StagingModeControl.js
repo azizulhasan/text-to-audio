@@ -1,24 +1,18 @@
-import React, { useState } from "react";
+import React from "react";
 import { __ } from "@wordpress/i18n";
-import { Button, Modal } from "react-bootstrap";
-import qrcode from "qrcode-generator";
-import { postData } from "../../context/utilities";
 
 /**
- * TTS-351: Staging / Live pill for the dashboard header, with Go live (or
- * Back to staging) and, in staging, "Test on your phone".
+ * TTS-351: Staging / Live status and Go live (or Back to staging), as the first
+ * items of the header button group, styled like What's New / Support
+ * (.tta-tab-style).
  *
- * Go live / Back to staging open the shared dialog printed by
+ * The button opens the shared dialog printed by
  * TTA\AtlasVoice\Mode::render_inline_script() (window.atlasvoiceGoLive /
- * atlasvoiceRevert), which reloads the page on success.
+ * atlasvoiceRevert), which reloads the page on success. "Test on your phone"
+ * lives in the front-end staging note, where it knows which post is open.
  */
 export default function StagingModeControl() {
   const isLive = (window?.tta_obj?.atlasvoice_mode || "production") === "production";
-  const [showPhone, setShowPhone] = useState(false);
-  const [preview, setPreview] = useState(null);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
-  const [copied, setCopied] = useState(false);
 
   const switchMode = () => {
     const fn = isLive ? window.atlasvoiceRevert : window.atlasvoiceGoLive;
@@ -27,71 +21,28 @@ export default function StagingModeControl() {
     }
   };
 
-  const openPhonePreview = async () => {
-    setShowPhone(true);
-    setError("");
-    setCopied(false);
-    setLoading(true);
-    try {
-      const res = await postData(`${ttsObj.api_url}tta/v1/preview-link`, undefined);
-      if (res && res.status && res.url) {
-        const qr = qrcode(0, "M");
-        qr.addData(res.url);
-        qr.make();
-        setPreview({ url: res.url, qr: qr.createDataURL(5, 8) });
-      } else {
-        setError((res && res.message) || __("The preview link could not be created. Please try again.", "text-to-audio"));
-      }
-    } catch (e) {
-      setError(__("The preview link could not be created. Please try again.", "text-to-audio"));
-    }
-    setLoading(false);
-  };
-
-  const copyLink = () => {
-    if (preview && navigator.clipboard) {
-      navigator.clipboard.writeText(preview.url).then(() => setCopied(true));
-    }
-  };
-
   return (
-    <div className="tta-mode-control d-flex align-items-center gap-2 ms-3 flex-wrap">
-      <span className={`tta-mode-pill ${isLive ? "is-live" : "is-staging"}`}>
-        <span className="tta-mode-dot" aria-hidden="true" />
+    <>
+      <span
+        className="btn d-flex align-items-center gap-2 tta-tab-style tta-mode-status"
+        title={isLive
+          ? __("Visitors can see and hear the player.", "text-to-audio")
+          : __("Only logged-in admins can see the player.", "text-to-audio")}
+      >
+        <span className={`tta-mode-dot ${isLive ? "is-live" : "is-staging"}`} aria-hidden="true" />
         {isLive ? __("Live", "text-to-audio") : __("Staging", "text-to-audio")}
       </span>
 
-      <button type="button" className="btn btn-sm tta-mode-btn" onClick={switchMode}>
+      <button type="button" className="btn d-flex align-items-center gap-2 tta-tab-style" onClick={switchMode}>
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+          {isLive ? (
+            <path d="M9 14 4 9l5-5M4 9h11a5 5 0 0 1 0 10h-3" stroke="#F4B400" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+          ) : (
+            <path d="M5 13a8 8 0 0 1 8-8h6v6a8 8 0 0 1-8 8l-3-3-3-3Zm3 3-3 3m10-10h.01" stroke="#F4B400" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+          )}
+        </svg>
         {isLive ? __("Back to staging", "text-to-audio") : __("Go live", "text-to-audio")}
       </button>
-
-      {!isLive && (
-        <button type="button" className="btn btn-sm tta-mode-btn tta-mode-btn--ghost" onClick={openPhonePreview}>
-          {__("Test on your phone", "text-to-audio")}
-        </button>
-      )}
-
-      <Modal show={showPhone} onHide={() => setShowPhone(false)} centered>
-        <Modal.Header closeButton>
-          <Modal.Title style={{ fontSize: "18px" }}>{__("Test the player on your phone", "text-to-audio")}</Modal.Title>
-        </Modal.Header>
-        <Modal.Body>
-          {loading && <p className="m-0">{__("Creating your private link…", "text-to-audio")}</p>}
-          {error && <p className="m-0 text-danger">{error}</p>}
-          {preview && !loading && (
-            <div className="d-flex gap-3 align-items-center flex-wrap">
-              <img src={preview.qr} alt={__("QR code for the private preview link", "text-to-audio")} width="180" height="180" />
-              <div style={{ flex: "1 1 200px" }}>
-                <p className="mb-2">{__("Scan this code with your phone's camera. Your newest post opens with the player, even though you're not logged in there.", "text-to-audio")}</p>
-                <p className="mb-2 text-muted" style={{ fontSize: "13px" }}>{__("The link is private and works for 24 hours. Visitors without it still see nothing until you go live.", "text-to-audio")}</p>
-                <Button variant="outline-secondary" size="sm" onClick={copyLink}>
-                  {copied ? __("Link copied", "text-to-audio") : __("Copy link", "text-to-audio")}
-                </Button>
-              </div>
-            </div>
-          )}
-        </Modal.Body>
-      </Modal>
-    </div>
+    </>
   );
 }

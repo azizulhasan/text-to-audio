@@ -254,7 +254,8 @@ class TTA_Admin
     public function enqueue_styles()
     {
         if (TTA_Helper::is_text_to_audio_page()) {
-            wp_enqueue_style('text-to-audio-dashboard', plugin_dir_url(__FILE__) . 'css/minify/text-to-audio-dashboard.min.css', [], $this->version, 'all');
+            // TTS-351: file-time version, like the player bundles, so a rebuilt dashboard is never served stale.
+            wp_enqueue_style('text-to-audio-dashboard', plugin_dir_url(__FILE__) . 'css/minify/text-to-audio-dashboard.min.css', [], $this->asset_version('css/minify/text-to-audio-dashboard.min.css'), 'all');
         }
     }
 
@@ -425,7 +426,7 @@ class TTA_Admin
                 'text-to-audio-dashboard-ui',
                 plugin_dir_url(__FILE__) . 'js/build/text-to-audio-dashboard-ui.min.js',
                 array('TextToSpeech', 'wp-element', 'wp-i18n'),
-                $this->version,
+                $this->asset_version('js/build/text-to-audio-dashboard-ui.min.js'),
                 true
             );
 

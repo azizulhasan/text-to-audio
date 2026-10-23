@@ -44,9 +44,6 @@ export default function DashboardTopNav() {
         </div>
       </Link>
 
-      {/* TTS-351: Staging / Live with Go live, from the design system. */}
-      <StagingModeControl />
-
       {/* RIGHT SIDE BUTTONS */}
       <div className="ms-auto d-flex align-items-center">
         {/* Container for buttons with borders */}
@@ -57,6 +54,9 @@ export default function DashboardTopNav() {
             overflow: "hidden",
           }}
         >
+          {/* TTS-351: Staging / Live + Go live, first in the group, same style as the rest. */}
+          <StagingModeControl />
+
           {/* What's New → the plugin changelog on the wp.org Developers tab. */}
           <a
             href="https://wordpress.org/plugins/text-to-audio/#developers"
