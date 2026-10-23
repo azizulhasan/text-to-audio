@@ -5,6 +5,7 @@ import { Accordion, Table } from "react-bootstrap";
 import toast from "./context/Notify";
 import { copyToClipBoard } from "./context/utilities";
 import DemoLink from "./DemoLink";
+import BetaInviteCard from "./BetaInviteCard";
 
 export default function UpgradeToPro({ promotionType = "general", showDemoCard = false, extraDocs = [] }) {
   const [activeTab, setActiveTab] = useState("documentation");
@@ -243,6 +244,9 @@ export default function UpgradeToPro({ promotionType = "general", showDemoCard =
 
   return (
     <div style={{ position: "sticky", top: "20px" }}>
+      {/* TTS-352 — 2.4 beta invitation, top of the sidebar on every tab (Free and Pro). */}
+      <BetaInviteCard />
+
       {/* TTS-264 — dedicated live-demo card. UpgradeToPro sits in the right
           column of every tab, but the card is opt-in per tab (showDemoCard) so
           it only appears on the two evaluation tabs (Customize, Listening)

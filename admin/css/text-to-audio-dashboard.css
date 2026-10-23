@@ -441,6 +441,30 @@ My Custom css
   color: white;
 }
 
+/* TTS-352: 2.4 beta invitation card at the top of the dashboard sidebar. */
+.tta-beta-card {
+  background: #fff;
+  border: 2px solid #5646e5;
+  border-radius: 12px;
+  padding: 16px;
+  margin-bottom: 16px;
+}
+.tta-beta-badge {
+  background: #eeedfe;
+  color: #3c3489;
+  font-size: 11px;
+  font-weight: 600;
+  padding: 2px 8px;
+  border-radius: 6px;
+}
+.tta-beta-version { font-size: 12px; color: #6b6b6b; }
+.tta-beta-title { margin: 0 0 6px; font-size: 15px; font-weight: 600; color: #1d2327; }
+.tta-beta-text { font-size: 13px; color: #50575e; line-height: 1.5; margin: 0 0 8px; }
+.tta-beta-list { font-size: 13px; margin: 0 0 12px; padding-left: 18px; line-height: 1.6; list-style: disc; }
+.tta-beta-primary { background: #5646e5; color: #fff; border: none; font-weight: 600; }
+.tta-beta-primary:hover { background: #3c3489; color: #fff; }
+.tta-beta-note { font-size: 11px; color: #8c8f94; margin: 10px 0 0; }
+
 .tta-loading-spinner {
   display: flex;
   justify-content: center;
