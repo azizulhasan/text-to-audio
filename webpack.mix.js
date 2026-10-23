@@ -17,6 +17,8 @@ mix.js('admin/js/TextToSpeech.js', 'admin/js/build/TextToSpeech.min.js');
 mix.js('admin/js/tts-alias-engine.js', 'admin/js/build/tts-alias-engine.min.js');
 
 mix.js('admin/js/text-to-audio-button.js', 'admin/js/build/text-to-audio-button.min.js');
+// TTS-351: QR code for "Test on your phone" in the front-end staging note (admins, staging only).
+mix.js('admin/js/tts-staging-phone-preview.js', 'admin/js/build/tts-staging-phone-preview.min.js');
 
 mix.js('admin/js/AtlasVoiceAnalytics.js', 'admin/js/build/AtlasVoiceAnalytics.min.js');
 mix.js('admin/js/AtlasVoicePlayerInsights.js', 'admin/js/build/AtlasVoicePlayerInsights.min.js');

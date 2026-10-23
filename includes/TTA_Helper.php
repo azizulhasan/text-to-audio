@@ -286,6 +286,8 @@ class TTA_Helper
             && ! current_user_can('manage_options')
             && class_exists('\\TTA\\AtlasVoice\\Mode')
             && ! \TTA\AtlasVoice\Mode::is_production()
+            // TTS-351: the admin's private phone-preview link shows the staging player.
+            && ! \TTA\AtlasVoice\Mode::is_preview_request()
         ) {
             $should_load_button = false;
             $reason             = __('the site is still in Staging, so only logged-in admins see the player', 'text-to-audio');
@@ -2305,6 +2307,44 @@ class TTA_Helper
         $active = in_array( true, $triggers, true );
 
         return (bool) apply_filters( 'tts_is_cdn_active', $active );
+    }
+
+    /**
+     * TTS-352: AtlasMCP promotion data for the dashboard sidebar and the setup
+     * wizards (Free and Pro read the same source). Nothing installs itself: the
+     * button opens WordPress's own plugin screen and the owner clicks Install
+     * (wp.org Guidelines 8 and 11).
+     *
+     * @return array { status: 'missing'|'installed'|'active', action_url: string, wporg_url: string }
+     */
+    public static function get_atlasmcp_promo() {
+        $slug = 'ai-workflow-automation-ai-agent-hub';
+        $file = $slug . '/' . $slug . '.php';
+
+        if ( ! function_exists( 'is_plugin_active' ) ) {
+            require_once ABSPATH . 'wp-admin/includes/plugin.php';
+        }
+
+        if ( is_plugin_active( $file ) ) {
+            $status = 'active';
+        } else {
+            $status = ( 0 === validate_plugin( $file ) ) ? 'installed' : 'missing';
+        }
+
+        // On multisite only the network admin can install or activate plugins.
+        $admin = is_multisite() ? 'network_admin_url' : 'admin_url';
+        $url   = '';
+        if ( 'missing' === $status && current_user_can( 'install_plugins' ) ) {
+            $url = $admin( 'plugin-install.php?tab=plugin-information&plugin=' . $slug );
+        } elseif ( 'installed' === $status && current_user_can( 'activate_plugins' ) ) {
+            $url = $admin( 'plugins.php?s=AtlasMCP' );
+        }
+
+        return apply_filters( 'tts_atlasmcp_promo', array(
+            'status'     => $status,
+            'action_url' => $url,
+            'wporg_url'  => 'https://wordpress.org/plugins/' . $slug . '/',
+        ) );
     }
 
     /**

@@ -164,6 +164,8 @@ class TTA_Admin
             'current_plugin_slug' => 'text-to-audio',
             'detected_caching_plugins' => TTA_Helper::get_detected_caching_plugins(),
             'latest_post_preview_url'  => '', // populated lazily in enqueue to avoid early get_permalink() call
+            // TTS-351: Staging/Live pill in the dashboard header.
+            'atlasvoice_mode' => class_exists('\\TTA\\AtlasVoice\\Mode') ? \TTA\AtlasVoice\Mode::get() : 'production',
 
         ];
 
@@ -252,7 +254,8 @@ class TTA_Admin
     public function enqueue_styles()
     {
         if (TTA_Helper::is_text_to_audio_page()) {
-            wp_enqueue_style('text-to-audio-dashboard', plugin_dir_url(__FILE__) . 'css/minify/text-to-audio-dashboard.min.css', [], $this->version, 'all');
+            // TTS-351: file-time version, like the player bundles, so a rebuilt dashboard is never served stale.
+            wp_enqueue_style('text-to-audio-dashboard', plugin_dir_url(__FILE__) . 'css/minify/text-to-audio-dashboard.min.css', [], $this->asset_version('css/minify/text-to-audio-dashboard.min.css'), 'all');
         }
     }
 
@@ -278,6 +281,9 @@ class TTA_Admin
         if ( empty( $this->localize_data['latest_post_preview_url'] ) ) {
             $this->localize_data['latest_post_preview_url'] = TTA_Helper::get_latest_post_preview_url();
         }
+
+        // TTS-352: AtlasMCP sidebar card (needs the current user, so resolved here).
+        $this->localize_data['atlasmcp'] = TTA_Helper::get_atlasmcp_promo();
 
         // TTS-238 v5 §14.2 (D0d) — lazy pass for AtlasVoice fields that
         // can't be computed until the main query resolves (current_post_type,
@@ -380,6 +386,8 @@ class TTA_Admin
                 'is_atlasvoice_addon_functional' => TTA_Helper::is_atlasvoice_addon_functional(),
                 'is_pro_active'     => TTA_Helper::is_atlasvoice_addon_functional(),
                 'is_pro_wizard'     => TTA_Helper::is_atlasvoice_addon_functional() && ! get_option( 'tta_pro_onboarding_completed' ),
+                // TTS-352: AtlasMCP card on the finish screen.
+                'atlasmcp'          => TTA_Helper::get_atlasmcp_promo(),
                 'nonce'             => wp_create_nonce( 'wp_rest' ),
                 'api_url'           => esc_url_raw( rest_url( 'tta/v1/' ) ),
                 // TTS-258: back-compat default + campaign config for the React
@@ -423,7 +431,7 @@ class TTA_Admin
                 'text-to-audio-dashboard-ui',
                 plugin_dir_url(__FILE__) . 'js/build/text-to-audio-dashboard-ui.min.js',
                 array('TextToSpeech', 'wp-element', 'wp-i18n'),
-                $this->version,
+                $this->asset_version('js/build/text-to-audio-dashboard-ui.min.js'),
                 true
             );
 
