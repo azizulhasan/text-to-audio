@@ -164,6 +164,8 @@ class TTA_Admin
             'current_plugin_slug' => 'text-to-audio',
             'detected_caching_plugins' => TTA_Helper::get_detected_caching_plugins(),
             'latest_post_preview_url'  => '', // populated lazily in enqueue to avoid early get_permalink() call
+            // TTS-351: Staging/Live pill in the dashboard header.
+            'atlasvoice_mode' => class_exists('\\TTA\\AtlasVoice\\Mode') ? \TTA\AtlasVoice\Mode::get() : 'production',
 
         ];
 

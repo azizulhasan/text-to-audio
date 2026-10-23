@@ -4,6 +4,7 @@ import { Link } from "react-router-dom";
 import Icon from "../../Icon";
 import { pricingPageUrl } from "../../../proUrl";
 import DemoLink from "../../DemoLink";
+import StagingModeControl from "./StagingModeControl";
 
 export default function DashboardTopNav() {
   return (
@@ -42,6 +43,9 @@ export default function DashboardTopNav() {
           </small>
         </div>
       </Link>
+
+      {/* TTS-351: Staging / Live with Go live, from the design system. */}
+      <StagingModeControl />
 
       {/* RIGHT SIDE BUTTONS */}
       <div className="ms-auto d-flex align-items-center">
