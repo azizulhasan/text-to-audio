@@ -83,6 +83,11 @@ class TTSSettingsModalManager {
     }
 
     static loadBrowserVoices() {
+        // TTS-350: without a speech engine this threw before the button was drawn,
+        // leaving a blank player in in-app browsers.
+        if (!TextToSpeech.hasSpeechEngine()) {
+            return;
+        }
         const loadVoices = () => {
             const voices = window.speechSynthesis.getVoices();
             if (voices.length > 0) {
@@ -847,6 +852,12 @@ class TTSPlayButton extends HTMLElement {
                 return;
             }
 
+            // TTS-350: say why nothing plays instead of switching to "Pause" silently.
+            if (!TextToSpeech.hasSpeechEngine()) {
+                this.showNoSpeechEngine(wrapper);
+                return;
+            }
+
             let button = wrapper.querySelector(`#tts__listent_content_${buttonId}`);
 
             if (this.speech != null && this.speech.listenStatus == 'listen') {
@@ -1017,6 +1028,22 @@ class TTSPlayButton extends HTMLElement {
             </button>
             <div class="tts-sr-only tts-live-region" role="status" aria-live="polite" aria-atomic="true"></div>
         `;
+    }
+
+    /**
+     * TTS-350: shown on click when the browser has no speech engine (in-app
+     * browsers, app web views). The label and live region carry the message.
+     */
+    showNoSpeechEngine(wrapper) {
+        const message = __('Listening is not available in this browser. Open the page in Chrome or Safari.', 'text-to-audio');
+        const label = wrapper.querySelector('.tts-button-left span');
+        if (label) {
+            label.textContent = message;
+        }
+        const liveRegion = wrapper.querySelector('.tts-live-region');
+        if (liveRegion) {
+            liveRegion.textContent = message;
+        }
     }
 
     /**
@@ -1338,7 +1365,7 @@ class TTSPlayButton extends HTMLElement {
     }
 }
 
-document.addEventListener('DOMContentLoaded', function () {
+function defineTTSPlayButton() {
     // TTS-290: the element renders in its constructor from window.TTS, so the
     // payload MUST be hydrated before the definition upgrades the elements
     // already in the document. Doing it here (rather than relying on the PHP
@@ -1351,4 +1378,12 @@ document.addEventListener('DOMContentLoaded', function () {
     if (!customElements.get('tts-play-button')) {
         customElements.define('tts-play-button', TTSPlayButton);
     }
-});
+}
+
+// TTS-350: delay-JS optimisers (often mobile-only) load this bundle after
+// DOMContentLoaded has fired, so waiting for it left the button blank.
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', defineTTSPlayButton);
+} else {
+    defineTTSPlayButton();
+}
