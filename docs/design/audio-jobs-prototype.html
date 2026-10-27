@@ -1,0 +1,418 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AtlasVoice Audio Jobs prototype</title>
+<style>
+:root{--brand:#5646e5;--brand-ground:#eeedfd;--brand-ink:#3a2db3;--canvas:#f0f0f1;--surface:#fff;--sunken:#f6f7f7;--border:#dcdcde;--border-strong:#a7aaad;--text:#1e1e1e;--muted:#50575e;--ok:#007a29;--ok-g:#edfaef;--warn:#8a5a00;--warn-g:#fcf9e8;--err:#b32d2e;--err-g:#fcf0f1;--info:#2145e6;--info-g:#eef2fd;--player:#184c53}
+*{box-sizing:border-box}
+body{margin:0;background:var(--canvas);color:var(--text);font:13px/1.5 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Oxygen-Sans,Ubuntu,Cantarell,"Helvetica Neue",sans-serif}
+.app{max-width:1440px;margin:0 auto;min-height:100vh;display:flex;flex-direction:column}
+.top{background:var(--surface);border-bottom:1px solid var(--border);display:flex;flex-wrap:wrap;align-items:center;gap:8px 16px;padding:10px 16px}
+.top b{font-size:17px}
+.spacer{flex:1}
+.btn{font:inherit;font-size:13px;min-height:32px;padding:0 12px;border-radius:4px;border:1px solid var(--brand);background:#fff;color:var(--brand);cursor:pointer;display:inline-flex;align-items:center;gap:6px}
+.btn:hover{background:var(--brand-ground)}
+.btn.p{background:var(--brand);color:#fff}.btn.p:hover{background:#4536c9}
+.btn.on{background:var(--brand);color:#fff}
+.btn.d{border-color:var(--err);color:var(--err)}
+.btn.l{border:none;background:none;padding:0;min-height:0;text-decoration:underline}
+.btn:disabled{opacity:.45;cursor:default}
+.btn:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid var(--brand);outline-offset:2px}
+.stats{display:flex;flex-wrap:wrap;background:var(--surface);border-bottom:1px solid var(--border)}
+.stat{padding:10px 14px;border-right:1px solid var(--border);display:flex;flex-direction:column;gap:2px;min-width:130px}
+.k{font-size:11px;font-weight:500;letter-spacing:.02em;text-transform:uppercase;color:var(--muted)}
+.num{font-size:22px;font-weight:600;font-variant-numeric:tabular-nums}
+.meter{height:6px;background:var(--canvas);border-radius:9999px;overflow:hidden}
+.meter>div{height:6px;background:var(--brand);transition:width .3s}
+.main{flex:1;display:flex;flex-wrap:wrap;gap:16px;padding:16px;align-items:flex-start}
+.col-a{flex:999 1 620px;min-width:0;display:flex;flex-direction:column;gap:16px}
+.col-b{flex:1 1 340px;min-width:0;display:flex;flex-direction:column;gap:16px}
+.panel{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:16px;display:flex;flex-direction:column;gap:12px}
+.st{font-size:15px;font-weight:600}
+.help{font-size:12px;color:var(--muted);line-height:1.45}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.chip{display:inline-flex;align-items:center;gap:5px;font-size:11px;font-weight:500;padding:1px 8px;border-radius:9999px;white-space:nowrap}
+.chip::before{content:"●"}
+.s-missing{background:var(--sunken);color:var(--muted)}.s-missing::before{content:"○"}
+.s-queued,.s-making{background:var(--info-g);color:var(--info)}
+.s-ready{background:var(--ok-g);color:var(--ok)}
+.s-outdated,.s-limit{background:var(--warn-g);color:var(--warn)}
+.s-failed{background:var(--err-g);color:var(--err)}
+.bar{display:flex;align-items:center;gap:12px;height:48px;padding:0 14px;border-radius:9999px;background:var(--player);color:#fff}
+.bar.fallback{background:var(--sunken);color:var(--text);border:1px solid var(--border)}
+.play{width:30px;height:30px;border-radius:9999px;border:none;background:#fff;color:var(--player);display:flex;align-items:center;justify-content:center;cursor:pointer;flex:none}
+.fallback .play{background:var(--player);color:#fff}
+.track{flex:1;height:6px;border-radius:9999px;background:rgba(255,255,255,.25);position:relative;overflow:hidden}
+.track .ready{position:absolute;inset:0;background:rgba(255,255,255,.45);transition:width .3s}
+.track .head{position:absolute;inset:0;background:#fff;transition:width .3s}
+.time{font-size:12px;font-variant-numeric:tabular-nums}
+.note{padding:10px 12px;border-radius:4px;background:var(--warn-g);color:#5b3e00;font-size:12px}
+.info{padding:10px 12px;border-radius:4px;background:var(--info-g);color:#1a3aa8;font-size:12px}
+.lang{display:flex;flex-direction:column;gap:6px;padding:10px 0;border-bottom:1px solid var(--canvas)}
+.lang-h{display:flex;justify-content:space-between;align-items:center;gap:8px}
+.prog{height:6px;background:var(--canvas);border-radius:9999px;overflow:hidden}.prog>div{height:6px;background:var(--brand);transition:width .3s}
+.tbl{border:1px solid var(--border);border-radius:8px;overflow-x:auto}
+table{border-collapse:collapse;width:100%}
+th{text-align:left;font-size:11px;font-weight:500;letter-spacing:.02em;text-transform:uppercase;color:var(--muted);padding:0 12px;height:34px;border-bottom:1px solid var(--border);background:var(--sunken)}
+td{padding:0 12px;height:46px;border-bottom:1px solid var(--canvas)}
+tr.sel{background:var(--brand-ground)}
+.in{font:inherit;height:36px;border:1px solid var(--border-strong);border-radius:4px;padding:0 10px;width:100%;background:#fff}
+label{cursor:pointer}
+.opt{display:flex;gap:8px;align-items:flex-start}
+.log{font:11.5px/1.6 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;color:var(--muted);max-height:520px;overflow:auto}
+.log div{padding:2px 0;border-bottom:1px dashed #eee}
+.log div:first-child{color:var(--text);font-weight:600}
+.split{display:flex;border:1px solid var(--border);border-radius:8px}.split .stat:last-child{border-right:none}
+.hidden{display:none}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="top">
+    <b>AtlasVoice · Audio jobs prototype</b>
+    <div class="row" id="tabs" role="tablist" aria-label="Screens"></div>
+    <div class="spacer"></div>
+    <label class="row" style="font-size:12px"><input type="checkbox" id="fail"> Provider out of credit</label>
+    <button class="btn l" type="button" id="reset">Reset demo</button>
+  </div>
+
+  <div class="stats">
+    <div class="stat"><span class="k">Jobs created</span><span class="num" id="c-jobs">0</span></div>
+    <div class="stat"><span class="k">Parts paid</span><span class="num" id="c-parts">0</span></div>
+    <div class="stat"><span class="k">Paid twice</span><span class="num" style="color:var(--ok)">0</span></div>
+    <div class="stat"><span class="k">Listeners who joined</span><span class="num" id="c-joined">0</span></div>
+    <div class="stat"><span class="k">Status checks (cached)</span><span class="num" id="c-checks">0</span></div>
+    <div class="stat" style="flex:1;min-width:240px"><span class="k">Characters today · limit <span id="c-limit"></span></span><span class="num" id="c-used"></span><div class="meter"><div id="c-meter"></div></div></div>
+  </div>
+
+  <div class="main">
+    <div class="col-a" id="screen"></div>
+    <div class="col-b">
+      <div id="side"></div>
+      <div class="panel"><div class="k">Server activity</div><div class="log" id="log" aria-live="polite"></div></div>
+    </div>
+  </div>
+</div>
+
+<script>
+(function () {
+  'use strict';
+  var PART = 1500, PRICE = 0.015, WORKERS = 3;
+  var LANGS = [{ k: 'en', name: 'English · Emma' }, { k: 'es', name: 'Spanish · Lucía' }];
+  var LABEL = { missing: 'Missing', queued: 'Queued', making: 'Making', ready: 'Ready', outdated: 'Outdated', failed: 'Failed', limit: 'Waiting · daily limit' };
+  var PLAY = '<svg width="12" height="12" viewBox="0 0 12 12" aria-hidden="true"><path d="M3 1l8 5-8 5z" fill="currentColor"/></svg>';
+
+  function parts(c) { return Math.max(1, Math.ceil(c / PART)); }
+  function L(status, chars) { return { status: status, done: (status === 'ready' || status === 'outdated') ? parts(chars) : 0, total: parts(chars), waiting: 0, reason: '' }; }
+  function fmt(n) { return Math.round(n).toLocaleString('en-US'); }
+  function esc(s) { return String(s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
+
+  function fresh() {
+    var seed = [
+      [1, 'Why river cities grew first', 6210, 'outdated', 'ready'],
+      [2, 'A teacher in every village', 9880, 'missing', 'missing'],
+      [3, 'Markets by the water', 4402, 'failed', 'missing'],
+      [4, 'Bridges and the evening trade', 18513, 'missing', 'ready'],
+      [5, 'Music in the square', 3120, 'ready', 'ready'],
+      [6, 'Libraries that followed the boats', 7744, 'ready', 'outdated']
+    ];
+    var posts = seed.map(function (x) {
+      var p = { id: x[0], title: x[1], chars: x[2], langs: { en: L(x[3], x[2]), es: L(x[4], x[2]) } };
+      if (x[3] === 'failed') { p.langs.en.done = 1; p.langs.en.reason = 'OpenAI: no credit left'; }
+      return p;
+    });
+    return {
+      tab: 'front', posts: posts, fail: false, when: 'play', onChange: 'outdated', limit: 200000, used: 38400,
+      c: { jobs: 0, parts: 0, joined: 0, checks: 0 }, log: ['Ready. Press play on the front end to start.'],
+      filter: 'all', selected: { 1: true, 2: true, 3: true }, editorPost: 1, readyPlays: 0, nextId: 7, left: false, publishNote: ''
+    };
+  }
+
+  var S = fresh();
+  function post(id) { for (var i = 0; i < S.posts.length; i++) if (S.posts[i].id === id) return S.posts[i]; }
+  function log(t) { S.log.unshift(t); S.log = S.log.slice(0, 40); }
+  function lab(l) { return l.status === 'making' ? 'Making · ' + l.done + ' of ' + l.total : LABEL[l.status]; }
+  function chip(l) { return '<span class="chip s-' + l.status + '">' + esc(lab(l)) + '</span>'; }
+
+  /* The server's job logic, simulated: start or join, never pay twice. */
+  function start(id, k, who) {
+    var p = post(id), l = p.langs[k], name = p.title + ' (' + k.toUpperCase() + ')';
+    var visitor = who.indexOf('visitor') === 0;
+    if (l.status === 'ready') { log(name + ': already up to date, saved file served. Cost: 0'); return 'ready'; }
+    if (l.status === 'making' || l.status === 'queued' || l.status === 'limit') {
+      l.waiting++; S.c.joined++; log(name + ': ' + who + ' joined the existing job. Cost: 0'); return 'joined';
+    }
+    if (S.when === 'manual' && visitor) { log(name + ': only editors make audio here; the visitor gets the device voice'); return 'manual'; }
+    var resume = l.status === 'failed';
+    if (!resume) { l.done = 0; S.c.jobs++; }
+    l.status = 'queued'; l.reason = ''; l.waiting = visitor ? 1 : 0;
+    log(resume
+      ? name + ': same job resumed by ' + who + ' at part ' + (l.done + 1) + '; finished parts are not paid again'
+      : name + ': job #' + S.c.jobs + ' created by ' + who);
+    return 'started';
+  }
+
+  function tick() {
+    var running = 0, changed = false;
+    S.posts.forEach(function (p) { ['en', 'es'].forEach(function (k) { if (p.langs[k].status === 'making') running++; }); });
+    S.posts.forEach(function (p) {
+      ['en', 'es'].forEach(function (k) {
+        var l = p.langs[k], name = p.title + ' (' + k.toUpperCase() + ')', pc = Math.round(p.chars / l.total);
+        if (l.status === 'queued' && running < WORKERS) { l.status = 'making'; running++; changed = true; }
+        if (l.status === 'limit' && S.used + pc <= S.limit) { l.status = 'making'; changed = true; log(name + ': limit raised, continuing at part ' + (l.done + 1)); }
+        if (l.status !== 'making') return;
+        changed = true;
+        S.c.checks += l.waiting;
+        if (S.fail) { l.status = 'failed'; l.reason = 'OpenAI: no credit left'; log(name + ': part ' + (l.done + 1) + ' failed (no credit). ' + l.done + ' finished parts kept, nothing joined'); return; }
+        if (S.used + pc > S.limit) { l.status = 'limit'; log(name + ': daily limit reached, job waits; visitors get the device voice'); return; }
+        l.done++; S.used += pc; S.c.parts++;
+        log(name + ': part ' + l.done + ' of ' + l.total + ' made, paid once (' + fmt(pc) + ' chars)');
+        if (l.done >= l.total) {
+          l.status = 'ready';
+          log(name + ': all ' + l.total + ' parts present → joined, renamed, saved. ' + l.waiting + ' waiting listener(s) got the same file');
+          l.waiting = 0;
+        }
+      });
+    });
+    if (changed) render();
+  }
+
+  /* Screens */
+  function tabs() {
+    var t = [['front', 'Front end'], ['editor', 'Post editor'], ['library', 'Audio library'], ['posts', 'Posts list'], ['settings', 'Settings']];
+    document.getElementById('tabs').innerHTML = t.map(function (x) {
+      return '<button type="button" role="tab" aria-selected="' + (S.tab === x[0]) + '" class="btn' + (S.tab === x[0] ? ' on' : '') + '" data-tab="' + x[0] + '">' + x[1] + '</button>';
+    }).join('');
+  }
+
+  function front() {
+    var p = post(4), l = p.langs.en, pct = Math.round(100 * l.done / l.total);
+    var fb = l.status === 'failed' || l.status === 'limit' || (S.when === 'manual' && l.status === 'missing');
+    var msg = {
+      missing: S.when === 'manual' ? 'No audio yet. Only editors can make it on this site.' : 'No audio yet. Nothing is spent until someone presses play.',
+      queued: 'Getting the audio ready…',
+      making: 'Getting the audio ready · part ' + (l.done + 1) + ' of ' + l.total + (l.done ? '. The first part is playing now.' : '.'),
+      ready: 'Ready. Every listener plays the same saved file.',
+      failed: 'Could not be made right now. Visitors use the device voice; editors see the reason.',
+      limit: 'Daily limit reached. The job waits; visitors use the device voice.',
+      outdated: 'Outdated audio is still playing.'
+    }[l.status];
+    var time = l.status === 'ready' ? '1:16 / 4:18' : (l.done ? '0:' + String(Math.min(59, 10 + l.done * 3)).padStart(2, '0') : '--:--');
+    var bar = fb
+      ? '<div class="bar fallback"><button class="play" type="button" aria-label="Listen with the device voice">' + PLAY + '</button><span>Listen with your device\'s voice</span></div>'
+      : '<div class="bar"><button class="play" type="button" data-act="play" aria-label="Play">' + PLAY + '</button><div class="track"><div class="ready" style="width:' + pct + '%"></div><div class="head" style="width:' + (l.status === 'ready' ? 30 : Math.min(pct, 8)) + '%"></div></div><span class="time">' + time + '</span></div>';
+    return '<div class="panel">' +
+      '<div class="k">Front end · a brand-new post</div><div class="st">' + esc(p.title) + '</div>' +
+      '<p class="help" style="margin:0">' + fmt(p.chars) + ' characters, ' + l.total + ' parts. Press play as different visitors and watch the counters: one job, each part paid once.</p>' +
+      bar + '<div style="color:var(--muted);min-height:20px">' + msg + '</div>' +
+      '<div class="row"><button class="btn p" type="button" data-act="play">Visitor presses play</button>' +
+      '<button class="btn" type="button" data-act="another">Another visitor presses play</button>' +
+      '<button class="btn" type="button" data-act="crowd">200 visitors at once</button>' +
+      '<button class="btn" type="button" data-act="leave">First visitor closes the tab</button></div>' +
+      '<div class="help">' + (S.left ? 'The first visitor left, but the job keeps running on the server. Nobody has to keep a tab open.' : 'Try: turn on "Provider out of credit" while it is making, then turn it off and use Try again in the Post editor.') + '</div>' +
+      '</div>' +
+      '<div class="panel"><div class="k">An older post that already has audio</div>' +
+      '<div class="row"><b>Music in the square</b>' + chip(post(5).langs.en) + '<button class="btn" type="button" data-act="playReady">Press play</button></div>' +
+      '<div class="help">' + (S.readyPlays ? 'Played ' + S.readyPlays + ' time(s): the URL was already in the page. No request to WordPress, no job, no cost.' : 'Its MP3 URL is in the page, so playing it never reaches WordPress or the provider.') + '</div></div>';
+  }
+
+  function editor() {
+    var p = post(S.editorPost) || S.posts[0];
+    var anyOut = p.langs.en.status === 'outdated' || p.langs.es.status === 'outdated';
+    var rows = LANGS.map(function (G) {
+      var l = p.langs[G.k], st = l.status;
+      var detail = {
+        missing: 'No audio yet · about ' + fmt(p.chars) + ' characters',
+        queued: 'Waiting for a free worker (three run at once)',
+        making: 'Part ' + l.done + ' of ' + l.total + ' done · runs on the server' + (l.waiting ? ' · ' + l.waiting + ' listener(s) waiting' : ''),
+        ready: 'Up to date · ' + l.total + ' parts',
+        outdated: 'Text changed since this audio was made',
+        failed: (l.reason || 'Failed') + ' · ' + l.done + ' of ' + l.total + ' parts kept',
+        limit: 'Paused at the daily limit · ' + l.done + ' of ' + l.total + ' parts kept'
+      }[st];
+      var prog = (st === 'making' || st === 'limit' || st === 'failed') ? '<div class="prog"><div style="width:' + Math.round(100 * l.done / l.total) + '%"></div></div>' : '';
+      var acts = '';
+      if (st === 'missing' || st === 'outdated') acts += '<button class="btn p" type="button" data-make="' + p.id + ':' + G.k + '">' + (st === 'outdated' ? 'Remake' : 'Make audio') + ' · ~' + fmt(p.chars) + ' characters</button>';
+      if (st === 'failed') acts += '<button class="btn" type="button" data-make="' + p.id + ':' + G.k + '">Try again (keeps finished parts)</button>';
+      if (st === 'ready' || st === 'outdated') acts += '<button class="btn d" type="button" data-del="' + p.id + ':' + G.k + '">Delete audio</button>';
+      return '<div class="lang"><div class="lang-h"><b>' + G.name + '</b>' + chip(l) + '</div>' + prog + '<div class="help">' + detail + '</div><div class="row">' + acts + '</div></div>';
+    }).join('');
+    var opts = S.posts.map(function (x) { return '<option value="' + x.id + '"' + (x.id === p.id ? ' selected' : '') + '>' + esc(x.title) + '</option>'; }).join('');
+    var setting = { outdated: 'Setting: mark it Outdated, remake on the next play.', remake: 'Setting: remake right away in the background.', keep: 'Setting: keep the old audio; only editors see Outdated.' }[S.onChange];
+    return '<div class="panel"><div class="row"><span class="k">Post editor · AtlasVoice → Audio</span><span class="spacer"></span>' +
+      '<label class="row">Post <select class="in" style="width:auto" id="edpost">' + opts + '</select></label></div>' +
+      '<div class="st">' + esc(p.title) + '</div>' +
+      (anyOut ? '<div class="note">The text changed since the audio was made. Visitors still hear the old version.</div>' : '') +
+      rows +
+      '<div class="row"><button class="btn" type="button" data-act="edit">Edit the post text and Update</button></div>' +
+      '<div class="help">' + setting + ' Change it in Settings.</div></div>';
+  }
+
+  function counts() {
+    var c = { all: 0, missing: 0, outdated: 0, failed: 0, making: 0, ready: 0 };
+    S.posts.forEach(function (p) {
+      var s = [p.langs.en.status, p.langs.es.status]; c.all++;
+      ['missing', 'outdated', 'failed', 'ready'].forEach(function (k) { if (s.indexOf(k) > -1) c[k]++; });
+      if (s.indexOf('making') > -1 || s.indexOf('queued') > -1) c.making++;
+    });
+    return c;
+  }
+  function library() {
+    var c = counts();
+    var f = ['all', 'missing', 'outdated', 'failed', 'making', 'ready'].map(function (x) {
+      return '<button type="button" class="btn' + (S.filter === x ? ' on' : '') + '" data-filter="' + x + '">' + (x === 'all' ? 'All' : x[0].toUpperCase() + x.slice(1)) + ' ' + c[x] + '</button>';
+    }).join('');
+    var rows = S.posts.filter(function (p) {
+      if (S.filter === 'all') return true;
+      var s = [p.langs.en.status, p.langs.es.status];
+      return S.filter === 'making' ? (s.indexOf('making') > -1 || s.indexOf('queued') > -1) : s.indexOf(S.filter) > -1;
+    }).map(function (p) {
+      var sel = !!S.selected[p.id];
+      return '<tr class="' + (sel ? 'sel' : '') + '"><td><input type="checkbox" data-pick="' + p.id + '"' + (sel ? ' checked' : '') + ' aria-label="Select ' + esc(p.title) + '"></td><td><b>' + esc(p.title) + '</b></td><td>' + chip(p.langs.en) + '</td><td>' + chip(p.langs.es) + '</td><td>' + fmt(p.chars) + '</td></tr>';
+    }).join('');
+    return '<div class="panel"><div class="k">Audio library · bulk (Pro)</div><div class="row">' + f + '</div>' +
+      '<div class="tbl"><table><thead><tr><th style="width:30px"></th><th>Post</th><th>English</th><th>Spanish</th><th>Characters</th></tr></thead><tbody>' + (rows || '<tr><td colspan="5" class="help">Nothing in this filter.</td></tr>') + '</tbody></table></div></div>';
+  }
+  function queueSide() {
+    var chars = 0, jobs = 0, n = 0;
+    S.posts.forEach(function (p) {
+      if (!S.selected[p.id]) return; n++;
+      ['en', 'es'].forEach(function (k) {
+        var l = p.langs[k];
+        if (l.status === 'missing' || l.status === 'outdated') { jobs++; chars += p.chars; }
+        if (l.status === 'failed') { jobs++; chars += p.chars * (1 - l.done / l.total); }
+      });
+    });
+    return '<div class="panel"><div class="k">Queue</div><div class="st">Make audio for ' + n + ' selected posts</div>' +
+      '<div class="split"><div class="stat"><span class="k">Characters</span><span class="num">~' + fmt(chars) + '</span></div>' +
+      '<div class="stat"><span class="k">Estimated cost</span><span class="num">~$' + (chars / 1000 * PRICE).toFixed(2) + '</span><span class="help">OpenAI tts-1, billed by OpenAI</span></div></div>' +
+      '<div class="help">Only missing, outdated and failed languages count; anything up to date is skipped. A failed job only pays for its unfinished parts.</div>' +
+      '<div class="info">Runs on the server, three jobs at a time. You can close this page.</div>' +
+      '<button class="btn p" type="button" data-act="queue"' + (jobs ? '' : ' disabled') + '>Start · ' + jobs + ' jobs</button></div>';
+  }
+
+  function postsList() {
+    var rows = S.posts.map(function (p) {
+      var l = p.langs.en, st = l.status;
+      var d = st === 'failed' ? l.reason : st === 'outdated' ? 'text changed' : st === 'missing' ? (S.when === 'play' ? 'made on the first play' : S.when === 'manual' ? 'editors only' : '') : '';
+      var a = (st === 'missing' || st === 'outdated' || st === 'failed') ? '<button class="btn l" type="button" data-make="' + p.id + ':en">' + (st === 'failed' ? 'Try again' : st === 'outdated' ? 'Remake audio' : 'Make audio') + '</button>' : '';
+      return '<tr><td><b>' + esc(p.title) + '</b></td><td>' + chip(l) + ' <span class="help">' + esc(d) + '</span></td><td style="text-align:right">' + a + '</td></tr>';
+    }).join('');
+    return '<div class="panel"><div class="row"><span class="k">Posts · Audio column</span><span class="spacer"></span><button class="btn p" type="button" data-act="publish">Publish a new post</button></div>' +
+      '<div class="tbl"><table><thead><tr><th>Title</th><th>Audio (English)</th><th></th></tr></thead><tbody>' + rows + '</tbody></table></div>' +
+      '<div class="help">' + esc(S.publishNote || 'The column reads the same jobs table as the editor and the Audio library, so they always agree.') + '</div></div>';
+  }
+
+  function settings() {
+    var w = [['play', 'On the first play', 'Nothing is spent until someone listens.'], ['publish', 'When a post is published', 'Made in the background after Publish. Try "Publish a new post" in Posts list.'], ['manual', 'Only when an editor clicks', 'Visitors get the device voice until an editor makes the audio.']]
+      .map(function (o) { return '<label class="opt"><input type="radio" name="when" value="' + o[0] + '"' + (S.when === o[0] ? ' checked' : '') + '><span><b>' + o[1] + '</b><div class="help">' + o[2] + '</div></span></label>'; }).join('');
+    var c = [['outdated', 'Mark it Outdated, remake on the next play'], ['remake', 'Remake right away, in the background'], ['keep', 'Keep the old audio; only editors see Outdated']]
+      .map(function (o) { return '<label class="opt"><input type="radio" name="chg" value="' + o[0] + '"' + (S.onChange === o[0] ? ' checked' : '') + '><span>' + o[1] + '</span></label>'; }).join('');
+    return '<div class="panel"><div class="k">Settings · Audio library → Settings</div>' +
+      '<div class="st">When audio is made</div>' + w +
+      '<div class="st">When a post\'s text changes</div>' + c +
+      '<div class="st">Spending limit</div>' +
+      '<label style="display:flex;flex-direction:column;gap:4px;max-width:280px"><span>Characters per day</span><input class="in" type="number" id="limit" value="' + S.limit + '" step="10000" min="0"></label>' +
+      '<div class="help">Try 50000, then play the new post: the job stops at the limit, visitors get the device voice, and nothing is wasted. Raise it again and the job continues.</div></div>';
+  }
+
+  /* Don't swap the DOM between mousedown and mouseup, or the click would be lost. */
+  var holding = false, pending = false;
+  document.addEventListener('pointerdown', function () { holding = true; });
+  ['pointerup', 'pointercancel'].forEach(function (ev) {
+    document.addEventListener(ev, function () { holding = false; if (pending) { pending = false; setTimeout(render, 0); } });
+  });
+
+  function render() {
+    if (holding) { pending = true; return; }
+    tabs();
+    var screen = { front: front, editor: editor, library: library, posts: postsList, settings: settings }[S.tab]();
+    var el = document.getElementById('screen');
+    var active = document.activeElement && document.activeElement.id;
+    el.innerHTML = screen;
+    document.getElementById('side').innerHTML = S.tab === 'library' ? queueSide() : '';
+    if (active === 'limit' || active === 'edpost') { var a = document.getElementById(active); if (a) a.focus(); }
+    document.getElementById('c-jobs').textContent = S.c.jobs;
+    document.getElementById('c-parts').textContent = S.c.parts;
+    document.getElementById('c-joined').textContent = fmt(S.c.joined);
+    document.getElementById('c-checks').textContent = fmt(S.c.checks);
+    document.getElementById('c-used').textContent = fmt(S.used);
+    document.getElementById('c-limit').textContent = fmt(S.limit);
+    var r = S.used / Math.max(1, S.limit), m = document.getElementById('c-meter');
+    m.style.width = Math.min(100, Math.round(100 * r)) + '%';
+    m.style.background = r > 0.95 ? 'var(--err)' : r > 0.8 ? '#d4a72c' : 'var(--brand)';
+    document.getElementById('fail').checked = S.fail;
+    document.getElementById('log').innerHTML = S.log.map(function (t) { return '<div>' + esc(t) + '</div>'; }).join('');
+  }
+
+  /* Events */
+  var ACTS = {
+    play: function () { S.left = false; start(4, 'en', 'visitor A'); },
+    another: function () { start(4, 'en', 'visitor ' + String.fromCharCode(66 + (S.c.joined % 24))); },
+    crowd: function () {
+      var l = post(4).langs.en;
+      if (l.status === 'ready') { log('200 visitors played the saved file. Jobs: 0, cost: 0'); return; }
+      var first = (l.status === 'missing' || l.status === 'outdated') ? start(4, 'en', 'visitor 1 of 200') : null;
+      if (first === 'manual') return;
+      var n = first === 'started' ? 199 : 200;
+      l.waiting += n; S.c.joined += n; S.c.checks += n;
+      log(n + ' more visitors joined the same job. One status row, cached for 3 s. Extra cost: 0');
+    },
+    leave: function () { S.left = true; log('Visitor A closed the tab. The server keeps going'); },
+    playReady: function () { S.readyPlays++; log('Music in the square: played from the saved URL. No request, no cost'); },
+    edit: function () {
+      var p = post(S.editorPost);
+      ['en', 'es'].forEach(function (k) {
+        var l = p.langs[k]; if (l.status !== 'ready') return;
+        l.status = 'outdated';
+        if (S.onChange === 'remake') start(p.id, k, 'the Update (setting: remake right away)');
+      });
+      log(p.title + ': text updated. Fingerprint changed → ' + (S.onChange === 'remake' ? 'remaking in the background' : 'marked Outdated'));
+    },
+    queue: function () {
+      S.posts.forEach(function (p) {
+        if (!S.selected[p.id]) return;
+        ['en', 'es'].forEach(function (k) { var s = p.langs[k].status; if (s === 'missing' || s === 'outdated' || s === 'failed') start(p.id, k, 'the bulk queue'); });
+      });
+    },
+    publish: function () {
+      var id = S.nextId++, chars = 5400;
+      S.posts.push({ id: id, title: 'New post #' + (id - 6), chars: chars, langs: { en: L('missing', chars), es: L('missing', chars) } });
+      if (S.when === 'publish') { start(id, 'en', 'Publish (setting: when published)'); S.publishNote = 'Published: the audio is being made in the background, so the first visitor never waits.'; }
+      else { S.publishNote = 'Published: no audio yet, nothing spent. ' + (S.when === 'play' ? 'It is made on the first play.' : 'An editor makes it by hand.'); log('New post #' + (id - 6) + ' published. No job yet'); }
+    }
+  };
+
+  document.addEventListener('click', function (e) {
+    var t = e.target.closest('button');
+    if (!t) return;
+    if (t.dataset.tab) { S.tab = t.dataset.tab; }
+    else if (t.dataset.act && ACTS[t.dataset.act]) { ACTS[t.dataset.act](); }
+    else if (t.dataset.make) { var a = t.dataset.make.split(':'); start(Number(a[0]), a[1], 'an editor'); }
+    else if (t.dataset.del) { var b = t.dataset.del.split(':'), l = post(Number(b[0])).langs[b[1]]; l.status = 'missing'; l.done = 0; log(post(Number(b[0])).title + ' (' + b[1].toUpperCase() + '): audio deleted by an editor'); }
+    else if (t.dataset.filter) { S.filter = t.dataset.filter; }
+    else if (t.id === 'reset') { S = fresh(); }
+    else return;
+    render();
+  });
+  document.addEventListener('change', function (e) {
+    var t = e.target;
+    if (t.id === 'fail') { S.fail = t.checked; log(S.fail ? 'Provider now answers "no credit left"' : 'Provider has credit again'); }
+    else if (t.dataset.pick) { S.selected[t.dataset.pick] = t.checked; }
+    else if (t.id === 'edpost') { S.editorPost = Number(t.value); }
+    else if (t.name === 'when') { S.when = t.value; log('Setting: audio is made ' + { play: 'on the first play', publish: 'when a post is published', manual: 'only by editors' }[t.value]); }
+    else if (t.name === 'chg') { S.onChange = t.value; }
+    else if (t.id === 'limit') { S.limit = Math.max(0, Number(t.value) || 0); log('Daily limit set to ' + fmt(S.limit) + ' characters'); }
+    else return;
+    render();
+  });
+
+  render();
+  setInterval(tick, 700);
+})();
+</script>
+</body>
+</html>
