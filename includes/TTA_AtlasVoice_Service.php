@@ -122,6 +122,9 @@ class TTA_AtlasVoice_Service {
 			'pending_approval' => false,
 			// Set when the service refused the Pro licence because all its seats are in use.
 			'license_seats_full' => false,
+			// TTS-353: Freemius does not list the licence as activated on this site,
+			// so the service keeps it Free until the licence is activated here.
+			'license_not_on_site' => false,
 			// The service refused the key (revoked or rejected in the dashboard):
 			// the site was disconnected and Listening says why.
 			'key_revoked' => false,
@@ -317,16 +320,27 @@ class TTA_AtlasVoice_Service {
 	 * @return array{text:string, url:string}
 	 */
 	public static function upgrade_cta() {
-		$cta = self::get()['license_seats_full']
+		$state = self::get();
+
+		if ( $state['license_not_on_site'] ) {
+			// TTS-353: a paying customer whose licence is not activated here needs to
+			// activate it, not buy again. Pro supplies the link to its Account page.
+			$cta = array(
+				'text' => __( 'Activate your licence here', 'text-to-audio' ),
+				'url'  => '',
+			);
+		} elseif ( $state['license_seats_full'] ) {
 			// A Pro customer whose licence covers other sites needs a seat, not Pro.
-			? array(
+			$cta = array(
 				'text' => __( 'Add this site to your licence', 'text-to-audio' ),
 				'url'  => TTA_Helper::get_pro_url( 'admin', 'atlasvoice_tts_seats', 'pricing' ),
-			)
-			: array(
+			);
+		} else {
+			$cta = array(
 				'text' => __( 'Go unlimited with Pro', 'text-to-audio' ),
 				'url'  => TTA_Helper::get_pro_url( 'admin', 'atlasvoice_tts_allowance', 'pricing' ),
 			);
+		}
 
 		/**
 		 * The upgrade button shown with the AtlasVoice TTS allowance warnings.
@@ -355,6 +369,7 @@ class TTA_AtlasVoice_Service {
 			'usage'        => self::usage_summary(),
 			'cta'          => self::upgrade_cta(),
 			'seatsFull'    => (bool) self::get()['license_seats_full'],
+			'licenseNotOnSite' => self::license_not_on_site(),
 			'termsUrl'     => 'https://atlasaidev.com/terms-and-conditions/',
 			'privacyUrl'   => 'https://atlasaidev.com/privacy-policy/',
 		);
@@ -399,6 +414,7 @@ class TTA_AtlasVoice_Service {
 			'exhausted'   => self::is_exhausted(),
 			'pendingApproval' => (bool) $state['pending_approval'],
 			'licenseSeatsFull' => (bool) $state['license_seats_full'],
+			'licenseNotOnSite' => (bool) $state['license_not_on_site'],
 			'keyRevoked'  => ! self::is_connected() && (bool) $state['key_revoked'],
 			'diagnostics' => self::diagnostics_offer(),
 			'serviceUrl'  => self::base_url(),
@@ -650,6 +666,7 @@ class TTA_AtlasVoice_Service {
 			'license_attached' => false,
 			'pending_approval' => false,
 			'license_seats_full' => false,
+			'license_not_on_site' => false,
 			'key_revoked'      => false,
 		) );
 	}
@@ -703,13 +720,18 @@ class TTA_AtlasVoice_Service {
 			// Every site of the licence already uses it: this site stays Free, and the
 			// Listening screen says why. Pro retries hourly, so a freed seat is picked up.
 			if ( 'license_quota_reached' === $result['error'] ) {
-				self::put( array( 'license_seats_full' => true ) );
+				self::put( array( 'license_seats_full' => true, 'license_not_on_site' => false ) );
+			}
+			// TTS-353: Freemius does not list the licence as activated on this site.
+			// The site stays Free; Pro retries hourly and on every licence change.
+			if ( 'license_not_active_on_site' === $result['error'] ) {
+				self::put( array( 'license_not_on_site' => true, 'license_seats_full' => false ) );
 			}
 
 			return self::error_from( $result );
 		}
 
-		self::put( array( 'license_attached' => true, 'license_seats_full' => false ) );
+		self::put( array( 'license_attached' => true, 'license_seats_full' => false, 'license_not_on_site' => false ) );
 		self::remember_usage( isset( $result['data']['usage'] ) ? $result['data']['usage'] : null );
 
 		return true;
@@ -731,7 +753,7 @@ class TTA_AtlasVoice_Service {
 			return self::error_from( $result );
 		}
 
-		self::put( array( 'license_attached' => false, 'license_seats_full' => false ) );
+		self::put( array( 'license_attached' => false, 'license_seats_full' => false, 'license_not_on_site' => false ) );
 		self::remember_usage( isset( $result['data']['usage'] ) ? $result['data']['usage'] : null );
 
 		return true;
@@ -742,6 +764,16 @@ class TTA_AtlasVoice_Service {
 	 */
 	public static function has_license_attached() {
 		return (bool) self::get()['license_attached'];
+	}
+
+	/**
+	 * TTS-353: the service refused the Pro licence because Freemius does not list
+	 * it as activated on this site.
+	 *
+	 * @return bool
+	 */
+	public static function license_not_on_site() {
+		return (bool) self::get()['license_not_on_site'];
 	}
 
 	/**

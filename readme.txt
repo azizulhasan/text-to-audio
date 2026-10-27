@@ -401,6 +401,10 @@ We are looking for people to help translate this plugin. If you can help, we wou
 Help us and the WordPress community translate the plugin. [Contact us](http://atlasaidev.com/contact-us/) and we'll guide you through the process.
 
 
+= 2.4.0-beta.8 ( 27 Oct 2026 ) =
+Beta: for testing before the 2.4.0 release. Use it with AtlasVoice Pro 3.5.0-beta.8.
+Improved : When your AtlasVoice Pro licence is not activated on this site, the Listening screen now says so and shows how to activate it, instead of offering to buy Pro again.
+
 = 2.4.0-beta.7 ( 23 Oct 2026 ) =
 Beta: for testing before the 2.4.0 release. Use it with AtlasVoice Pro 3.5.0-beta.7.
 Improved : Includes every fix from the released 2.3.21 and 2.3.22: the player keeps reading on iPhone, uses the phone's own voice when yours is missing, and no longer stays empty in app browsers.

@@ -232,6 +232,17 @@ export default function AtlasVoiceTTSSettings({ listeningSettings, handleChange,
                 </div>
               </Alert>
             )}
+            {state.licenseNotOnSite && state.plan !== "premium" && (
+              <Alert variant="warning" className="small" role="status">
+                <strong className="d-block">{__("Your AtlasVoice Pro licence isn’t activated on this site yet.", "text-to-audio")}</strong>
+                {__("Until it is, this site uses the Free allowance. Activate the licence on this site under AtlasVoice → Account; the site becomes Premium right after. Local sites and common staging addresses (like staging.yoursite.com) don’t use up a site on your licence.", "text-to-audio")}
+                {state.upgradeCta?.url && (
+                  <div className="mt-2">
+                    <a href={state.upgradeCta.url}>{__("Activate the licence on this site", "text-to-audio")}</a>
+                  </div>
+                )}
+              </Alert>
+            )}
             <AtlasVoiceUsage summary={state.usageSummary} cta={state.upgradeCta} />
             <Button variant="link" className="p-0 mt-3 small" type="button" disabled={busy} onClick={disconnect}>
               {__("Disconnect", "text-to-audio")}
