@@ -344,6 +344,46 @@ for counts and the docked player. Nothing nests a card inside a card.
   `FormFileUpload`, `BaseControl`, `Dropdown` + `MenuGroup`/`MenuItem` (notices, help, export),
   `Notice`, `Modal`, `SnackbarList`, `Tooltip`, `Spinner`.
 
+## Accessibility (WCAG 2.2 AA): AtlasVoice is an accessibility product
+
+The bar is WCAG 2.2 AA for every surface: admin screens, setup, the post editor panel (block and
+Classic), the Audio library and bulk queue, the WordPress screens, and above all the front-end
+player that visitors use.
+
+- **Keyboard:**
+  - every control is a real `button`, `input` or `a`, reachable with Tab;
+  - the search opens with Ctrl K or `/` and moves with ↑ ↓ Enter Esc;
+  - drawers move focus inside and close with Esc;
+  - tables that scroll sideways are focusable regions with a name;
+  - nothing interactive is nested inside another control (for example, a voice card's pick,
+    favourite and sample are three separate buttons).
+- **Focus:** a visible 2px brand outline on everything we style. WordPress components keep their own.
+- **Names:** icon-only buttons have `aria-label`. The player's buttons say what they do ("Pause",
+  "Download MP3", "Playback speed 1 times"). The seek bar is a `slider` with a value. Job
+  progress is a `progressbar` with "Part n of m".
+- **Status:** never colour alone. Every chip has a word (Ready, Outdated, Missing, Failed,
+  Making 9 of 14, Live, Staging). Progress and "Preparing…" messages are `role="status"`, and a
+  failed generation is `role="alert"`.
+- **Contrast:** at least 4.5:1 for text, on light and dark sites. The Look screen shows the
+  player's contrast ratio live and warns below 4.5:1. Muted text is #50575e on light and #c3c4c7
+  on dark, never lower.
+- **The player for listeners:**
+  - the docked player keeps its space in the article, so text never jumps;
+  - phones always get the full-width player with every control;
+  - read-along highlighting is optional and its colours pass contrast;
+  - "Listen to a selection" works from the keyboard;
+  - the optional AI notice is also read out to screen readers;
+  - when audio can't be made, visitors get the device voice instead of an error.
+- **Motion:** `prefers-reduced-motion` turns off slides, spinners and the waveform animation.
+- **Language:** `lang` on the page, and the player and its notices in the visitor's language.
+- **Checked (26–27 Oct 2026):**
+  - axe-core WCAG 2.2 AA run on all 32 screens and sub-tabs, plus the editor, front-end and
+    WordPress views, in Pro, Free and at 390 px: 105 pages, 0 violations
+    (`a11y-audit.cjs` in the plans folder);
+  - responsive at 1440 / 1100 / 820 / 390 px with no sideways scroll.
+  - Still to do in the build: a manual screen-reader pass (NVDA and VoiceOver) and a
+    keyboard-only run of every flow, as part of the QA subtask.
+
 ## Do's and Don'ts
 
 - Do use a WordPress component whenever one exists, and style it only through tokens.

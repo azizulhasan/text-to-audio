@@ -129,7 +129,7 @@
 			footer );
 	};
 	AV.Scroll = ( { pad = true, width, children } ) => h( 'div', { className: 'atlasvoice-scroll' }, pad ? h( 'div', { className: 'atlasvoice-pad', style: width ? { maxWidth: width } : null }, children ) : children );
-	AV.Table = ( { head, children } ) => h( 'div', { className: 'atlasvoice-table-wrap' }, h( 'table', { className: 'atlasvoice-table' }, h( 'thead', null, h( 'tr', null, head.map( ( t, i ) => h( 'th', { key: i, style: t && t.w ? { width: t.w } : null }, t && t.l !== undefined ? t.l : t ) ) ) ), h( 'tbody', null, children ) ) );
+	AV.Table = ( { head, children, label } ) => h( 'div', { className: 'atlasvoice-table-wrap', tabIndex: 0, role: 'region', 'aria-label': label || 'Table' }, h( 'table', { className: 'atlasvoice-table' }, h( 'thead', null, h( 'tr', null, head.map( ( t, i ) => h( 'th', { key: i, style: t && t.w ? { width: t.w } : null }, t && t.l !== undefined ? t.l : t ) ) ) ), h( 'tbody', null, children ) ) );
 	/* Mockup-only switch row (states you could not otherwise see). Yellow, labelled. */
 	AV.MockBar = ( { label, value, onChange, options } ) => h( 'div', { className: 'atlasvoice-mockbar' }, h( 'b', null, 'Mockup only: ' + label ),
 		options.map( ( [ v, l ] ) => h( Button, { key: v, size: 'small', variant: v === value ? 'primary' : 'secondary', onClick: () => onChange( v ) }, l ) ) );
@@ -220,7 +220,7 @@
 			const status = { progressive: 'Getting the audio ready · part 6 of 14. The first part is playing now.', joined: 'This audio is being prepared · part 9 of 14. You can start with the first parts now.' }[ state ];
 			play = h( 'button', { className: 'atlasvoice-player-play', 'aria-label': playing ? 'Pause' : 'Play', onClick: () => act( playing ? 'pause' : 'play' ) }, h( Glyph, { g: playing ? 'pause' : state === 'ended' ? 'replay' : 'play' } ) );
 			mid = h( 'div', { className: 'atlasvoice-player-mid' },
-				status ? h( 'div', { className: 'atlasvoice-player-title', role: 'status' }, status ) : h( 'div', { className: 'atlasvoice-player-title' }, 'Listen to this article ', h( 'span', { style: { opacity: .75, fontWeight: 400 } }, '· ' + voice ) ),
+				status ? h( 'div', { className: 'atlasvoice-player-title', role: 'status' }, status ) : h( 'div', { className: 'atlasvoice-player-title' }, 'Listen to this article ', h( 'span', { style: { fontWeight: 400 } }, '· ' + voice ) ),
 				h( Wave, { played: pl } ) );
 			tools = h( 'span', { className: 'atlasvoice-player-tools' },
 				h( 'span', { className: 'atlasvoice-player-time' }, { idle: '4:05', playing: '1:24 / 4:05', paused: '1:24 / 4:05', progressive: '0:31', ended: '4:05', joined: 'ready soon', outdated: '4:05' }[ state ] ),
