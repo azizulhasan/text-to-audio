@@ -396,7 +396,8 @@ Help us and the WordPress community translate the plugin. [Contact us](http://at
 
 
 = 2.3.23 ( 29 Oct 2026 ) =
-Changed : Behind-the-scenes tidy-up of the code documentation. Nothing changes in how the plugin works.
+Fixed : On a page with audio players for more than one post, each player now tells AtlasVoice Pro which post it belongs to.
+Changed : Behind-the-scenes tidy-up of the code documentation.
 
 = 2.3.22 ( 23 Oct 2026 ) =
 Fixed : On iPhone the player keeps reading the whole post instead of stopping after the first paragraph.
@@ -572,7 +573,7 @@ Fixed : Removed external sample-audio requests from the dashboard; previews now 
 == Upgrade Notice ==
 
 = 2.3.23 =
-Routine maintenance release with a behind-the-scenes tidy-up. Safe to update; nothing changes in how the plugin works.
+Helps pages with audio players for more than one post when AtlasVoice Pro is active, plus a behind-the-scenes tidy-up. Safe to update.
 
 = 2.3.22 =
 Fixes the player on iPhone and Android phones (stopping after the first paragraph, staying silent, or an empty button) and makes Staging and Go live easier to see. Recommended for all sites.

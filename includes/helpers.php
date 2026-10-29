@@ -613,6 +613,9 @@ function get_enqueued_js_object($params, $plugin_all_settings)
         'use_old_player'       => (string) $use_old_player,
         'settings'             => isset( $plugin_all_settings['settings'] ) ? $plugin_all_settings['settings'] : new \stdClass(),
         'extra'                => array(
+            // TTS-359: TTS.settings is filled by the first player only, so a page
+            // with players for several posts needs each player's own post ID here.
+            'post_id'             => (int) $post->ID,
             'title'               => (string) $title,
             'file_name'           => (string) $file_name,
             'date'                => (string) $date,
