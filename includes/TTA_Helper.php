@@ -130,6 +130,14 @@ class TTA_Helper
         }
     }
 
+    /**
+     * Check whether a post has any of the excluded tags or categories.
+     *
+     * @param WP_Term[]|false $post_terms     Terms attached to the post.
+     * @param string[]        $excluded_terms Excluded term slugs from the settings.
+     * @param string          $term_type      'tag' or 'category', passed to the filter.
+     * @return bool True when at least one term is excluded.
+     */
     public static function is_exluded_by_terms($post_terms, $excluded_terms, $term_type = 'tag')
     {
         $terms = [];
@@ -152,6 +160,17 @@ class TTA_Helper
         return apply_filters('tts_is_exluded_by_terms', $is_exclude, $term_type);
     }
 
+    /**
+     * Decide whether the player should be shown for a post.
+     *
+     * Checks the single-view context, excluded posts, tags, categories, post types
+     * and post statuses from the settings. Filter: `tta_should_load_button`.
+     *
+     * @param WP_Post|int|string $current_post Post object or ID; defaults to the global post.
+     * @param string             $called_from  Caller name, passed to the filter.
+     * @param string|null        $reason       Out-parameter: why the player was not shown.
+     * @return bool True when the player should be shown.
+     */
     public static function should_load_button($current_post = '', $called_from = 'default', &$reason = null)
     {
         // TTS-305: $reason is an optional out-parameter. The shortcode returns
@@ -395,6 +414,11 @@ class TTA_Helper
         return isset($post->post_type) ? $post->post_type : '';
     }
 
+    /**
+     * Get the status of the global post.
+     *
+     * @return string Post status, or an empty string when there is no post.
+     */
     public static function tts_post_status()
     {
         global $post;
@@ -532,6 +556,11 @@ class TTA_Helper
         return $output;
     }
 
+    /**
+     * Collect settings for active translation plugins the player supports (GTranslate, WPML and others).
+     *
+     * @return array Data keyed by plugin file, only for active plugins.
+     */
     public static function get_compatible_plugins_data()
     {
         $compatible_plugins_data = [];
@@ -648,6 +677,12 @@ class TTA_Helper
         return \apply_filters('tts_compatible_plugins_data', $compatible_plugins_data, TTA_Cache::all_plugins());
     }
 
+    /**
+     * Get the listening language saved in the settings.
+     *
+     * @param array $plugin_all_settings All plugin settings.
+     * @return string Language code, filtered by `tts_site_language`.
+     */
     public static function tts_site_language($plugin_all_settings)
     {
 
@@ -702,6 +737,13 @@ class TTA_Helper
         return apply_filters('tts_normalize_language_code', $primary . $rest, $language);
     }
 
+    /**
+     * Build the key an MP3 file URL is stored under for a language and voice.
+     *
+     * @param string $language Language code.
+     * @param string $voice    Voice name; added to the key for players above 3.
+     * @return string The file URL key.
+     */
     public static function tts_get_file_url_key($language, $voice = '')
     {
         // Normalize here too: some callers (e.g. Pro generation) pass a saved
@@ -721,6 +763,12 @@ class TTA_Helper
         return apply_filters('tts_get_file_url_key', $file_url_key, $language, $voice);
     }
 
+    /**
+     * Get the listening voice saved in the settings (players 4 to 6 only).
+     *
+     * @param array $plugin_all_settings All plugin settings.
+     * @return string Voice name with spaces and brackets replaced by underscores.
+     */
     public static function tts_get_voice($plugin_all_settings)
     {
         $default_voice = '';
@@ -735,6 +783,16 @@ class TTA_Helper
         return $voice;
     }
 
+    /**
+     * Build the MP3 file name for a post, language and voice.
+     *
+     * @param string         $title        Title to use; falls back to the post title, then the post ID.
+     * @param string         $selectedLang Language code.
+     * @param string         $voice        Voice name (players 4 to 6).
+     * @param int|string     $post_id      Post ID; defaults to the post's ID.
+     * @param WP_Post|string $post         Post object; defaults to the global post.
+     * @return string File name without extension, filtered by `tts_file_name`.
+     */
     public static function tts_file_name($title, $selectedLang, $voice = '', $post_id = '', $post = '')
     {
         if(!$post) {
@@ -1185,6 +1243,11 @@ class TTA_Helper
         return apply_filters('tts_pro_url', add_query_arg($args, $base), $context, $content, $page);
     }
 
+    /**
+     * Check whether the uploads folder can be written to.
+     *
+     * @return bool True when the folder is writable.
+     */
     public static function is_audio_folder_writable()
     {
         $upload_dir = wp_upload_dir();
@@ -1197,6 +1260,11 @@ class TTA_Helper
         return false;
     }
 
+    /**
+     * Get the active player ID. Wrapper for the global get_player_id().
+     *
+     * @return int Player ID.
+     */
     public static function get_player_id()
     {
         return get_player_id();
@@ -1227,6 +1295,11 @@ class TTA_Helper
         return (array) apply_filters( 'tts_available_players', $players );
     }
 
+    /**
+     * Save the default settings when they have not been saved yet.
+     *
+     * @return void
+     */
     public static function set_default_settings()
     {
         $settings = (array)get_option('tta_settings_data');
@@ -1235,6 +1308,14 @@ class TTA_Helper
         }
     }
 
+    /**
+     * Check whether an MP3 file is missing, so it must be made again.
+     *
+     * @param string $url       File URL.
+     * @param string $date      Post date folder (Y/m/d).
+     * @param string $file_name Expected file name.
+     * @return bool True when the file is missing or does not match.
+     */
     public static function is_file_url_not_exists_and_is_file_empty($url, $date, $file_name)
     {
 
@@ -1563,6 +1644,15 @@ class TTA_Helper
         return $html;
     }
 
+    /**
+     * Clean text before it is read aloud.
+     *
+     * Removes symbols that cannot be spoken, repeated punctuation, spacer dots and
+     * extra white space.
+     *
+     * @param string $inputString Text to clean.
+     * @return string Cleaned text.
+     */
     public static function clean_string($inputString)
     {
         $delimiter = \apply_filters('tts_sentence_delimiter', '.');
@@ -1623,6 +1713,15 @@ class TTA_Helper
     }
 
 
+    /**
+     * Get the language and voice the player uses for a post.
+     *
+     * @param string  $language            Language from the settings.
+     * @param string  $voice               Voice from the settings.
+     * @param array   $plugin_all_settings All plugin settings.
+     * @param WP_Post $post                Current post.
+     * @return array { language: string, voice: string }, filtered by `tts_player_language_and_player_voice`.
+     */
     public static function get_player_language_and_player_voice($language, $voice, $plugin_all_settings, $post)
     {
         $language_and_voice = apply_filters('tts_player_language_and_player_voice', [
@@ -1639,6 +1738,11 @@ class TTA_Helper
         return $language_and_voice;
     }
 
+    /**
+     * Check whether the current admin screen is the post editor.
+     *
+     * @return bool True on post.php or post-new.php.
+     */
     public static function is_edit_page()
     {
         global $pagenow;
@@ -1653,6 +1757,11 @@ class TTA_Helper
         return false;
     }
 
+    /**
+     * Check whether the current admin screen is the AtlasVoice dashboard.
+     *
+     * @return bool|null True on the dashboard, false on other admin screens, null outside the admin.
+     */
     public static function is_text_to_audio_page()
     {
         // Ensure we are in the admin area
@@ -1761,6 +1870,11 @@ class TTA_Helper
         }
     }
 
+    /**
+     * Check whether Advanced Custom Fields (free or Pro) is active.
+     *
+     * @return bool True when ACF is active.
+     */
     public static function is_acf_active()
     {
 
@@ -1783,6 +1897,11 @@ class TTA_Helper
         return $status;
     }
 
+    /**
+     * Get the post statuses shown in the admin, cached.
+     *
+     * @return array Status labels keyed by status name.
+     */
     public static function all_post_status()
     {
 
@@ -1865,6 +1984,11 @@ class TTA_Helper
         return $display_player_to;
     }
 
+    /**
+     * Get the public post types, cached.
+     *
+     * @return array Post type labels keyed by name, filtered by `tts_get_post_types`.
+     */
     public static function get_post_types()
     {
         $cache_key = TTA_Cache::get_key('get_post_types');
@@ -2015,6 +2139,12 @@ class TTA_Helper
     }
 
 
+    /**
+     * Get a post's date as the Y/m/d folder used for its MP3 files.
+     *
+     * @param WP_Post $post Post object.
+     * @return string Date in Y/m/d format.
+     */
     public static function get_post_date($post)
     {
         $post_date = get_post_field('post_date', $post->ID);
@@ -2023,6 +2153,12 @@ class TTA_Helper
         return $date;
     }
 
+    /**
+     * Check whether the listening language or voice differs from the saved settings.
+     *
+     * @param array|object $current_data Listening settings about to be saved.
+     * @return bool True when a value changed or is missing.
+     */
     public static function is_listening_lang_or_voice_changed($current_data)
     {
         $previous_data = get_option('tta_listening_settings');
@@ -2060,6 +2196,12 @@ class TTA_Helper
         return false; // No changes detected
     }
 
+    /**
+     * Check whether the chosen player differs from the saved one.
+     *
+     * @param array|object $current_data Customize settings about to be saved.
+     * @return bool True when the player changed.
+     */
     public static function is_player_number_changed($current_data)
     {
         $current_data = (array)$current_data;
@@ -2076,6 +2218,12 @@ class TTA_Helper
         return  $previous_player_id == $current_player_id ? false : true;
     }
 
+    /**
+     * Delete a meta key from every post.
+     *
+     * @param string $meta_key Meta key to delete.
+     * @return int|bool Number of rows deleted, or false on error.
+     */
     public static function delete_post_meta($meta_key = 'tts_is_mp3_file_url_exists')
     {
         global $wpdb;
@@ -2095,6 +2243,12 @@ class TTA_Helper
         return $deleted;
     }
 
+    /**
+     * Strip HTML, scripts and styles from content and clean it for reading aloud.
+     *
+     * @param string $content Raw content.
+     * @return string Plain text.
+     */
     public static function clean_content($content) {
 
         $content = wp_strip_all_tags($content, true);
@@ -2110,6 +2264,12 @@ class TTA_Helper
         return $content;
     }
 
+    /**
+     * Remove a post from the duplicate-post list and clear its saved MP3 URLs.
+     *
+     * @param int $post_id Post ID.
+     * @return void
+     */
     public static function  delete_duplicate_post_ids_if_have( $post_id ){
         $duplicate_post_ids = get_option('tts_duplicate_post_ids', array());
         if(in_array($post_id, $duplicate_post_ids)) {
@@ -2126,6 +2286,12 @@ class TTA_Helper
         }
     }
 
+    /**
+     * Remove script, style and stylesheet tags from content.
+     *
+     * @param string $content HTML content.
+     * @return string Content without scripts and styles.
+     */
     public static function remove_js_and_css_from_content($content) {
         // Remove <script>...</script>
         $content = preg_replace('#<script\b[^>]*>(.*?)</script>#is', '', $content);
@@ -2142,6 +2308,12 @@ class TTA_Helper
         return $content;
     }
     
+    /**
+     * Check whether a post's content contains an AtlasVoice shortcode.
+     *
+     * @param WP_Post|object $post Post object.
+     * @return bool True when [tta_listen_btn] or [atlasvoice] is used.
+     */
     public static function tts_has_shortcode($post) {
         // TTS-261: has_shortcode() runs str_contains() on the content — a non-string
         // post_content (Formidable style/action objects hold an array) fatals on PHP 8.
@@ -2149,6 +2321,11 @@ class TTA_Helper
             && (has_shortcode($post->post_content, 'tta_listen_btn') || has_shortcode($post->post_content, 'atlasvoice'));
     }
 
+    /**
+     * Detect the visitor's browser from the user agent.
+     *
+     * @return string firefox, chrome, safari, edge, opera or unknown.
+     */
     public  static  function detect_browser() {
         $user_agent = isset( $_SERVER['HTTP_USER_AGENT'] )
             ? strtolower( sanitize_text_field( wp_unslash( $_SERVER['HTTP_USER_AGENT'] ) ) )
@@ -2170,6 +2347,11 @@ class TTA_Helper
         return $browser;
     }
 
+    /**
+     * Get the visitor's IP address, checking proxy and Cloudflare headers first.
+     *
+     * @return string IP address, or UNKNOWN.
+     */
     public static  function get_user_ip_address() {
         $ip_keys = [
             'HTTP_CF_CONNECTING_IP', // Cloudflare
