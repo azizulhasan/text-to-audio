@@ -233,11 +233,14 @@ export class AtlasVoiceMp3Player extends AtlasVoiceProgressivePlayer {
             return { code: 'empty' };
         }
 
-        const title = String(this.extra.file_name || 'post-' + this.TTS?.settings?.postId);
+        // TTS-359: TTS.settings belongs to the first player on the page; each
+        // player's own post ID is in its extra data.
+        const postId = this.extra.post_id || this.TTS?.settings?.postId;
+        const title = String(this.extra.file_name || 'post-' + postId);
         const base = {
             title,
             path: this.extra.date || '',
-            post_id: this.TTS?.settings?.postId,
+            post_id: postId,
             user_id: visitorId(),
             settings: {
                 language: this.extra.language || '',

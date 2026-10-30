@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AtlasVoice Redesign Mockup</title>
+<!-- WordPress core styles, straight from the local site: the same files wp-admin loads. -->
+<link rel="stylesheet" href="http://localhost/tts/wp-includes/css/dist/theme/design-tokens.min.css">
+<link rel="stylesheet" href="http://localhost/tts/wp-includes/css/dist/components/style.min.css">
+<link rel="stylesheet" href="atlasvoice-mockup.css?v=8">
+</head>
+<body>
+<div class="mock-wpbar"><b>WordPress</b><span class="mock-hide">The Reading Site</span><span class="mock-hide">+ New</span><span class="sp"></span>
+	<label for="mock-view">View:</label>
+	<select id="mock-view"><option value="app">AtlasVoice screens</option><option value="editor">Post editor</option><option value="front">Front end</option><option value="wp">WordPress screens</option></select>
+	<label for="mock-scn">Site:</label>
+	<select id="mock-scn"><option value="live">Live site</option><option value="new">New install</option><option value="bad">Needs attention</option></select>
+	<label for="mock-plan">Mockup:</label>
+	<select id="mock-plan"><option value="pro">Pro active</option><option value="free">Free plugin only</option></select>
+	<span class="mock-hide">Howdy, admin</span></div>
+<div class="mock-wpmenu"><div>Dashboard</div><div>Posts</div><div>Media</div><div>Pages</div><div>Comments</div><div class="cur">AtlasVoice</div><div>Appearance</div><div>Plugins</div><div>Users</div><div>Tools</div><div>Settings</div></div>
+<div class="mock-wpbody"><div id="atlasvoice-app" style="height:100%;position:relative"></div></div>
+<script>window.process = { env: {} };</script>
+<script src="http://localhost/tts/wp-includes/js/dist/vendor/react.min.js"></script>
+<script src="http://localhost/tts/wp-includes/js/dist/vendor/react-dom.min.js"></script>
+<script src="http://localhost/tts/wp-includes/js/dist/vendor/react-jsx-runtime.min.js"></script>
+<script src="http://localhost/tts/wp-includes/js/dist/dom-ready.min.js"></script>
+<script src="http://localhost/tts/wp-includes/js/dist/hooks.min.js"></script>
+<script src="http://localhost/tts/wp-includes/js/dist/i18n.min.js"></script>
+<script src="http://localhost/tts/wp-includes/js/dist/a11y.min.js"></script>
+<script src="http://localhost/tts/wp-includes/js/dist/deprecated.min.js"></script>
+<script src="http://localhost/tts/wp-includes/js/dist/dom.min.js"></script>
+<script src="http://localhost/tts/wp-includes/js/dist/escape-html.min.js"></script>
+<script src="http://localhost/tts/wp-includes/js/dist/element.min.js"></script>
+<script src="http://localhost/tts/wp-includes/js/dist/is-shallow-equal.min.js"></script>
+<script src="http://localhost/tts/wp-includes/js/dist/keycodes.min.js"></script>
+<script src="http://localhost/tts/wp-includes/js/dist/priority-queue.min.js"></script>
+<script src="http://localhost/tts/wp-includes/js/dist/private-apis.min.js"></script>
+<script src="http://localhost/tts/wp-includes/js/dist/undo-manager.min.js"></script>
+<script src="http://localhost/tts/wp-includes/js/dist/compose.min.js"></script>
+<script src="http://localhost/tts/wp-includes/js/dist/vendor/moment.min.js"></script>
+<script src="http://localhost/tts/wp-includes/js/dist/date.min.js"></script>
+<script src="http://localhost/tts/wp-includes/js/dist/html-entities.min.js"></script>
+<script src="http://localhost/tts/wp-includes/js/dist/primitives.min.js"></script>
+<script src="http://localhost/tts/wp-includes/js/dist/redux-routine.min.js"></script>
+<script src="http://localhost/tts/wp-includes/js/dist/data.min.js"></script>
+<script src="http://localhost/tts/wp-includes/js/dist/rich-text.min.js"></script>
+<script src="http://localhost/tts/wp-includes/js/dist/theme.min.js"></script>
+<script src="http://localhost/tts/wp-includes/js/dist/warning.min.js"></script>
+<script src="http://localhost/tts/wp-includes/js/dist/components.min.js"></script>
+<script src="atlasvoice-icons.js?v=8"></script>
+<script src="atlasvoice-mockup-core.js?v=8"></script>
+<script src="atlasvoice-mockup-screens.js?v=8"></script>
+<script src="atlasvoice-mockup-views.js?v=8"></script>
+<script src="atlasvoice-mockup.js?v=8"></script>
+</body></html>

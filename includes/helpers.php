@@ -218,6 +218,14 @@ function tta_button_skip_note($reason)
 ";
 }
 
+/**
+ * Build the player markup for a shortcode, block or the_content.
+ *
+ * @param array  $atts        Shortcode or block attributes.
+ * @param bool   $is_block    True when called from the block.
+ * @param string $tag_content Content wrapped by the shortcode.
+ * @return string|null Player HTML, an HTML note for editors, or null in the admin.
+ */
 function tta_get_button_content($atts, $is_block = false, $tag_content = '')
 {
     
@@ -559,6 +567,13 @@ function tts_enqueue_button_scripts($params)
     }, 5);
 }
 
+/**
+ * Print the player's data for one post as a JSON payload.
+ *
+ * @param array $params              Player values (post, title, content, date, player_number and others).
+ * @param array $plugin_all_settings All plugin settings.
+ * @return void
+ */
 function get_enqueued_js_object($params, $plugin_all_settings)
 {
     extract($params);
@@ -598,6 +613,9 @@ function get_enqueued_js_object($params, $plugin_all_settings)
         'use_old_player'       => (string) $use_old_player,
         'settings'             => isset( $plugin_all_settings['settings'] ) ? $plugin_all_settings['settings'] : new \stdClass(),
         'extra'                => array(
+            // TTS-359: TTS.settings is filled by the first player only, so a page
+            // with players for several posts needs each player's own post ID here.
+            'post_id'             => (int) $post->ID,
             'title'               => (string) $title,
             'file_name'           => (string) $file_name,
             'date'                => (string) $date,
@@ -681,6 +699,13 @@ JS;
 }
 
 
+/**
+ * Check whether two texts share at least 80% of their words (Jaccard similarity).
+ *
+ * @param string $text1 First text.
+ * @param string $text2 Second text.
+ * @return bool True when the texts match by 80% or more.
+ */
 function tts_text_match_80_percent($text1, $text2)
 {
     // Tokenize the input texts into words
@@ -930,6 +955,12 @@ function add_listen_button($content)
 }
 
 
+/**
+ * Get the registered shortcodes used in content.
+ *
+ * @param string $content Content to search.
+ * @return string[] Shortcode tag names.
+ */
 function get_used_shortcodes($content)
 {
     global $shortcode_tags;
@@ -946,6 +977,11 @@ function get_used_shortcodes($content)
     return $tagnames;
 }
 
+/**
+ * Get the WordPress locale names, keyed by locale code.
+ *
+ * @return array Locale names keyed by locale code.
+ */
 function tta_get_default_languages()
 {
     return array(
@@ -1080,6 +1116,11 @@ function tta_get_default_languages()
 }
 
 // Define rtl
+/**
+ * Check whether the site locale is written right to left.
+ *
+ * @return bool True for Arabic, Hebrew and Urdu locales.
+ */
 function tta_is_rtl()
 {
     global $locale;
@@ -1152,6 +1193,12 @@ function tta_get_player_button_inline_css()
 }
 
 
+/**
+ * Save the default button texts on first use and return them.
+ *
+ * @param string $content_read_time Reading time, passed to the filter.
+ * @return array Button texts, filtered by `tts_initial_button_texts`.
+ */
 function set_initial_button_texts($content_read_time)
 {
     if (!get_option('tta__button_text_arr')) {
@@ -1187,6 +1234,14 @@ function set_initial_button_texts($content_read_time)
 }
 
 
+/**
+ * Get the active player ID from the settings.
+ *
+ * Falls back to player 1 when the saved player is not available, for example
+ * after Pro was deactivated. Filter: `tts_get_player_id`.
+ *
+ * @return int Player ID.
+ */
 function get_player_id()
 {
 

@@ -5,7 +5,7 @@ Tags: accessibility, speech, tts, text to speech, text to audio
 Requires at least: 5.6
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 2.3.22
+Stable tag: 2.3.23
 License: GPLv3 or later
 License URI: https://www.gnu.org/licenses/gpl-3.0.txt
 
@@ -401,6 +401,10 @@ We are looking for people to help translate this plugin. If you can help, we wou
 Help us and the WordPress community translate the plugin. [Contact us](http://atlasaidev.com/contact-us/) and we'll guide you through the process.
 
 
+= 2.4.0-beta.9 ( 30 Oct 2026 ) =
+Beta: for testing before the 2.4.0 release. Use it with AtlasVoice Pro 3.5.0-beta.9.
+Improved : Includes every fix from the released 2.3.23: on a page with audio players for more than one post, each player now tells AtlasVoice Pro which post it belongs to.
+
 = 2.4.0-beta.8 ( 27 Oct 2026 ) =
 Beta: for testing before the 2.4.0 release. Use it with AtlasVoice Pro 3.5.0-beta.8.
 Improved : When your AtlasVoice Pro licence is not activated on this site, the Listening screen now says so and shows how to activate it, instead of offering to buy Pro again.
@@ -440,6 +444,10 @@ Added : An audio box in the post editor to listen to, replace or delete a post's
 Added : A Versions screen to go back to an earlier version if an update causes trouble. Settings, audio and statistics are kept.
 Added : A voice step in the setup wizard, a "What's New" panel, and your AtlasVoice TTS usage in Listening and on the Dashboard, with a warning before the monthly allowance runs out.
 Changed : When AtlasVoice TTS cannot make audio (for example, the allowance is used up), the post is read by the browser voice with your usual player button and settings.
+= 2.3.23 ( 29 Oct 2026 ) =
+Fixed : On a page with audio players for more than one post, each player now tells AtlasVoice Pro which post it belongs to.
+Changed : Behind-the-scenes tidy-up of the code documentation.
+
 = 2.3.22 ( 23 Oct 2026 ) =
 Fixed : On iPhone the player keeps reading the whole post instead of stopping after the first paragraph.
 Fixed : On phones that don't have the voice chosen in your settings, the player now reads with the phone's own voice instead of staying silent.
@@ -612,6 +620,9 @@ Fixed : Removed external sample-audio requests from the dashboard; previews now 
 
 
 == Upgrade Notice ==
+
+= 2.3.23 =
+Helps pages with audio players for more than one post when AtlasVoice Pro is active, plus a behind-the-scenes tidy-up. Safe to update.
 
 = 2.3.22 =
 Fixes the player on iPhone and Android phones (stopping after the first paragraph, staying silent, or an empty button) and makes Staging and Go live easier to see. Recommended for all sites.
