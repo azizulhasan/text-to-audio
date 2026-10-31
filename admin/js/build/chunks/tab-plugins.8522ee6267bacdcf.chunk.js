@@ -1,1 +1,0 @@
-"use strict";(self.webpackChunktext_to_audio=self.webpackChunktext_to_audio||[]).push([[755],{7252:(t,a,n)=>{n.r(a),n.d(a,{default:()=>i});var o=n(6540);function i(){return(0,o.useEffect)((function(){var t=window.tta_obj&&window.tta_obj.admin_url?window.tta_obj.admin_url:"/wp-admin/";window.location.href=t+"admin.php?page=atlasvoice-other-plugins"}),[]),null}}}]);

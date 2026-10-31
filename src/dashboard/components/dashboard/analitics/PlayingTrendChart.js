@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useState, useMemo, useCallback } from "react";
 import { __ } from "@wordpress/i18n";
+import { withQuery } from "../../context/utilities";
 import { Form } from "react-bootstrap";
 import ProFeatureOverlay from "./ProFeatureOverlay";
 
@@ -98,7 +99,7 @@ export default function PlayingTrendChart({
 
         try {
             const response = await fetch(
-                `${tta_obj.api_url}tta/v1/trend_data?date_range=Custom&from_date=${fromDateStr}&to_date=${toDateStr}`,
+                withQuery(`${tta_obj.api_url}tta/v1/trend_data`, `date_range=Custom&from_date=${fromDateStr}&to_date=${toDateStr}`),
                 {
                     method: "GET",
                     headers: {
