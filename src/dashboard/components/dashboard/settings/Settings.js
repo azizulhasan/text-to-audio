@@ -55,6 +55,7 @@ export default function Settings() {
     });
     const [postTypes, setPostTypes] = useState([]);
     const [isDataLoaded, setIsDataLoaded] = useState(false);
+    const [loadFailed, setLoadFailed] = useState(false);
     // TTS-247: Settings → Danger zone "Reset all plugin data".
     const [resetConfirmText, setResetConfirmText] = useState("");
     const [resetting, setResetting] = useState(false);
@@ -69,7 +70,7 @@ export default function Settings() {
             (res) => {
                 setSettings({...settings, ...res.data});
             }
-        );
+        ).catch(() => setLoadFailed(true));
 
         let formData2 = new FormData();
         formData2.append("method", "get");
@@ -98,7 +99,7 @@ export default function Settings() {
                 setPostsStatus(tempPostStatus);
             }
             setIsDataLoaded(true);
-        });
+        }).catch(() => setLoadFailed(true));
 
         console.log({id: ttsObj.player_id})
     }, []);
@@ -959,10 +960,16 @@ export default function Settings() {
         <div
             className="tta-loading-spinner"
         >
-            <div>
-                <Icon name="spinner" spin className="me-2" />
-                {__("Loading...", "text-to-audio")}
-            </div>
+            {loadFailed ? (
+                <div role="alert">
+                    {__("Could not load the settings. Please reload the page, and contact support if this continues.", "text-to-audio")}
+                </div>
+            ) : (
+                <div>
+                    <Icon name="spinner" spin className="me-2" />
+                    {__("Loading...", "text-to-audio")}
+                </div>
+            )}
         </div>
     );
 }

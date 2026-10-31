@@ -96,18 +96,23 @@ class TTA_Cache {
 	 * front-end requests. Comparing against home_url() instead would let a
 	 * Spanish page "repair" the cache back to the prefixed value.
 	 *
-	 * @return string REST root with a trailing slash, e.g. https://site/wp-json/
+	 * @return string REST root, e.g. https://site/wp-json/ or, on plain
+	 *                permalinks, https://site/index.php?rest_route=/
 	 */
 	public static function get_rest_api_url() {
-		$rest_api_url = esc_url_raw( untrailingslashit( get_option( 'home' ) ) . '/wp-json/' );
+		// TTS-361: /wp-json/ needs rewrite rules, which plain permalinks do not have.
+		$path         = get_option( 'permalink_structure' ) ? '/wp-json/' : '/index.php?rest_route=/';
+		$rest_api_url = esc_url_raw( untrailingslashit( get_option( 'home' ) ) . $path );
 		$cached       = self::get( 'tts_rest_api_url' );
 
 		if ( ! $cached ) {
-			return $rest_api_url;
+			return self::match_page_scheme( $rest_api_url );
 		}
 
-		if ( untrailingslashit( $cached ) === untrailingslashit( $rest_api_url ) ) {
-			return $cached;
+		$cached_for_page = self::match_page_scheme( $cached );
+
+		if ( untrailingslashit( $cached_for_page ) === untrailingslashit( self::match_page_scheme( $rest_api_url ) ) ) {
+			return $cached_for_page;
 		}
 
 		// Stale: heal it in place, so an affected site recovers on the next
@@ -116,7 +121,19 @@ class TTA_Cache {
 		self::set( 'tts_rest_api_url', $rest_api_url );
 		update_option( 'tts_rest_api_url', $rest_api_url, false );
 
-		return $rest_api_url;
+		return self::match_page_scheme( $rest_api_url );
+	}
+
+	/**
+	 * TTS-361: a home option saved as http on a site served over https made the
+	 * browser block every call as mixed content. Only ever upgrades: behind a
+	 * proxy is_ssl() can be false on an https site, so it must never downgrade.
+	 *
+	 * @param string $url REST root.
+	 * @return string The root, on https when this request is on https.
+	 */
+	private static function match_page_scheme( $url ) {
+		return is_ssl() ? set_url_scheme( $url, 'https' ) : $url;
 	}
 
 	public static function get_key( $cache_key = 'all' ) {
