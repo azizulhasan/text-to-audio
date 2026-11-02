@@ -401,6 +401,12 @@ We are looking for people to help translate this plugin. If you can help, we wou
 Help us and the WordPress community translate the plugin. [Contact us](http://atlasaidev.com/contact-us/) and we'll guide you through the process.
 
 
+= 2.4.0-beta.10 ( 2 Nov 2026 ) =
+Beta: for testing before the 2.4.0 release. Use it with AtlasVoice Pro 3.5.0-beta.10.
+Fixed : Includes the fixes from the released 2.3.24: the dashboard now works on sites with plain permalinks and on https sites whose address was saved as http, so Settings no longer stays on "Loading...".
+Improved : Settings shows a message when it cannot load, instead of a spinner that never stops.
+Improved : Polylang Pro is now recognised, so its languages can be matched to voices.
+
 = 2.4.0-beta.9 ( 30 Oct 2026 ) =
 Beta: for testing before the 2.4.0 release. Use it with AtlasVoice Pro 3.5.0-beta.9.
 Improved : Includes every fix from the released 2.3.23: on a page with audio players for more than one post, each player now tells AtlasVoice Pro which post it belongs to.
