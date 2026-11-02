@@ -673,6 +673,12 @@ class TTA_Helper
             }
         }
 
+        // TTS-361: Polylang Pro runs from another folder, so detect Polylang by its
+        // API. Free and Pro read this one key, so they need no second entry.
+        if ( isset( $datas['polylang/polylang.php'] ) && function_exists( 'pll_languages_list' ) ) {
+            $compatible_plugins_data['polylang/polylang.php'] = $datas['polylang/polylang.php'];
+        }
+
 
         return \apply_filters('tts_compatible_plugins_data', $compatible_plugins_data, TTA_Cache::all_plugins());
     }

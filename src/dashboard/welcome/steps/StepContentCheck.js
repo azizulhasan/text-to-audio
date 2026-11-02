@@ -28,9 +28,10 @@ const StepContentCheck = ({ postType }) => {
             // Prefer a sample of the post type the admin just chose; the
             // endpoint falls back to any published post when none matches.
             const q = postType
-                ? '?scope=post_type&post_type=' + encodeURIComponent(postType)
-                : '?scope=global';
-            const res = await fetch(base + 'step-rail/sample-url' + q, {
+                ? 'scope=post_type&post_type=' + encodeURIComponent(postType)
+                : 'scope=global';
+            // TTS-361: plain permalinks already have a "?" in the REST base.
+            const res = await fetch(base + 'step-rail/sample-url' + (base.includes('?') ? '&' : '?') + q, {
                 credentials: 'same-origin',
                 headers: { 'X-WP-Nonce': nonce },
             });

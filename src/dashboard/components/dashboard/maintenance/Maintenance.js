@@ -12,6 +12,7 @@
  */
 import React, { useEffect, useMemo, useState } from "react";
 import { __ } from "@wordpress/i18n";
+import { withQuery } from "../../context/utilities";
 import { toast } from "react-toastify";
 
 const PER_PAGE_OPTIONS = [25, 50, 100, 200];
@@ -84,7 +85,7 @@ export default function Maintenance() {
         if (!isProActive) return;
         setIsScanning(true);
         try {
-            const url = `${API_BASE}tta_pro/v1/scan_orphan_temp_files?page=${nextPage}&per_page=${nextPerPage}&min_age_seconds=${nextAge}`;
+            const url = withQuery(`${API_BASE}tta_pro/v1/scan_orphan_temp_files`, `page=${nextPage}&per_page=${nextPerPage}&min_age_seconds=${nextAge}`);
             const res = await fetch(url, {
                 method: "GET",
                 headers: {

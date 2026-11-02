@@ -72,6 +72,15 @@ export const postWithoutImage = async (url = "", data = {}) => {
 };
 
 /**
+ * TTS-361: add a query string to a REST URL. Plain-permalink sites use
+ * index.php?rest_route=/..., where a second "?" would 404 the request.
+ * @param {string} url REST URL.
+ * @param {string} query Query string without the leading "?".
+ * @returns {string} The full URL.
+ */
+export const withQuery = (url, query) => url + (url.includes("?") ? "&" : "?") + query;
+
+/**
  * get data methon
  * @param {url} url api url
  * @returns  data mixed.

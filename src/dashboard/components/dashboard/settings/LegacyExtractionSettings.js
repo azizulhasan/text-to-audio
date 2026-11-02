@@ -16,6 +16,7 @@
  */
 import React from "react";
 import {__} from "@wordpress/i18n";
+import {withQuery} from "../../context/utilities";
 import {Form, Row, Col, OverlayTrigger, Tooltip, Button} from "react-bootstrap";
 import Icon from "../../Icon";
 import {ProLockIcon} from "./SettingsPrimitives";
@@ -32,7 +33,7 @@ async function openPickerForGlobal() {
         const nonce   = (window.wpApiSettings && window.wpApiSettings.nonce)
             || (window.ttsObj && window.ttsObj.rest_nonce)
             || "";
-        const r = await fetch(apiRoot + "tta/v1/step-rail/sample-url?scope=global", {
+        const r = await fetch(withQuery(apiRoot + "tta/v1/step-rail/sample-url", "scope=global"), {
             credentials: "same-origin",
             headers: {"X-WP-Nonce": nonce},
         });
