@@ -142,7 +142,9 @@
 
     function restFetch(path, opts) {
         opts = opts || {};
-        var url = (state.rest || '').replace(/\/$/, '') + path;
+        var base = (state.rest || '').replace(/\/$/, '');
+        // TTS-361: plain permalinks already have a "?" in the REST base.
+        var url = base + (base.indexOf('?') !== -1 ? path.replace('?', '&') : path);
         var headers = { 'X-WP-Nonce': state.nonce, 'Accept': 'application/json' };
         if (opts.body) { headers['Content-Type'] = 'application/json'; }
         return fetch(url, {

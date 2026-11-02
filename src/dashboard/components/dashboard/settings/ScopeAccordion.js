@@ -34,6 +34,7 @@
 
 import React, {useMemo, useState} from "react";
 import {__} from "@wordpress/i18n";
+import {withQuery} from "../../context/utilities";
 import {Accordion, Form, useAccordionButton} from "react-bootstrap";
 import { proUrl } from "../../../proUrl";
 
@@ -91,7 +92,7 @@ async function resolvePickerUrl(scopeKind, postType, manualInput) {
             }
         } else {
             const r = await fetch(
-                apiBase + "wp/v2/posts?slug=" + encodeURIComponent(trimmed) + "&_fields=link,id",
+                withQuery(apiBase + "wp/v2/posts", "slug=" + encodeURIComponent(trimmed) + "&_fields=link,id"),
                 {credentials: "same-origin", headers}
             );
             if (r.ok) {
@@ -103,9 +104,9 @@ async function resolvePickerUrl(scopeKind, postType, manualInput) {
     }
 
     // 2. Sample-url fallback
-    let q = "?scope=" + (scopeKind === "post_type" ? "post_type" : "global");
+    let q = "scope=" + (scopeKind === "post_type" ? "post_type" : "global");
     if (scopeKind === "post_type" && postType) q += "&post_type=" + encodeURIComponent(postType);
-    const r = await fetch(apiBase + "tta/v1/step-rail/sample-url" + q, {credentials: "same-origin", headers});
+    const r = await fetch(withQuery(apiBase + "tta/v1/step-rail/sample-url", q), {credentials: "same-origin", headers});
     const j = await r.json();
     if (j && j.url) return j.url;
     throw new Error(__("No published post available to launch the picker on.", "text-to-audio"));

@@ -8,7 +8,7 @@ import {
     Row,
 } from "react-bootstrap";
 import UpgradeToPro from "../../UpgradeToPro";
-import { postWithoutImage } from "../../context/utilities";
+import { postWithoutImage, withQuery } from "../../context/utilities";
 import { __ } from "@wordpress/i18n";
 import toast from "../../context/Notify";
 
@@ -301,7 +301,7 @@ export default function Analytics() {
     const fetchAggregatedInsights = useCallback(async (dateRange = "Last 30 Days", fromDate = null, toDate = null) => {
         setIsAggregatedLoading(true);
         try {
-            let url = `${tta_obj.api_url}tta/v1/aggregated_insights?date_range=${encodeURIComponent(dateRange)}`;
+            let url = withQuery(`${tta_obj.api_url}tta/v1/aggregated_insights`, `date_range=${encodeURIComponent(dateRange)}`);
 
             // Add custom dates if provided
             if (dateRange === "Custom" && fromDate && toDate) {
@@ -387,7 +387,7 @@ export default function Analytics() {
         // the locked "Upgrade to Pro" card instead.
         if (!capabilities.trend) return;
         try {
-            let url = `${tta_obj.api_url}tta_pro/v1/trend_data?date_range=${encodeURIComponent(dateRange)}`;
+            let url = withQuery(`${tta_obj.api_url}tta_pro/v1/trend_data`, `date_range=${encodeURIComponent(dateRange)}`);
 
             // Add custom dates if provided
             if (dateRange === "Custom" && fromDate && toDate) {
@@ -419,7 +419,7 @@ export default function Analytics() {
         if (!capabilities.heatmap) return;
 
         try {
-            let url = `${tta_obj.api_url}tta_pro/v1/heatmap_data?date_range=${encodeURIComponent(dateRange)}`;
+            let url = withQuery(`${tta_obj.api_url}tta_pro/v1/heatmap_data`, `date_range=${encodeURIComponent(dateRange)}`);
 
             // Add custom dates if provided
             if (dateRange === "Custom" && fromDate && toDate) {
@@ -455,7 +455,7 @@ export default function Analytics() {
 
         try {
             const response = await fetch(
-                `${tta_obj.api_url}tta_pro/v1/export_csv?date_range=${encodeURIComponent(dateRange)}`,
+                withQuery(`${tta_obj.api_url}tta_pro/v1/export_csv`, `date_range=${encodeURIComponent(dateRange)}`),
                 {
                     method: "GET",
                     headers: {
@@ -497,7 +497,7 @@ export default function Analytics() {
         }
 
         try {
-            let url = `${tta_obj.api_url}tta_pro/v1/export_pdf?date_range=${encodeURIComponent(dateRange)}`;
+            let url = withQuery(`${tta_obj.api_url}tta_pro/v1/export_pdf`, `date_range=${encodeURIComponent(dateRange)}`);
 
             // Add custom dates if provided
             if (dateRange === "Custom" && globalFromDate && globalToDate) {
