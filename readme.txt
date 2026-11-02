@@ -5,7 +5,7 @@ Tags: accessibility, speech, tts, text to speech, text to audio
 Requires at least: 5.6
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 2.3.23
+Stable tag: 2.3.24
 License: GPLv3 or later
 License URI: https://www.gnu.org/licenses/gpl-3.0.txt
 
@@ -395,6 +395,12 @@ We are looking for people to help translate this plugin. If you can help, we wou
 Help us and the WordPress community translate the plugin. [Contact us](http://atlasaidev.com/contact-us/) and we'll guide you through the process.
 
 
+= 2.3.24 ( 31 Oct 2026 ) =
+Fixed : The AtlasVoice dashboard no longer stays on "Loading..." on sites that use plain permalinks.
+Fixed : The dashboard now works on https sites whose WordPress address is saved with http.
+Fixed : Polylang Pro is now recognised, so you can choose a language and voice for each Polylang language.
+Improved : The Settings page now shows a message if it cannot load, instead of loading for ever.
+
 = 2.3.23 ( 29 Oct 2026 ) =
 Fixed : On a page with audio players for more than one post, each player now tells AtlasVoice Pro which post it belongs to.
 Changed : Behind-the-scenes tidy-up of the code documentation.
@@ -571,6 +577,9 @@ Fixed : Removed external sample-audio requests from the dashboard; previews now 
 
 
 == Upgrade Notice ==
+
+= 2.3.24 =
+Fixes the dashboard staying on "Loading..." on sites with plain permalinks or an http WordPress address, and adds Polylang Pro support. Recommended for all sites.
 
 = 2.3.23 =
 Helps pages with audio players for more than one post when AtlasVoice Pro is active, plus a behind-the-scenes tidy-up. Safe to update.
