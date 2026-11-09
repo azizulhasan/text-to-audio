@@ -917,12 +917,6 @@ function add_listen_button($content)
 
     if (isset($settings['tta__settings_enable_button_add']) && $settings['tta__settings_enable_button_add']) {
         // TODO: write functionality if current page is home page where content is excerpt.
-        // if(is_single()) {
-        //     add_filter( 'the_content', 'add_listen_button' );
-        // }
-        // elseif(did_filter( 'the_excerpt' )){
-        //     add_filter( 'the_excerpt', 'add_listen_button' , 9999 );
-        // }
         $reduce_enqueue = apply_filters('tts_reduce_enqueue', ['reduce_enqueue_status' => false, 'button_no' => 1]);
         if (
             isset($reduce_enqueue['button_no'])
