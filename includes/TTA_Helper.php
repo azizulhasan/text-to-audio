@@ -186,7 +186,6 @@ class TTA_Helper
         if (is_numeric($current_post) && $current_post > 0) {
             $current_post = get_post((int) $current_post);
         }
-        // is_home() || is_archive() || is_front_page() || is_category()
         // TTS-261: is_single() needs a scalar (ID/slug), never a WP_Post object.
         // Formidable stores style/action posts whose post_content is an array;
         // casting such an object inside is_single() throws "Array to string
@@ -2589,17 +2588,7 @@ class TTA_Helper
                     }
                     // Add the field to the result array
                     $all_acf_fields[$field['name']] = $field['name'] . '::' . $field['label'];
-
-                    // Check if the field has subfields and process them recursively
-//					if (isset($field['sub_fields']) && is_array($field['sub_fields'])) {
-//						self::process_acf_fields($field['sub_fields'], $all_acf_fields);
-//					}
                 }
-
-//				if (is_array($fields)) {
-//					// Process fields recursively
-//					self::process_acf_fields($fields, $all_acf_fields);
-//				}
             }
         }
 

@@ -5,7 +5,7 @@ Tags: accessibility, speech, tts, text to speech, text to audio
 Requires at least: 5.6
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 2.3.24
+Stable tag: 2.3.25
 License: GPLv3 or later
 License URI: https://www.gnu.org/licenses/gpl-3.0.txt
 
@@ -401,6 +401,10 @@ We are looking for people to help translate this plugin. If you can help, we wou
 Help us and the WordPress community translate the plugin. [Contact us](http://atlasaidev.com/contact-us/) and we'll guide you through the process.
 
 
+= 2.4.0-beta.11 ( 9 Nov 2026 ) =
+Beta: for testing before the 2.4.0 release. Use it with AtlasVoice Pro 3.5.0-beta.11.
+Improved : Includes the released 2.3.25: a behind-the-scenes tidy-up of the code. Nothing changes in how the plugin works.
+
 = 2.4.0-beta.10 ( 2 Nov 2026 ) =
 Beta: for testing before the 2.4.0 release. Use it with AtlasVoice Pro 3.5.0-beta.10.
 Fixed : Includes the fixes from the released 2.3.24: the dashboard now works on sites with plain permalinks and on https sites whose address was saved as http, so Settings no longer stays on "Loading...".
@@ -450,6 +454,9 @@ Added : An audio box in the post editor to listen to, replace or delete a post's
 Added : A Versions screen to go back to an earlier version if an update causes trouble. Settings, audio and statistics are kept.
 Added : A voice step in the setup wizard, a "What's New" panel, and your AtlasVoice TTS usage in Listening and on the Dashboard, with a warning before the monthly allowance runs out.
 Changed : When AtlasVoice TTS cannot make audio (for example, the allowance is used up), the post is read by the browser voice with your usual player button and settings.
+= 2.3.25 ( 9 Nov 2026 ) =
+Changed : Behind-the-scenes tidy-up: removed old, unused code notes. Nothing changes in how the plugin works.
+
 = 2.3.24 ( 31 Oct 2026 ) =
 Fixed : The AtlasVoice dashboard no longer stays on "Loading..." on sites that use plain permalinks.
 Fixed : The dashboard now works on https sites whose WordPress address is saved with http.
@@ -632,6 +639,9 @@ Fixed : Removed external sample-audio requests from the dashboard; previews now 
 
 
 == Upgrade Notice ==
+
+= 2.3.25 =
+A small maintenance release that tidies up the code. Nothing changes in how the plugin works. Safe to update.
 
 = 2.3.24 =
 Fixes the dashboard staying on "Loading..." on sites with plain permalinks or an http WordPress address, and adds Polylang Pro support. Recommended for all sites.

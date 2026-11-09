@@ -48,8 +48,7 @@ class TTA_Cache {
 		}
 
 		if ( false === $expiration ) {
-			// TODO: this dynamic.
-			// $expiration = get_option( 'atlas_voice_settings', array( 'cache_ttl' => 6 * HOUR_IN_SECONDS ) );
+			// TODO: make the cache lifetime a setting.
 			$expiration = 24 * HOUR_IN_SECONDS;
 		}
 
