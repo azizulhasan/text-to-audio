@@ -5,7 +5,7 @@ Tags: accessibility, speech, tts, text to speech, text to audio
 Requires at least: 5.6
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 2.3.24
+Stable tag: 2.3.25
 License: GPLv3 or later
 License URI: https://www.gnu.org/licenses/gpl-3.0.txt
 
@@ -395,6 +395,9 @@ We are looking for people to help translate this plugin. If you can help, we wou
 Help us and the WordPress community translate the plugin. [Contact us](http://atlasaidev.com/contact-us/) and we'll guide you through the process.
 
 
+= 2.3.25 ( 9 Nov 2026 ) =
+Changed : Behind-the-scenes tidy-up: removed old, unused code notes. Nothing changes in how the plugin works.
+
 = 2.3.24 ( 31 Oct 2026 ) =
 Fixed : The AtlasVoice dashboard no longer stays on "Loading..." on sites that use plain permalinks.
 Fixed : The dashboard now works on https sites whose WordPress address is saved with http.
@@ -577,6 +580,9 @@ Fixed : Removed external sample-audio requests from the dashboard; previews now 
 
 
 == Upgrade Notice ==
+
+= 2.3.25 =
+A small maintenance release that tidies up the code. Nothing changes in how the plugin works. Safe to update.
 
 = 2.3.24 =
 Fixes the dashboard staying on "Loading..." on sites with plain permalinks or an http WordPress address, and adds Polylang Pro support. Recommended for all sites.
