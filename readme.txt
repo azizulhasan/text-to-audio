@@ -5,7 +5,7 @@ Tags: accessibility, speech, tts, text to speech, text to audio
 Requires at least: 5.6
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 2.3.25
+Stable tag: 2.3.26
 License: GPLv3 or later
 License URI: https://www.gnu.org/licenses/gpl-3.0.txt
 
@@ -395,6 +395,10 @@ We are looking for people to help translate this plugin. If you can help, we wou
 Help us and the WordPress community translate the plugin. [Contact us](http://atlasaidev.com/contact-us/) and we'll guide you through the process.
 
 
+= 2.3.26 ( 10 Nov 2026 ) =
+Fixed : On iPhone and iPad, the browser voice player now reads the whole article instead of stopping after the first sentence.
+Fixed : Resume now continues from where the reading stopped, instead of jumping to the end of the article.
+
 = 2.3.25 ( 9 Nov 2026 ) =
 Changed : Behind-the-scenes tidy-up: removed old, unused code notes. Nothing changes in how the plugin works.
 
@@ -580,6 +584,9 @@ Fixed : Removed external sample-audio requests from the dashboard; previews now 
 
 
 == Upgrade Notice ==
+
+= 2.3.26 =
+Fixes the player stopping after the first sentence on iPhone and iPad, and Resume jumping to the end of the article. Recommended for all sites.
 
 = 2.3.25 =
 A small maintenance release that tidies up the code. Nothing changes in how the plugin works. Safe to update.
