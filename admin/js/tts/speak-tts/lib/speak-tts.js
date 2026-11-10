@@ -6,6 +6,7 @@ Object.defineProperty(exports, "__esModule", {
 exports.default = void 0;
 
 import _utils from "./utils.js";
+import * as _speechQueue from "../../speech-queue.js";
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
@@ -193,6 +194,9 @@ var SpeakTTS =
             listeners = _data$listeners === void 0 ? {} : _data$listeners,
             _data$queue = data.queue,
             queue = _data$queue === void 0 ? true : _data$queue;
+          // TTS-367: iPhone/iPad can drop every sentence after the first when all
+          // are queued at once, so the caller can ask for one sentence at a time.
+          var sequential = data.sequential === true;
           var msg = (0, _utils.trim)(text);
           if ((0, _utils.isNil)(msg)) resolve(); // Stop current speech
 
@@ -220,7 +224,7 @@ var SpeakTTS =
               var fn = listeners[listener];
 
               var newListener = function newListener(data) {
-                fn && fn(data);
+                fn && fn(data, utterance);
 
                 if (listener === 'onerror') {
                   reject({
@@ -241,8 +245,19 @@ var SpeakTTS =
               utterance[listener] = newListener;
             });
             utterances.push(utterance);
-            speechSynthesis.speak(utterance);
+            if (!sequential) speechSynthesis.speak(utterance);
           });
+
+          if (sequential) {
+            _this3._sequence = (0, _speechQueue.speakInSequence)(utterances, speechSynthesis, {
+              onDone: function onDone() {
+                resolve({
+                  utterances: utterances,
+                  lastUtterance: utterances[utterances.length - 1]
+                });
+              }
+            });
+          }
         });
       }
     }, {
@@ -273,6 +288,11 @@ var SpeakTTS =
     }, {
       key: "cancel",
       value: function cancel() {
+        // TTS-367: end our own sentence queue first, so cancelling never starts the next sentence.
+        if (this._sequence) {
+          this._sequence.stop();
+          this._sequence = null;
+        }
         speechSynthesis.cancel();
       }
     }]);
