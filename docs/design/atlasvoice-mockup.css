@@ -602,3 +602,22 @@ body { background: #f0f0f1; overflow: hidden; font-family: -apple-system, system
 /* Audio Jobs: the status bar holds more at wide widths only */
 @media (max-width: 1279px) { .atlasvoice-hide-lg { display: none !important; } }
 .atlasvoice-status { overflow: hidden; }
+
+/* ---------- v3: grouped screens, the Home journey ---------- */
+.atlasvoice-group-body { flex: 1; min-height: 0; min-width: 0; display: flex; }
+.atlasvoice-group-body > .atlasvoice-main, .atlasvoice-group-body > .atlasvoice-split { flex: 1; }
+.atlasvoice-journey { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); background: #fff; border: 1px solid var(--atlasvoice-line); border-radius: var(--atlasvoice-radius-lg); overflow: hidden; }
+.atlasvoice-journey-step { display: flex; align-items: center; gap: 10px; padding: 14px 16px; border: 0; border-left: 1px solid var(--atlasvoice-line); background: none; font: inherit; color: inherit; text-align: left; cursor: pointer; min-width: 0; }
+.atlasvoice-journey-step:first-child { border-left: 0; }
+.atlasvoice-journey-step:hover { background: var(--atlasvoice-canvas); }
+.atlasvoice-journey-step:focus-visible { outline: 2px solid var(--atlasvoice-accent); outline-offset: -2px; }
+.atlasvoice-journey-step .atlasvoice-step-n { flex: none; }
+.atlasvoice-journey-step.is-done .atlasvoice-step-n { background: var(--atlasvoice-ok); border-color: var(--atlasvoice-ok); color: #fff; }
+.atlasvoice-journey-step.is-next { background: var(--atlasvoice-warn-bg); }
+.atlasvoice-journey-step.is-next .atlasvoice-step-n { border: 2px solid var(--atlasvoice-warn); color: var(--atlasvoice-warn); }
+.atlasvoice-journey-text { flex: 1; min-width: 0; }
+.atlasvoice-journey-text b { display: block; font-weight: 600; }
+.atlasvoice-journey-text small { display: block; font-size: 12px; color: #50575e; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.atlasvoice-journey-end { flex: none; font-size: 12px; color: var(--atlasvoice-accent); text-decoration: underline; }
+@media (max-width: 1099px) { .atlasvoice-journey { grid-template-columns: repeat(2, minmax(0, 1fr)); } .atlasvoice-journey-step:nth-child(3) { border-left: 0; } .atlasvoice-journey-step:nth-child(n+3) { border-top: 1px solid var(--atlasvoice-line); } }
+@media (max-width: 781px) { .atlasvoice-group-body { display: block; } .atlasvoice-journey { grid-template-columns: minmax(0, 1fr); } .atlasvoice-journey-step { border-left: 0; border-top: 1px solid var(--atlasvoice-line); } .atlasvoice-journey-step:first-child { border-top: 0; } }

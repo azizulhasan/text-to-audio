@@ -76,10 +76,15 @@
 		return [ JSON.stringify( value ) !== base, () => setBase( JSON.stringify( value ) ) ];
 	};
 	/* Sticky footer of a form pane: what changed, and the one Save button. */
-	AV.SaveBar = ( { dirty, onSave, label, children } ) => h( 'div', { className: 'atlasvoice-footer' },
-		h( 'span', { className: 'atlasvoice-footer-note' }, h( I, { icon: dirty ? 'pencil' : 'check', size: 20 } ), dirty ? 'Unsaved changes' : 'All changes saved' ),
-		children,
-		h( Button, { variant: 'primary', disabled: ! dirty, onClick: onSave }, label || 'Save' ) );
+	/* v3: leaving a screen with unsaved changes asks first (see go() in the app). */
+	AV.dirty = { current: false };
+	AV.SaveBar = function SaveBar( { dirty, onSave, label, children } ) {
+		useEffect( () => { AV.dirty.current = dirty; return () => { AV.dirty.current = false; }; }, [ dirty ] );
+		return h( 'div', { className: 'atlasvoice-footer' },
+			h( 'span', { className: 'atlasvoice-footer-note' }, h( I, { icon: dirty ? 'pencil' : 'check', size: 20 } ), dirty ? 'Unsaved changes' : 'All changes saved' ),
+			children,
+			h( Button, { variant: 'primary', disabled: ! dirty, onClick: onSave }, label || 'Save' ) );
+	};
 	AV.ext = ( notify, what ) => notify( 'In the plugin this opens ' + what + ' in a new tab.' );
 	/* A labelled row inside a Card: title + help on the left, a control on the right. */
 	AV.Row = ( { title, help, children } ) => h( Item, null, h( HStack, { alignment: 'center', wrap: true, spacing: 3 },
@@ -176,9 +181,10 @@
 	/* form: button | bar | dock. state: idle playing paused ended blocked generating progressive failed quota */
 	AV.Player = function Player( { form = 'bar', state = 'idle', look = {}, voice = 'Emma · Natural voice', staging, ai, credit, lang, download = true, onAct } ) {
 		const st = { '--p-bg': look.bg || '#184c53', '--p-fg': look.fg || '#fff', '--p-radius': { square: '4px', pill: '999px' }[ look.shape ] || '12px', '--p-h': { s: '44px', l: '60px' }[ look.size ] || '52px' };
+		const app = useApp();
 		const act = ( what ) => onAct && onAct( what );
 		const note = ai && ai.on && h( 'div', { className: 'atlasvoice-player-note' }, h( I, { icon: 'info' } ), ai.text || AV.AI_TXT );
-		const adm = staging && h( 'div', { className: 'atlasvoice-player-admin', role: 'note' }, h( 'b', null, 'Staging.' ), 'Only you can see this player. Visitors see it after you go live.' );
+		const adm = staging && h( 'div', { className: 'atlasvoice-player-admin', role: 'note' }, h( 'b', null, 'Staging.' ), 'Only you can see this player. Visitors see it after you go live. ', app && app.phone && h( 'button', { type: 'button', onClick: app.phone, style: { border: 0, background: 'none', padding: 0, font: 'inherit', color: 'inherit', textDecoration: 'underline', cursor: 'pointer' } }, 'Test on your phone' ) );
 		const wrap = ( inner ) => h( 'div', { className: 'atlasvoice-player' + ( form === 'button' || look.width === 'auto' ? ' is-auto' : '' ), style: st },
 			ai && ai.pos === 'before' && note, inner, ai && ai.pos !== 'before' && note, adm, credit && h( 'div', { className: 'atlasvoice-player-credit' }, 'Voiced by AtlasVoice' ) );
 		if ( state === 'quota' ) {
@@ -191,7 +197,7 @@
 		if ( state === 'fallback' || state === 'limit' ) {
 			return h( 'div', { className: 'atlasvoice-player is-auto', style: st },
 				h( 'button', { className: 'atlasvoice-player-btn', onClick: () => act( 'play' ) }, h( 'span', { className: 'atlasvoice-player-icon' }, h( Glyph, { g: 'play' } ) ), 'Listen with your device’s voice' ),
-				h( 'div', { className: 'atlasvoice-player-admin' }, h( 'b', null, 'Editors only.' ), state === 'limit' ? 'Today’s character limit is reached. New audio waits until tomorrow or until you raise the limit; posts with audio play as usual.' : 'This audio could not be made right now: the voice provider has no credit. The reason is in the editor and the Audio library.' ) );
+				h( 'div', { className: 'atlasvoice-player-admin' }, h( 'b', null, 'Editors only.' ), state === 'limit' ? 'Today’s character limit is reached. New audio waits until tomorrow or until you raise the limit; posts with audio play as usual.' : 'This audio could not be made right now. ElevenLabs answered: “unpaid invoice on the account”. The reason is in the editor and the Audio library.' ) );
 		}
 		if ( form === 'button' ) {
 			const lab = { playing: 'Pause', paused: 'Resume', ended: 'Replay', blocked: 'Tap again to listen' }[ state ] || 'Listen';
@@ -401,6 +407,7 @@
 			update: ( n ) => h( Notice, { key: n.id, status: 'info', onRemove: () => drop( n.id ), actions: [ { label: 'What’s new', onClick: () => ctx.modal( { title: 'What’s new in 2.5.0', body: h( 'ul', { className: 'atlasvoice-list' }, h( 'li', null, 'A new home for every setting, with search.' ), h( 'li', null, 'Audio starts in seconds: the first part plays while the rest is prepared.' ), h( 'li', null, 'Undo an update from Versions.' ) ), ok: 'Got it' } ) }, { label: 'Roll back', onClick: () => go( 'versions' ) } ] }, h( 'b', null, 'AtlasVoice updated to 2.5.0. ' ), 'If something stopped working, go back to 2.4.0.' ),
 			lang: ( n ) => h( Notice, { key: n.id, status: 'info', onRemove: () => drop( n.id ), actions: [ { label: 'Download Spanish', onClick: () => { drop( n.id ); notify( 'Spanish downloaded. The AtlasVoice screens reload in Spanish.' ); } } ] }, 'AtlasVoice is available in Español. Downloads only when you click.' ),
 			review: ( n ) => h( Notice, { key: n.id, status: 'success', onRemove: () => drop( n.id ), actions: [ { label: 'Leave a review', variant: 'primary', onClick: () => { drop( n.id ); AV.ext( notify, 'the WordPress.org review page' ); } }, { label: 'Not now', onClick: () => { drop( n.id ); notify( 'We’ll ask again in two weeks.' ); } } ] }, 'AtlasVoice has read your posts 1,000 times. A quick review helps other site owners find it.' ),
+			classic: ( n ) => h( Notice, { key: n.id, status: 'info', onRemove: () => drop( n.id ), actions: [ { label: 'Where things moved', onClick: () => go( 'help:moved' ) }, { label: 'Use the classic screens', onClick: () => go( 'advanced' ) } ] }, h( 'b', null, 'AtlasVoice has a new look. ' ), 'Nothing you saved has changed.' ),
 			other: ( n ) => h( Notice, { key: n.id, status: 'warning', onRemove: () => drop( n.id ) }, h( 'b', null, 'From another plugin: ' ), 'WP Rocket: one or more plugins have been enabled or disabled, clear the cache.' ),
 		};
 		return h( 'header', { className: 'atlasvoice-header' },
@@ -456,8 +463,9 @@
 		const next = setupSteps.find( ( s ) => ! setup.done.includes( s.id ) );
 		const live = mode === 'live';
 		return h( AV.Pane, { canvas: true }, h( AV.Scroll, { width: 1180 },
-			h( 'div', { className: 'atlasvoice-section' }, h( Notice, { status: live ? 'success' : 'warning', isDismissible: false, actions: live ? [ { label: 'View as a visitor', onClick: () => ctx.setView( 'front' ) }, { label: 'Change who sees it', onClick: () => go( 'player:place' ) } ] : [ { label: 'Go live…', variant: 'primary', onClick: () => ctx.askMode( 'live' ) }, { label: 'View as a visitor', onClick: () => ctx.setView( 'front' ) } ] },
+			h( 'div', { className: 'atlasvoice-section' }, h( Notice, { status: live ? 'success' : 'warning', isDismissible: false, actions: live ? [ { label: 'View as a visitor', onClick: () => ctx.setView( 'front' ) }, { label: 'Change who sees it', onClick: () => go( 'player:place' ) } ] : [ { label: 'Go live…', variant: 'primary', onClick: () => ctx.askMode( 'live' ) }, { label: 'View as a visitor', onClick: () => ctx.setView( 'front' ) }, { label: 'Test on your phone', onClick: ctx.phone } ] },
 				h( 'b', null, live ? 'Right now, everyone can hear it. ' : 'Right now, only you can hear it. ' ), live ? 'On Posts' + ( free ? '' : ', Pages and Products' ) + ' · shown to everyone · except posts in Podcasts · download allowed for everyone.' : 'You are in staging, so only logged-in admins see the player.' ) ),
+			setup.finished && h( 'div', { className: 'atlasvoice-section' }, h( AV.Journey ) ),
 			! fresh && h( 'div', { className: 'atlasvoice-section' }, h( AV.Stats, { items: [ [ 'Plays, last 7 days', '1,284', '+18% on the week before', '#007f30' ], [ 'Listening time', '41 h', '+9%' ], [ 'Finished listening', '38%', '−2%' ], [ 'Posts with audio', '182 of 214', '32 still need audio' ] ] } ) ),
 			h( 'div', { className: 'atlasvoice-grid is-2 atlasvoice-section' },
 				! setup.finished ? h( Card, null,
@@ -472,8 +480,8 @@
 							h( I, { icon: tone === 'err' ? 'error' : tone === 'info' ? 'info' : 'caution', style: { color: { err: '#cc1818', warn: '#926300', info: '#006bd7' }[ tone ], flex: 'none' } } ),
 							h( 'div', { className: 'atlasvoice-issue-text' }, h( 'b', null, t ), h( 'span', { className: 'atlasvoice-weak' }, d ) ), h( Button, { variant: 'secondary', size: 'compact', onClick: fn }, b ) ) ) ) )
 							: h( ItemGroup, { isSeparated: true },
-								h( Item, { onClick: () => go( 'voice' ) }, h( HStack, null, h( 'span', null, 'Voice: ' + AV.voiceName( ctx.voice ) + ' · ' + AV.ENGINES[ engine ] ), h( I, { icon: 'chevron-right' } ) ) ),
-								h( Item, { onClick: () => go( 'content' ) }, h( HStack, null, h( 'span', null, 'Shown on Posts' + ( free ? '' : ', Pages, Products' ) ), h( I, { icon: 'chevron-right' } ) ) ),
+								h( Item, { onClick: () => go( 'health' ) }, h( HStack, null, h( 'span', null, 'The player loads on your posts' ), h( I, { icon: 'chevron-right' } ) ) ),
+								h( Item, { onClick: () => go( 'library' ) }, h( HStack, null, h( 'span', null, 'No failed audio in the last 7 days' ), h( I, { icon: 'chevron-right' } ) ) ),
 								h( Item, { onClick: () => go( 'health' ) }, h( HStack, null, h( 'span', null, 'Last check today 09:12, no problems found' ), h( I, { icon: 'chevron-right' } ) ) ) ) ),
 				h( Card, null,
 					h( CardHeader, null, h( AV.H2, null, 'Your player' ), h( Button, { variant: 'tertiary', size: 'compact', onClick: () => go( 'player' ) }, 'Change look' ) ),
@@ -493,7 +501,7 @@
 					h( AV.Row, { title: 'Undo an update', help: 'Go back to an earlier version from Versions.' }, h( Button, { variant: 'secondary', size: 'compact', onClick: () => go( 'versions' ) }, 'Open' ) ),
 					h( AV.Row, { title: 'Tell listeners it’s an AI voice', help: 'An optional line with the player, in their language.' }, h( Button, { variant: 'secondary', size: 'compact', onClick: () => go( 'player:ai' ) }, 'Open' ) ) ) ) ),
 			free && h( Card, null, h( CardBody, null, h( HStack, { wrap: true },
-				h( VStack, { spacing: 1, style: { flex: 1, minWidth: 240 } }, h( HStack, { justify: 'flex-start' }, h( AV.Pro ), h( 'b', null, 'More with AtlasVoice Pro' ) ), h( 'span', { className: 'atlasvoice-weak' }, '374 studio voices in 43 languages, every content type, a voice per language, audio for many posts at once, audio in search and deeper insights.' ) ),
+				h( VStack, { spacing: 1, style: { flex: 1, minWidth: 240 } }, h( HStack, { justify: 'flex-start' }, h( AV.Pro ), h( 'b', null, 'More with AtlasVoice Pro' ) ), h( 'span', { className: 'atlasvoice-weak' }, '380 studio voices in 43 languages, every content type, a voice per language, audio for many posts at once, audio in search and deeper insights.' ) ),
 				h( Button, { variant: 'secondary', onClick: () => go( 'plans' ) }, 'Compare plans' ) ) ) ) ) );
 	};
 
@@ -551,7 +559,7 @@
 		} else if ( step.id === 'voice' ) {
 			const opts = free
 				? [ { id: 'atlas', title: 'Natural voice', badge: h( AV.Chip, { tone: 'info' }, 'Recommended' ), text: 'Sounds the same on every device. Saved as MP3. 100,000 characters a month free.', icon: 'audio' }, { id: 'browser', title: 'Browser voice', text: 'No account. The sound depends on each visitor’s device.', icon: 'desktop' }, { id: 'own', title: 'Your own provider', text: 'Google Cloud, OpenAI or ElevenLabs. Billed by them.', icon: 'key' } ]
-				: [ { id: 'cloud', title: 'AtlasVoice Cloud', badge: h( AV.Chip, { tone: 'ok' }, 'In your licence' ), text: '374 studio voices, saved as MP3. Nothing to set up.', icon: 'cloud' }, { id: 'atlas', title: 'Natural voice', text: 'AtlasVoice TTS, unlimited with Pro.', icon: 'audio' }, { id: 'own', title: 'Your own provider', text: 'Google Cloud, OpenAI or ElevenLabs. Billed by them.', icon: 'key' } ];
+				: [ { id: 'cloud', title: 'AtlasVoice Cloud', badge: h( AV.Chip, { tone: 'ok' }, 'In your licence' ), text: '380 studio voices, saved as MP3. Nothing to set up.', icon: 'cloud' }, { id: 'atlas', title: 'Natural voice', text: 'AtlasVoice TTS, unlimited with Pro.', icon: 'audio' }, { id: 'own', title: 'Your own provider', text: 'Google Cloud, OpenAI or ElevenLabs. Billed by them.', icon: 'key' } ];
 			body = h( Fragment, null, h( StepHead, { n: idx + 1, of: setupSteps.length, title: 'How should your posts sound?' } ),
 				h( AV.Tiles, { value: d.engine, onChange: ( v ) => up( { engine: v } ), options: opts } ),
 				h( 'div', { style: { marginTop: 16 } }, h( Card, null, h( CardBody, null, h( VStack, { spacing: 4 },
@@ -598,7 +606,8 @@
 				h( Card, null, h( CardBody, null, h( AV.KV, { rows: [ [ 'Where', d.types.join( ', ' ) ], [ 'Voice', AV.ENGINES[ d.engine ] ], [ 'Style', AV.PRESETS.find( ( x ) => x[ 0 ] === d.preset )[ 1 ] + ', ' + d.shape ], [ 'Counting plays', d.count ? 'On' : 'Off' ] ].concat( free ? [] : [ [ 'MP3 download', { all: 'Everyone', users: 'Logged-in users', admins: 'Administrators only', none: 'Nobody' }[ d.dl ] ], [ 'Report', d.report ? ( d.freq === 'w' ? 'Weekly to ' : 'Monthly to ' ) + d.reportTo : 'Off' ] ] ) } ) ) ),
 				h( 'div', { className: 'atlasvoice-grid is-2', style: { marginTop: 16 } },
 					h( 'button', { className: 'atlasvoice-tile', onClick: () => ctx.setView( 'front' ) }, h( 'span', { className: 'atlasvoice-tile-icon' }, h( I, { icon: 'seen' } ) ), h( 'span', null, h( 'b', null, 'See the player on your site' ), h( 'p', null, 'Opens your newest post' ) ) ),
-					h( 'button', { className: 'atlasvoice-tile', onClick: () => cont() }, h( 'span', { className: 'atlasvoice-tile-icon' }, h( I, { icon: 'home' } ) ), h( 'span', null, h( 'b', null, 'Go to Overview' ), h( 'p', null, 'Health, plays and every setting' ) ) ) ),
+					h( 'button', { className: 'atlasvoice-tile', onClick: () => cont() }, h( 'span', { className: 'atlasvoice-tile-icon' }, h( I, { icon: 'home' } ) ), h( 'span', null, h( 'b', null, 'Go to Home' ), h( 'p', null, 'Health, plays and every setting' ) ) ),
+					h( 'button', { className: 'atlasvoice-tile', onClick: () => go( 'more' ) }, h( 'span', { className: 'atlasvoice-tile-icon' }, h( I, { icon: 'plugins' } ) ), h( 'span', null, h( 'b', null, 'Also free: AtlasMCP' ), h( 'p', null, 'Run your site from Claude, ChatGPT and more.' ) ) ) ),
 				h( 'div', { style: { marginTop: 16 } }, h( Notice, { status: 'info', isDismissible: false, actions: [ { label: 'Leave a review', onClick: () => AV.ext( notify, 'the WordPress.org review page' ) } ] }, 'Enjoying AtlasVoice? A quick review helps other site owners find it.' ) ) );
 		}
 		const onCont = () => {
@@ -615,10 +624,10 @@
 				} ) ),
 				h( 'p', { className: 'atlasvoice-weak atlasvoice-steps-note' }, 'Opens once after you activate. Each step saves when you continue; leave any time and pick up here.' ) ),
 			h( AV.Pane, { canvas: true, footer: h( 'div', { className: 'atlasvoice-footer' },
-				h( Button, { variant: 'tertiary', className: 'atlasvoice-footer-note', onClick: () => ctx.modal( { title: 'Skip setup?', body: h( 'p', null, 'Nothing is lost. Overview keeps a “Finish setting up” card until you come back.' ), ok: 'Skip for now', onOk: () => go( 'overview' ) } ) }, 'Skip setup' ),
+				h( Button, { variant: 'tertiary', className: 'atlasvoice-footer-note', onClick: () => ctx.modal( { title: 'Skip setup?', body: h( 'p', null, 'Nothing is lost. Home keeps a “Finish setting up” card until you come back.' ), ok: 'Skip for now', onOk: () => go( 'overview' ) } ) }, 'Skip setup' ),
 				! valid && blocked && h( 'span', { className: 'atlasvoice-weak atlasvoice-hide-sm' }, blocked ),
 				h( Button, { variant: 'secondary', disabled: idx === 0, onClick: () => goTo( idx - 1 ) }, 'Back' ),
-				h( Button, { variant: 'primary', disabled: ! valid, onClick: onCont, 'aria-describedby': ! valid ? 'atlasvoice-why' : undefined }, step.id === 'done' ? 'Go to Overview' : step.id === 'live' ? ( d.golive === 'live' ? 'Go live and finish' : 'Finish in staging' ) : 'Continue' ),
+				h( Button, { variant: 'primary', disabled: ! valid, onClick: onCont, 'aria-describedby': ! valid ? 'atlasvoice-why' : undefined }, step.id === 'done' ? 'Go to Home' : step.id === 'live' ? ( d.golive === 'live' ? 'Go live and finish' : 'Finish in staging' ) : 'Continue' ),
 				! valid && blocked && h( 'span', { id: 'atlasvoice-why', className: 'screen-reader-text', style: { position: 'absolute', left: -9999 } }, blocked ) ) },
 				h( AV.Scroll, { width: 780 }, body ) ) );
 	};
