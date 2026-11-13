@@ -1,0 +1,127 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+# A newer push to the same branch cancels the run that is still going.
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  lint-php:
+    name: PHP lint and coding standards
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          coverage: none
+          tools: composer
+      - name: Syntax check every PHP file
+        run: |
+          find . -name '*.php' -not -path './vendor/*' -not -path './node_modules/*' \
+            -not -path './tests/phpunit/vendor/*' -not -path './production/*' -print0 \
+            | xargs -0 -n1 -P4 php -l > /dev/null
+      - name: Install lint tools
+        run: composer install -d tests/phpunit --no-interaction --no-progress
+      - name: WordPress Coding Standards
+        run: tests/phpunit/vendor/bin/phpcs --standard=phpcs.xml.dist
+
+  phpunit:
+    name: PHPUnit (PHP ${{ matrix.php }}, WP ${{ matrix.wp }})
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          # Oldest supported pair, and the newest.
+          - { php: '7.4', wp: '6.6' }
+          - { php: '8.3', wp: 'latest' }
+    services:
+      mysql:
+        image: mysql:8.0
+        env:
+          MYSQL_ROOT_PASSWORD: root
+          MYSQL_DATABASE: atlasvoice_test
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="mysqladmin ping -h 127.0.0.1 -proot"
+          --health-interval=10s --health-timeout=5s --health-retries=5
+    env:
+      WP_TESTS_DB_NAME: atlasvoice_test
+      WP_TESTS_DB_USER: root
+      WP_TESTS_DB_PASSWORD: root
+      WP_TESTS_DB_HOST: 127.0.0.1
+      WP_TESTS_ABSPATH: /tmp/wordpress/
+    steps:
+      - uses: actions/checkout@v4
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ matrix.php }}
+          extensions: mysqli
+          coverage: none
+          tools: composer, wp-cli
+      - name: Download WordPress
+        run: wp core download --path=/tmp/wordpress --version=${{ matrix.wp }} --skip-content
+      - name: Install test tools for this WordPress version
+        run: |
+          composer install -d tests/phpunit --no-interaction --no-progress
+          if [ "${{ matrix.wp }}" != "latest" ]; then
+            composer require -d tests/phpunit --dev --no-interaction --no-progress -W "wp-phpunit/wp-phpunit:~${{ matrix.wp }}.0"
+          fi
+      - name: Run PHPUnit
+        working-directory: tests/phpunit
+        run: vendor/bin/phpunit
+
+  js:
+    name: JS tests and production build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - name: JS tests
+        run: npm test
+      - name: Production build
+        run: npm run production
+      - name: Assemble the plugin as it is released
+        run: npx gulp clean:production copy
+        env:
+          # No desktop on the runner to show gulp's notifications.
+          DISABLE_NOTIFIER: 'true'
+      - name: Nothing for developers may ship
+        run: |
+          cd production/text-to-audio
+          for path in tests .github node_modules src phpcs.xml.dist CLAUDE.md DESIGN.md plan docs; do
+            if [ -e "$path" ]; then echo "::error::$path is in the release folder"; exit 1; fi
+          done
+      - uses: actions/upload-artifact@v4
+        with:
+          name: text-to-audio
+          path: production/text-to-audio
+          retention-days: 7
+
+  plugin-check:
+    name: Plugin Check
+    needs: js
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: text-to-audio
+          path: text-to-audio
+      - uses: wordpress/plugin-check-action@v1
+        with:
+          build-dir: ./text-to-audio
+          # Warnings are reported; only errors fail the run.
+          ignore-warnings: true

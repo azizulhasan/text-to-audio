@@ -79,6 +79,8 @@ const productionSrc = [
 	'!package.json',
 	'!composer.lock',
 	'!phpcs.xml',
+	'!phpcs.xml.dist',
+	'!.github/**',
 	'!.cpanel.yml',
 	'!package-lock.json',
 	'!mix-manifest.json',

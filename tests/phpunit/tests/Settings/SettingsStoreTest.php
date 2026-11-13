@@ -21,15 +21,33 @@ class SettingsStoreTest extends WP_UnitTestCase {
 	}
 
 	public function test_partial_payload_keeps_fields_that_were_not_sent() {
-		update_option( self::OPTION, (object) array( 'color' => '#184c53', 'width' => '100' ) );
+		update_option(
+			self::OPTION,
+			(object) array(
+				'color' => '#184c53',
+				'width' => '100',
+			)
+		);
 
 		$value = Settings_Store::prepare( self::OPTION, (object) array( 'width' => '80' ) );
 
-		$this->assertEquals( (object) array( 'color' => '#184c53', 'width' => '80' ), $value );
+		$this->assertEquals(
+			(object) array(
+				'color' => '#184c53',
+				'width' => '80',
+			),
+			$value
+		);
 	}
 
 	public function test_full_payload_gives_exactly_what_a_replace_stored() {
-		update_option( self::OPTION, (object) array( 'a' => 1, 'b' => array( 'x', 'y' ) ) );
+		update_option(
+			self::OPTION,
+			(object) array(
+				'a' => 1,
+				'b' => array( 'x', 'y' ),
+			)
+		);
 		$payload = json_decode( '{"a":2,"b":["z"],"c":{"id":3}}' );
 
 		$value = Settings_Store::prepare( self::OPTION, $payload );
@@ -55,7 +73,13 @@ class SettingsStoreTest extends WP_UnitTestCase {
 		update_option( self::OPTION, (object) array( 'a' => 1 ) );
 		$value = Settings_Store::prepare( self::OPTION, array( 'b' => 2 ) );
 		$this->assertIsArray( $value );
-		$this->assertSame( array( 'a' => 1, 'b' => 2 ), $value );
+		$this->assertSame(
+			array(
+				'a' => 1,
+				'b' => 2,
+			),
+			$value
+		);
 	}
 
 	public function test_empty_payload_changes_nothing() {
@@ -65,18 +89,42 @@ class SettingsStoreTest extends WP_UnitTestCase {
 	}
 
 	public function test_false_and_empty_values_that_were_sent_still_win() {
-		update_option( self::OPTION, (object) array( 'enabled' => true, 'text' => 'Listen' ) );
+		update_option(
+			self::OPTION,
+			(object) array(
+				'enabled' => true,
+				'text'    => 'Listen',
+			)
+		);
 
-		$value = Settings_Store::prepare( self::OPTION, (object) array( 'enabled' => false, 'text' => '' ) );
+		$value = Settings_Store::prepare(
+			self::OPTION,
+			(object) array(
+				'enabled' => false,
+				'text'    => '',
+			)
+		);
 
 		$this->assertFalse( $value->enabled );
 		$this->assertSame( '', $value->text );
 	}
 
 	public function test_numeric_keys_are_not_renumbered() {
-		update_option( self::OPTION, array( 3 => 'three', 7 => 'seven' ) );
+		update_option(
+			self::OPTION,
+			array(
+				3 => 'three',
+				7 => 'seven',
+			)
+		);
 
-		$this->assertSame( array( 3 => 'three', 7 => 'SEVEN' ), Settings_Store::prepare( self::OPTION, array( 7 => 'SEVEN' ) ) );
+		$this->assertSame(
+			array(
+				3 => 'three',
+				7 => 'SEVEN',
+			),
+			Settings_Store::prepare( self::OPTION, array( 7 => 'SEVEN' ) )
+		);
 	}
 
 	/**
@@ -136,7 +184,14 @@ class SettingsStoreTest extends WP_UnitTestCase {
 	public function test_css_selectors_survive_for_users_without_unfiltered_html() {
 		add_filter( 'map_meta_cap', array( $this, 'deny_unfiltered_html' ), 10, 2 );
 
-		$value = Settings_Store::prepare( self::OPTION, (object) array( 'selector' => 'article > p, .a + .b', 'n' => 5, 'on' => true ) );
+		$value = Settings_Store::prepare(
+			self::OPTION,
+			(object) array(
+				'selector' => 'article > p, .a + .b',
+				'n'        => 5,
+				'on'       => true,
+			)
+		);
 
 		remove_filter( 'map_meta_cap', array( $this, 'deny_unfiltered_html' ), 10 );
 

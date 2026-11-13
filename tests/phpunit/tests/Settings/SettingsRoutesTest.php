@@ -50,7 +50,13 @@ class SettingsRoutesTest extends WP_UnitTestCase {
 	 * @dataProvider map_routes
 	 */
 	public function test_partial_save_keeps_the_other_fields( $route, $option, $param ) {
-		update_option( $option, (object) array( 'kept_field' => 'stays', 'changed_field' => 'old' ) );
+		update_option(
+			$option,
+			(object) array(
+				'kept_field'    => 'stays',
+				'changed_field' => 'old',
+			)
+		);
 
 		$response = $this->save( $route, array( 'changed_field' => 'new' ), $param );
 
@@ -65,7 +71,11 @@ class SettingsRoutesTest extends WP_UnitTestCase {
 	 */
 	public function test_full_save_stores_the_payload_as_an_object_like_before( $route, $option, $param ) {
 		update_option( $option, (object) array( 'a' => 'old' ) );
-		$payload = array( 'a' => 'new', 'list' => array( 'post', 'page' ), 'nested' => array( 'id' => 1 ) );
+		$payload = array(
+			'a'      => 'new',
+			'list'   => array( 'post', 'page' ),
+			'nested' => array( 'id' => 1 ),
+		);
 
 		$this->save( $route, $payload, $param );
 
@@ -102,7 +112,13 @@ class SettingsRoutesTest extends WP_UnitTestCase {
 	}
 
 	public function test_settings_save_without_the_mode_keeps_the_site_live() {
-		update_option( 'tta_settings_data', (object) array( 'tta__settings_atlasvoice_mode' => 'production', 'x' => 1 ) );
+		update_option(
+			'tta_settings_data',
+			(object) array(
+				'tta__settings_atlasvoice_mode' => 'production',
+				'x'                             => 1,
+			)
+		);
 
 		$this->save( '/settings-data', array( 'x' => 2 ) );
 
@@ -111,7 +127,13 @@ class SettingsRoutesTest extends WP_UnitTestCase {
 
 	public function test_settings_stored_as_an_array_by_the_picker_are_kept() {
 		// includes/atlasvoice/RestRoutes.php writes this option as an array.
-		update_option( 'tta_settings_data', array( 'picker_rule' => array( 'scope' => 'post' ), 'x' => 1 ) );
+		update_option(
+			'tta_settings_data',
+			array(
+				'picker_rule' => array( 'scope' => 'post' ),
+				'x'           => 1,
+			)
+		);
 
 		$this->save( '/settings-data', array( 'x' => 2 ) );
 
@@ -149,7 +171,13 @@ class SettingsRoutesTest extends WP_UnitTestCase {
 	public function test_customize_save_without_the_player_does_not_reset_audio_meta() {
 		$post_id = self::factory()->post->create();
 		update_post_meta( $post_id, 'tts_is_mp3_file_url_exists', '1' );
-		update_option( 'tta_customize_settings', (object) array( 'buttonSettings' => (object) array( 'id' => 3 ), 'color' => 'a' ) );
+		update_option(
+			'tta_customize_settings',
+			(object) array(
+				'buttonSettings' => (object) array( 'id' => 3 ),
+				'color'          => 'a',
+			)
+		);
 		\TTA\TTA_Cache::flush();
 
 		// A tab that only knows about the colour.
@@ -171,7 +199,13 @@ class SettingsRoutesTest extends WP_UnitTestCase {
 	}
 
 	public function test_customize_button_texts_are_not_stored_in_the_customize_option() {
-		$this->save( '/customize', array( 'color' => 'a', 'button_texts' => array( 'players' => array() ) ) );
+		$this->save(
+			'/customize',
+			array(
+				'color'        => 'a',
+				'button_texts' => array( 'players' => array() ),
+			)
+		);
 
 		$this->assertObjectNotHasProperty( 'button_texts', get_option( 'tta_customize_settings' ) );
 	}
