@@ -41,6 +41,8 @@ class TTA_Api_Routes {
 		Admin_Ui_Controller::register_routes();
 		// Voice › Pronunciation: described routes beside the classic text_alias route.
 		Pronunciation_Controller::register_routes();
+		// Player › Read-along: described routes beside the classic highlight route.
+		Read_Along_Controller::register_routes();
 
 
 		// register listening route.
@@ -1042,43 +1044,10 @@ class TTA_Api_Routes {
 			$fields = json_decode( $request['fields'], true );
 			$fields = is_array( $fields ) ? $fields : array();
 
-			// TTS-370: a field that was not sent keeps its saved value instead of the default.
-			$fields = \TTA\Settings\Settings_Store::merge( get_option( 'tta_highlight_settings', array() ), $fields );
-
-			$mode = isset( $fields['tta__highlight_mode'] ) ? $fields['tta__highlight_mode'] : 'sentence';
-			if ( ! in_array( $mode, array( 'word_sentence', 'word', 'sentence' ), true ) ) {
-				$mode = 'sentence';
-			}
-
-			$word_bg     = isset( $fields['tta__highlight_word_bg'] ) ? sanitize_hex_color( $fields['tta__highlight_word_bg'] ) : '';
-			$word_color  = isset( $fields['tta__highlight_word_color'] ) ? sanitize_hex_color( $fields['tta__highlight_word_color'] ) : '';
-			$sentence_bg = isset( $fields['tta__highlight_sentence_bg'] ) ? sanitize_hex_color( $fields['tta__highlight_sentence_bg'] ) : '';
-
-			$opacity = isset( $fields['tta__highlight_dim_opacity'] ) ? floatval( $fields['tta__highlight_dim_opacity'] ) : 0.7;
-			$opacity = max( 0.1, min( 0.85, $opacity ) );
-
-			// TTS-263 — announcement strategy for the selection-listen feature.
-			$announce = isset( $fields['tta__selection_announce'] ) ? $fields['tta__selection_announce'] : 'tip';
-			if ( ! in_array( $announce, array( 'tip', 'badge', 'both', 'off' ), true ) ) {
-				$announce = 'tip';
-			}
-
-			$clean = array(
-				'tta__highlight_enabled'     => ! empty( $fields['tta__highlight_enabled'] ),
-				'tta__highlight_mode'        => $mode,
-				'tta__highlight_word_bg'     => $word_bg ? $word_bg : '#a5abf0',
-				'tta__highlight_word_color'  => $word_color ? $word_color : '#202124',
-				'tta__highlight_sentence_bg' => $sentence_bg ? $sentence_bg : '#e8e7fe',
-				'tta__highlight_dim_enabled' => ! empty( $fields['tta__highlight_dim_enabled'] ),
-				'tta__highlight_dim_opacity' => $opacity,
-				'tta__highlight_autoscroll'  => ! empty( $fields['tta__highlight_autoscroll'] ),
-				// TTS-263 — "Listen to selected text" floating control (all players).
-				'tta__selection_listen_enabled' => ! empty( $fields['tta__selection_listen_enabled'] ),
-				'tta__selection_announce'       => $announce,
-			);
-
-			update_option( 'tta_highlight_settings', $clean, false );
-			TTA_Cache::delete( 'all_settings' ); // invalidate the merged tts_get_settings cache.
+			// The checks live in Player\Read_Along, shared with the new screen, its
+			// routes and WP-CLI (TTS-376). A field that was not sent keeps its saved
+			// value (TTS-370).
+			$clean = \TTA\Player\Read_Along::save( $fields );
 
 			$response['data'] = $clean;
 
