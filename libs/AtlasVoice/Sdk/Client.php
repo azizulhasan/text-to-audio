@@ -191,6 +191,100 @@ final class Client {
 	}
 
 	/**
+	 * Downloads a finished audio file whose address the service returned.
+	 *
+	 * The address comes from a response, so it is checked before anything is
+	 * sent: it must be a plain web address on the service's own host or on
+	 * one of the hosts the platform allows, over HTTPS (plain http only on
+	 * the service's own host, for a developer's local service). The project
+	 * key is never sent with a download, and a redirect is not followed.
+	 *
+	 * @param string   $url           The file's address.
+	 * @param string[] $allowed_hosts Other hosts files may come from. An entry that starts
+	 *                                with a dot allows every host under that domain, e.g.
+	 *                                ".atlasvoice.cloud".
+	 * @param int      $timeout       Seconds to wait.
+	 *
+	 * @return Result data: the file's bytes on success.
+	 */
+	public function download( $url, array $allowed_hosts = array(), $timeout = self::DEFAULT_TIMEOUT ) {
+		$url        = (string) $url;
+		$request_id = self::new_request_id();
+		$started    = microtime( true );
+
+		if ( ! $this->is_file_address( $url, $allowed_hosts ) ) {
+			$result = new Result( 0, null, '', '', array(), 'The file address is not on the AtlasVoice service.', $request_id );
+			$this->report( 'GET', '/(file)', $result, $started, true );
+
+			return $result;
+		}
+
+		$headers = array(
+			'Accept'              => 'audio/mpeg',
+			'X-AtlasVoice-Client' => $this->config->client_name(),
+			'X-Request-Id'        => $request_id,
+		);
+		$timeout = max( 1, min( self::MAX_TIMEOUT, (int) $timeout ) );
+
+		$response = $this->transport->send( new Request( 'GET', $url, $headers, null, $timeout, false ) );
+		if ( ! $response instanceof Response ) {
+			$response = Response::failed( 'The transport returned no answer.' );
+		}
+
+		// The bytes are returned untouched; a redirect or an error page is not a file.
+		$result = new Result( $response->status, 200 === $response->status ? $response->body : null, '', '', $response->headers, $response->transport_error, $request_id );
+		$this->report( 'GET', '/(file)', $result, $started );
+
+		return $result;
+	}
+
+	/**
+	 * Whether an address from a response may be downloaded.
+	 *
+	 * @param string   $url           The address.
+	 * @param string[] $allowed_hosts Hosts allowed beside the service's own.
+	 *
+	 * @return bool
+	 */
+	private function is_file_address( $url, array $allowed_hosts ) {
+		if ( '' === $url || strlen( $url ) > 2048 || preg_match( '/[\x00-\x20\x7F\\\\]/', $url ) ) {
+			return false;
+		}
+
+		$file = parse_url( $url ); // phpcs:ignore WordPress.WP.AlternativeFunctions.parse_url_parse_url -- the SDK has no WordPress function in it.
+		$own  = parse_url( $this->config->base_url ); // phpcs:ignore WordPress.WP.AlternativeFunctions.parse_url_parse_url -- the SDK has no WordPress function in it.
+
+		if ( ! is_array( $file ) || empty( $file['scheme'] ) || empty( $file['host'] ) || isset( $file['user'] ) || isset( $file['pass'] ) ) {
+			return false;
+		}
+
+		$scheme   = strtolower( $file['scheme'] );
+		$host     = strtolower( $file['host'] );
+		$own_host = strtolower( $own['host'] );
+
+		if ( $host === $own_host ) {
+			// The service's own host, by the way the service itself is reached.
+			return 'https' === $scheme || strtolower( $own['scheme'] ) === $scheme;
+		}
+
+		if ( 'https' !== $scheme ) {
+			return false;
+		}
+
+		foreach ( $allowed_hosts as $allowed ) {
+			$allowed = strtolower( (string) $allowed );
+			if ( '' === $allowed || '.' === $allowed ) {
+				continue;
+			}
+			if ( $host === $allowed || ( '.' === $allowed[0] && substr( $host, -strlen( $allowed ) ) === $allowed ) ) {
+				return true;
+			}
+		}
+
+		return false;
+	}
+
+	/**
 	 * Sends one call to the service.
 	 *
 	 * @param string     $method   HTTP method.

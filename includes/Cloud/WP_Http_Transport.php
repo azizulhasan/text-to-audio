@@ -33,6 +33,10 @@ class WP_Http_Transport implements Http_Transport {
 			'headers' => $request->headers,
 		);
 
+		if ( ! $request->follow_redirects ) {
+			$args['redirection'] = 0;
+		}
+
 		if ( null !== $request->body ) {
 			$args['body'] = $request->body;
 		}

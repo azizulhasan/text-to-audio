@@ -59,11 +59,14 @@ class Cloud {
 	 * or the site's owner configured — never one taken from a request, a
 	 * response or stored content.
 	 *
-	 * @param string $base_url Address of the service, e.g. "https://voice.atlasvoice.cloud".
+	 * @param string $base_url   Address of the service, e.g. "https://voice.atlasvoice.cloud".
+	 * @param bool   $allow_http Accept a plain http address that is not this machine. Only when
+	 *                           the site's owner set that address on purpose (a constant in
+	 *                           wp-config.php or a filter), never for a default.
 	 *
 	 * @return Client
 	 */
-	public static function client_for( $base_url ) {
+	public static function client_for( $base_url, $allow_http = false ) {
 		$base_url = (string) $base_url;
 
 		if ( ! isset( self::$clients[ $base_url ] ) ) {
@@ -72,7 +75,7 @@ class Cloud {
 			try {
 				// Plain http is accepted only for an address the site's owner set on
 				// purpose: the wp-config.php constant or the service-address filter.
-				$config = new Config( $base_url, $host, defined( 'TTA_ATLASVOICE_SERVICE_URL' ) || has_filter( 'atlasvoice_service_url' ) );
+				$config = new Config( $base_url, $host, $allow_http || defined( 'TTA_ATLASVOICE_SERVICE_URL' ) || has_filter( 'atlasvoice_service_url' ) );
 			} catch ( \InvalidArgumentException $e ) {
 				// An address that is not a web address must not take the site down:
 				// say so to the developer and use the live service.

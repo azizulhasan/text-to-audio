@@ -318,6 +318,12 @@ class WordPressAdapterTest extends WP_UnitTestCase {
 		$this->assertSame( 'https://api.atlasvoice.cloud/v1/usage', $this->sent['url'] );
 	}
 
+	public function test_an_owner_who_set_a_plain_http_voice_host_on_purpose_keeps_it() {
+		Cloud::client_for( 'http://192.168.1.30:8080', true )->request( 'POST', '/api/atlasvoice', array() );
+
+		$this->assertSame( 'http://192.168.1.30:8080/api/atlasvoice', $this->sent['url'] );
+	}
+
 	public function test_the_voice_host_must_be_https_too() {
 		$this->setExpectedIncorrectUsage( 'TTA\Cloud\Cloud::client' );
 

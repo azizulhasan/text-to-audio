@@ -49,19 +49,30 @@ final class Request {
 	public $timeout;
 
 	/**
+	 * Whether the transport may follow a redirect. False for a file
+	 * download: its address was checked, and a redirect would lead to an
+	 * address that was not.
+	 *
+	 * @var bool
+	 */
+	public $follow_redirects;
+
+	/**
 	 * Builds the request.
 	 *
-	 * @param string      $method  HTTP method.
-	 * @param string      $url     Full address.
-	 * @param array       $headers Header name => value.
-	 * @param string|null $body    Body, or null.
-	 * @param int         $timeout Seconds.
+	 * @param string      $method           HTTP method.
+	 * @param string      $url              Full address.
+	 * @param array       $headers          Header name => value.
+	 * @param string|null $body             Body, or null.
+	 * @param int         $timeout          Seconds.
+	 * @param bool        $follow_redirects Whether a redirect may be followed.
 	 */
-	public function __construct( $method, $url, array $headers, $body, $timeout ) {
-		$this->method  = strtoupper( (string) $method );
-		$this->url     = (string) $url;
-		$this->headers = $headers;
-		$this->body    = null === $body ? null : (string) $body;
-		$this->timeout = (int) $timeout;
+	public function __construct( $method, $url, array $headers, $body, $timeout, $follow_redirects = true ) {
+		$this->method           = strtoupper( (string) $method );
+		$this->url              = (string) $url;
+		$this->headers          = $headers;
+		$this->body             = null === $body ? null : (string) $body;
+		$this->timeout          = (int) $timeout;
+		$this->follow_redirects = (bool) $follow_redirects;
 	}
 }
