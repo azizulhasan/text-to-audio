@@ -24,6 +24,7 @@
 	<file>./api/Cloud_Jobs_Controller.php</file>
 	<file>./api/Languages_Controller.php</file>
 	<file>./api/Providers_Controller.php</file>
+	<file>./api/Placement_Controller.php</file>
 	<file>./includes/Voice</file>
 	<file>./includes/Home</file>
 	<file>./includes/Player</file>

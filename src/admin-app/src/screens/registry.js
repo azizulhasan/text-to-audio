@@ -39,6 +39,11 @@ const BUILT_IN = {
 			/* webpackChunkName: "screen-account-usage" */ './AccountUsage'
 		)
 	),
+	'player:place': lazy( () =>
+		import(
+			/* webpackChunkName: "screen-player-placement" */ './PlayerPlacement'
+		)
+	),
 	'player:read': lazy( () =>
 		import(
 			/* webpackChunkName: "screen-player-read-along" */ './PlayerReadAlong'

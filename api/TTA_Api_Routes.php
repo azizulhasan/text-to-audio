@@ -59,6 +59,8 @@ class TTA_Api_Routes {
 		Languages_Controller::register_routes();
 		// TTS-347: the site's own voice providers, read-only (Voice > Your own provider).
 		Providers_Controller::register_routes();
+		// TTS-347: where the player sits and who gets it (Player > Placement).
+		Placement_Controller::register_routes();
 
 
 		// register listening route.

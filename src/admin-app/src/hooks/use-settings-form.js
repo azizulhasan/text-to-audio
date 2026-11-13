@@ -5,6 +5,30 @@ import { request } from '../api';
 import { useApp } from '../app-context';
 
 /**
+ * Whether a value on screen is the value that is saved. A list (the roles
+ * that see the player) is compared by what it holds: ticking a box and
+ * unticking it again builds a new list, which is not a change.
+ *
+ * @param {*} a One value.
+ * @param {*} b The other value.
+ * @return {boolean} True when they are the same.
+ */
+export function sameValue( a, b ) {
+	if ( a === b ) {
+		return true;
+	}
+
+	if ( Array.isArray( a ) && Array.isArray( b ) ) {
+		return (
+			a.length === b.length &&
+			a.every( ( item, index ) => sameValue( item, b[ index ] ) )
+		);
+	}
+
+	return false;
+}
+
+/**
  * The state of a settings form that is loaded from, and saved to, one REST
  * route: the values on screen, what is saved, and whether they differ.
  *
@@ -42,7 +66,7 @@ export default function useSettingsForm( route, savedMessage ) {
 		const fields = {};
 		if ( saved && values ) {
 			for ( const key of Object.keys( values ) ) {
-				if ( values[ key ] !== saved[ key ] ) {
+				if ( ! sameValue( values[ key ], saved[ key ] ) ) {
 					fields[ key ] = values[ key ];
 				}
 			}
