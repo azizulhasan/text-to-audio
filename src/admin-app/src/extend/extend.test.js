@@ -39,6 +39,7 @@ describe( 'the extension surface (window.atlasvoice.ui)', () => {
 			'Empty',
 			'Pane',
 			'ProBadge',
+			'ProNote',
 			'SaveBar',
 			'Scroll',
 			'Section',

@@ -32,6 +32,7 @@ import {
 	Empty,
 	Pane,
 	ProBadge,
+	ProNote,
 	Scroll,
 	Section,
 } from '../shell/parts';
@@ -61,6 +62,7 @@ export function createKit() {
 			Empty,
 			Pane,
 			ProBadge,
+			ProNote,
 			SaveBar,
 			Scroll,
 			Section,

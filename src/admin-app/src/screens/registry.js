@@ -13,6 +13,11 @@ import { lazy } from '@wordpress/element';
 import { applyFilters } from '@wordpress/hooks';
 
 const BUILT_IN = {
+	'voice:pronunciation': lazy( () =>
+		import(
+			/* webpackChunkName: "screen-voice-pronunciation" */ './VoicePronunciation'
+		)
+	),
 	'site:advanced': lazy( () =>
 		import(
 			/* webpackChunkName: "screen-site-advanced" */ './SiteAdvanced'

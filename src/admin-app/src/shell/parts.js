@@ -2,6 +2,8 @@
  * Small layout parts that WordPress has no component for.
  * Everything interactive still comes from @wordpress/components.
  */
+import { __ } from '@wordpress/i18n';
+import { Button } from '@wordpress/components';
 import { Icon } from '@wordpress/icons';
 
 import { ICONS } from './icons';
@@ -146,5 +148,28 @@ export function Section( { title, description, end, children } ) {
 			</div>
 			{ children }
 		</section>
+	);
+}
+
+/**
+ * The one way a Pro feature appears inside a free screen: a dashed line that
+ * says what Pro adds, with a link to the Plans tab. It is text and a link,
+ * never a form and never a disabled control (wp.org guideline 5), and a
+ * screen shows at most one.
+ *
+ * @param {Object}   props
+ * @param {*}        props.children What Pro adds, in one sentence.
+ * @param {Function} props.onSeePro Opens the Plans tab.
+ * @return {*} The note.
+ */
+export function ProNote( { children, onSeePro } ) {
+	return (
+		<div className="atlasvoice-pronote">
+			<ProBadge />
+			<span>{ children }</span>
+			<Button variant="link" onClick={ onSeePro }>
+				{ __( 'See Pro', 'text-to-audio' ) }
+			</Button>
+		</div>
 	);
 }

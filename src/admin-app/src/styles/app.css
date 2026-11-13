@@ -446,6 +446,42 @@ body.atlasvoice-app-page #atlasvoice-app {
 	list-style: disc;
 }
 
+.atlasvoice-root .atlasvoice-table tr.is-off td {
+	color: var(--atlasvoice-text-weak);
+}
+
+.atlasvoice-root .atlasvoice-form > * + * {
+	margin-top: 16px;
+}
+
+.atlasvoice-root .atlasvoice-tryit {
+	display: flex;
+	align-items: center;
+	gap: 12px;
+	flex-wrap: wrap;
+}
+
+.atlasvoice-root .atlasvoice-pronote-wrap {
+	margin-top: 12px;
+}
+
+.atlasvoice-root .atlasvoice-pronote {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	flex-wrap: wrap;
+	padding: 10px 12px;
+	border: 1px dashed #d6d6d6;
+	border-radius: var(--atlasvoice-radius-lg);
+	color: var(--atlasvoice-text-weak);
+	background: #fcfcfc;
+}
+
+.atlasvoice-root .atlasvoice-pronote > span:not(.atlasvoice-pro) {
+	flex: 1;
+	min-width: 200px;
+}
+
 /* ---------- Chips ---------- */
 .atlasvoice-root .atlasvoice-chip {
 	display: inline-flex;
