@@ -123,3 +123,28 @@ export function Empty( { title, children, action } ) {
 		</div>
 	);
 }
+
+/**
+ * A titled block of a screen: heading, one line of explanation, content.
+ *
+ * @param {Object} props
+ * @param {string} props.title       Section heading.
+ * @param {string} props.description One line under the heading.
+ * @param {*}      props.end         Actions at the end of the heading row.
+ * @param {*}      props.children    Content.
+ * @return {*} The section.
+ */
+export function Section( { title, description, end, children } ) {
+	return (
+		<section className="atlasvoice-section">
+			<div className="atlasvoice-section-head">
+				<div>
+					<h2>{ title }</h2>
+					{ description && <p>{ description }</p> }
+				</div>
+				{ end && <div className="atlasvoice-section-end">{ end }</div> }
+			</div>
+			{ children }
+		</section>
+	);
+}

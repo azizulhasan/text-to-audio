@@ -1,6 +1,7 @@
 import { __ } from '@wordpress/i18n';
-import { Button, Modal, SnackbarList } from '@wordpress/components';
+import { Button, Modal, SnackbarList, Spinner } from '@wordpress/components';
 import {
+	Suspense,
 	useCallback,
 	useEffect,
 	useMemo,
@@ -11,10 +12,12 @@ import {
 import { AppContext } from './app-context';
 import { getScreen, getTabs, resolveRoute, toHash } from './routes';
 import Placeholder from './screens/Placeholder';
+import { getScreenComponent } from './screens/registry';
 import Header from './shell/Header';
 import Rail from './shell/Rail';
 import ScreenTabs from './shell/ScreenTabs';
 import StatusBar, { MODE_LIVE, MODE_STAGING } from './shell/StatusBar';
+import Welcome from './shell/Welcome';
 import { BrandTheme } from './theme';
 
 let nextSnackId = 1;
@@ -158,6 +161,8 @@ export default function App( { boot } ) {
 	);
 
 	const tabs = getTabs( getScreen( route.screen ), isPro );
+	// A route without a rebuilt screen shows the placeholder.
+	const Screen = getScreenComponent( route.id ) || Placeholder;
 	const closeDialog = () => setDialog( null );
 
 	return (
@@ -174,10 +179,23 @@ export default function App( { boot } ) {
 							{ tabs.length > 0 && (
 								<ScreenTabs tabs={ tabs } attempt={ refused } />
 							) }
-							<Placeholder key={ route.id } />
+							<Suspense
+								fallback={
+									<div
+										className="atlasvoice-loading"
+										role="status"
+									>
+										<Spinner />
+										{ __( 'Loading…', 'text-to-audio' ) }
+									</div>
+								}
+							>
+								<Screen key={ route.id } />
+							</Suspense>
 						</div>
 					</main>
 					<StatusBar />
+					<Welcome />
 					<SnackbarList
 						className="atlasvoice-snackbars"
 						notices={ snacks }

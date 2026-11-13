@@ -105,6 +105,9 @@
  * Rules outside .atlasvoice-root exist only under body.atlasvoice-app-page,
  * the class PHP adds on our own screen, so nothing reaches the rest of wp-admin.
  */
+.atlasvoice-root .atlasvoice-table {
+	display: table;
+}
 
 /* ---------- Our page inside wp-admin ---------- */
 
@@ -443,6 +446,105 @@ body.atlasvoice-app-page #atlasvoice-app {
 	gap: 8px;
 	margin-top: 16px;
 	flex-wrap: wrap;
+}
+
+/* ---------- Sections and tables ---------- */
+.atlasvoice-root .atlasvoice-section {
+	margin-bottom: 24px;
+}
+
+.atlasvoice-root .atlasvoice-section-head {
+	display: flex;
+	align-items: flex-end;
+	gap: 12px;
+	margin-bottom: 12px;
+	flex-wrap: wrap;
+}
+
+.atlasvoice-root .atlasvoice-section-head h2 {
+	font-size: 15px;
+	font-weight: 600;
+	line-height: 1.4;
+}
+
+.atlasvoice-root .atlasvoice-section-head p {
+	color: var(--atlasvoice-text-weak);
+}
+
+.atlasvoice-root .atlasvoice-section-end {
+	margin-right: auto;
+	display: flex;
+	gap: 8px;
+	align-items: center;
+}
+
+.atlasvoice-root .atlasvoice-moved-search {
+	max-width: 360px;
+}
+
+.atlasvoice-root .atlasvoice-table-wrap {
+	overflow-x: auto;
+}
+
+.atlasvoice-root .atlasvoice-table {
+	width: 100%;
+	border-collapse: collapse;
+}
+
+.atlasvoice-root .atlasvoice-table th {
+	text-align: right;
+	font-weight: 500;
+	font-size: 12px;
+	color: var(--atlasvoice-text-weak);
+	height: 40px;
+	padding: 0 12px;
+	border-bottom: 1px solid var(--atlasvoice-line);
+	white-space: nowrap;
+}
+
+.atlasvoice-root .atlasvoice-table td {
+	padding: 8px 12px;
+	border-bottom: 1px solid var(--atlasvoice-line-weak);
+	vertical-align: middle;
+	height: 52px;
+}
+
+.atlasvoice-root .atlasvoice-table td:first-child,
+.atlasvoice-root .atlasvoice-table th:first-child {
+	padding-right: 16px;
+}
+
+.atlasvoice-root .atlasvoice-table td:last-child,
+.atlasvoice-root .atlasvoice-table th:last-child {
+	padding-left: 16px;
+}
+
+.atlasvoice-root .atlasvoice-table tr:last-child td {
+	border-bottom: 0;
+}
+
+.atlasvoice-root .atlasvoice-table td.atlasvoice-td-end {
+	text-align: left;
+	white-space: nowrap;
+}
+
+.atlasvoice-root .atlasvoice-cell-title {
+	font-weight: 500;
+}
+
+.atlasvoice-root .atlasvoice-loading {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	padding: 24px;
+	color: var(--atlasvoice-text-weak);
+}
+
+.atlasvoice-root .atlasvoice-list {
+	margin: 16px 0 0;
+	padding-right: 20px;
+	line-height: 1.9;
+	list-style: disc;
 }
 
 /* ---------- Chips ---------- */
