@@ -583,6 +583,101 @@ body.atlasvoice-app-page #atlasvoice-app {
 	min-width: 200px;
 }
 
+/* ---------- A form with a live preview beside it ---------- */
+.atlasvoice-root .atlasvoice-withpreview {
+	display: flex;
+	flex: 1;
+	min-height: 0;
+	min-width: 0;
+}
+
+.atlasvoice-root .atlasvoice-withpreview > .atlasvoice-scroll {
+	flex: 1;
+	min-width: 0;
+}
+
+.atlasvoice-root .atlasvoice-pad-form {
+	max-width: 760px;
+}
+
+.atlasvoice-root .atlasvoice-preview {
+	width: 400px;
+	flex: none;
+	border-left: 1px solid var(--atlasvoice-line);
+	background: var(--atlasvoice-canvas);
+	overflow: auto;
+	padding: 16px;
+	display: flex;
+	flex-direction: column;
+	gap: 12px;
+}
+
+.atlasvoice-root .atlasvoice-preview-title {
+	font-size: 11px;
+	font-weight: 500;
+	text-transform: uppercase;
+	color: var(--atlasvoice-text-weak);
+}
+
+.atlasvoice-root .atlasvoice-preview-page {
+	background: #fff;
+	border: 1px solid var(--atlasvoice-line);
+	border-radius: var(--atlasvoice-radius-lg);
+	padding: 16px;
+	font-size: 15px;
+	line-height: 1.7;
+	color: #1e1e1e;
+}
+
+.atlasvoice-root .atlasvoice-preview-page p + p {
+	margin-top: 12px;
+}
+
+.atlasvoice-root .atlasvoice-preview-sentence,
+.atlasvoice-root .atlasvoice-preview-word {
+	border-radius: 3px;
+	padding: 1px 0;
+}
+
+.atlasvoice-root .atlasvoice-preview-word {
+	padding: 1px 2px;
+}
+
+/* ---------- Colour rows ---------- */
+.atlasvoice-root .atlasvoice-color-row-main {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 12px;
+	flex-wrap: wrap;
+}
+
+.atlasvoice-root .atlasvoice-color-row-note {
+	margin-top: 6px;
+	color: var(--atlasvoice-text-weak);
+	font-size: 12px;
+}
+
+.atlasvoice-root .atlasvoice-color-row-button.components-button {
+	gap: 8px;
+	padding: 0 10px 0 6px;
+	color: var(--atlasvoice-text);
+	box-shadow: inset 0 0 0 1px var(--atlasvoice-line);
+}
+
+.atlasvoice-root .atlasvoice-swatch {
+	width: 20px;
+	height: 20px;
+	border-radius: 50%;
+	box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.2);
+	flex: none;
+}
+
+.atlasvoice-color-row-palette {
+	width: 260px;
+	padding: 8px;
+}
+
 /* ---------- Chips ---------- */
 .atlasvoice-root .atlasvoice-chip {
 	display: inline-flex;
@@ -919,6 +1014,26 @@ body.atlasvoice-app-page #atlasvoice-app {
 
 	.atlasvoice-root .atlasvoice-drawer {
 		--atlasvoice-drawer-w: 520px;
+	}
+}
+
+/* ---------- Below 1100: the preview moves under the form ---------- */
+@media (max-width: 1099px) {
+
+	.atlasvoice-root .atlasvoice-withpreview {
+		display: block;
+		overflow: auto;
+	}
+
+	.atlasvoice-root .atlasvoice-withpreview > .atlasvoice-scroll {
+		overflow: visible;
+	}
+
+	.atlasvoice-root .atlasvoice-preview {
+		width: auto;
+		border-left: 0;
+		border-top: 1px solid var(--atlasvoice-line);
+		overflow: visible;
 	}
 }
 

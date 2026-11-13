@@ -445,6 +445,8 @@ describe( 'Voice › Pronunciation', () => {
 		fakeSite( { rules: [ WP, K5 ], max: 1 } );
 		const { container } = renderWithApp( <VoicePronunciation /> );
 		await screen.findByRole( 'table' );
+		// Let the "Read as" request finish, so nothing updates after the test.
+		await screen.findByText( /^Read as:/ );
 
 		expect( await axe( container ) ).toHaveNoViolations();
 
