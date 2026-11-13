@@ -570,6 +570,10 @@ body.atlasvoice-app-page #atlasvoice-app {
 	white-space: nowrap;
 }
 
+.atlasvoice-root .atlasvoice-show-sm {
+	display: none;
+}
+
 .atlasvoice-root .atlasvoice-snackbars {
 	position: fixed;
 	right: 176px;
@@ -884,6 +888,10 @@ body.atlasvoice-app-page #atlasvoice-app {
 
 	.atlasvoice-root .atlasvoice-hide-sm {
 		display: none;
+	}
+
+	.atlasvoice-root .atlasvoice-show-sm {
+		display: inline;
 	}
 
 	.atlasvoice-root .atlasvoice-drawer {

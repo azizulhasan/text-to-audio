@@ -86,12 +86,23 @@ export default function StatusBar() {
 				role="status"
 			>
 				<span className="atlasvoice-dot" aria-hidden="true" />
-				{ live
-					? __( 'Live: visitors hear your posts', 'text-to-audio' )
-					: __(
-							'Staging: only admins see the player',
-							'text-to-audio'
-					  ) }
+				{ /* The full sentence on wide screens, the one word on phones. */ }
+				<span className="atlasvoice-hide-sm">
+					{ live
+						? __(
+								'Live: visitors hear your posts',
+								'text-to-audio'
+						  )
+						: __(
+								'Staging: only admins see the player',
+								'text-to-audio'
+						  ) }
+				</span>
+				<span className="atlasvoice-show-sm">
+					{ live
+						? __( 'Live', 'text-to-audio' )
+						: __( 'Staging', 'text-to-audio' ) }
+				</span>
 			</span>
 			<span className="atlasvoice-status-item atlasvoice-hide-sm">
 				{ isPro && boot.proVersion
