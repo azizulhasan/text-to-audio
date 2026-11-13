@@ -30,7 +30,7 @@ use AtlasVoice\Sdk\Contracts\Logger;
  */
 final class Client {
 
-	const VERSION = '0.2.0';
+	const VERSION = '0.3.0';
 
 	/**
 	 * The longest a single call may wait, whatever a caller asks for. One
@@ -39,6 +39,14 @@ final class Client {
 	const MAX_TIMEOUT = 300;
 
 	const DEFAULT_TIMEOUT = 30;
+
+	/**
+	 * Characters of a job id, an idempotency key and a job reference, as the
+	 * service accepts them (character classes without brackets).
+	 */
+	const ID_CHARS  = 'A-Za-z0-9-';
+	const KEY_CHARS = 'A-Za-z0-9_.:-';
+	const REF_CHARS = 'A-Za-z0-9_.:\\/#@+-';
 
 	/**
 	 * Settings.
@@ -284,6 +292,169 @@ final class Client {
 		return false;
 	}
 
+	// ------------------------------------------------------------ audio jobs
+
+	/**
+	 * Asks the service to make the audio of a whole text as one job. The
+	 * service cuts the text into parts, makes them, joins them and keeps the
+	 * finished file for a limited time; the platform asks how the job is
+	 * going (get_job) and downloads the file when it is done.
+	 *
+	 * @param string $text     The whole text.
+	 * @param string $language Language code.
+	 * @param array  $options  engine (default "gtts"), voice (or null), ref (a reference for the
+	 *                         usage log, never content), idempotency_key (see idempotency_key()).
+	 *
+	 * @return Result data: job, poll_after_ms.
+	 */
+	public function create_job( $text, $language, array $options = array() ) {
+		$payload = array(
+			'text'   => (string) $text,
+			'lang'   => (string) $language,
+			'engine' => isset( $options['engine'] ) ? (string) $options['engine'] : 'gtts',
+			'voice'  => isset( $options['voice'] ) && '' !== $options['voice'] ? (string) $options['voice'] : null,
+			'ref'    => isset( $options['ref'] ) ? (string) $options['ref'] : '',
+		);
+
+		$headers = array();
+		if ( isset( $options['idempotency_key'] ) && self::is_token( $options['idempotency_key'], self::KEY_CHARS ) ) {
+			$headers['Idempotency-Key'] = (string) $options['idempotency_key'];
+		}
+
+		return $this->call( 'POST', '/v1/jobs', $payload, false, 60, true, $headers );
+	}
+
+	/**
+	 * Reads one job. The answer's poll_after_ms says how long to wait before
+	 * asking again; it is null once the job is finished.
+	 *
+	 * @param string $id The job's id.
+	 *
+	 * @return Result data: job, poll_after_ms.
+	 */
+	public function get_job( $id ) {
+		if ( ! self::is_token( $id, self::ID_CHARS ) ) {
+			return $this->refused( 'This is not a job id.' );
+		}
+
+		return $this->call( 'GET', '/v1/jobs/' . $id, null, false, self::DEFAULT_TIMEOUT, true, array(), false );
+	}
+
+	/**
+	 * Reads up to 100 jobs in one call.
+	 *
+	 * @param string[] $ids Job ids. Values that are not ids are left out.
+	 *
+	 * @return Result data: jobs, poll_after_ms (the shortest wait among the unfinished ones).
+	 */
+	public function get_jobs( array $ids ) {
+		$clean = array();
+		foreach ( $ids as $id ) {
+			if ( self::is_token( $id, self::ID_CHARS ) ) {
+				$clean[ (string) $id ] = true;
+			}
+		}
+		$clean = array_slice( array_keys( $clean ), 0, 100 );
+
+		if ( ! $clean ) {
+			return $this->refused( 'There is no job id to ask for.' );
+		}
+
+		return $this->call( 'GET', '/v1/jobs?ids=' . implode( ',', $clean ), null, false, self::DEFAULT_TIMEOUT, true, array(), false );
+	}
+
+	/**
+	 * Reads the latest jobs whose reference starts with a prefix, for example
+	 * "post:161:" for every language of one post.
+	 *
+	 * @param string $prefix Start of the reference.
+	 *
+	 * @return Result data: jobs, poll_after_ms.
+	 */
+	public function get_jobs_by_ref( $prefix ) {
+		if ( ! self::is_token( $prefix, self::REF_CHARS ) ) {
+			return $this->refused( 'This is not a job reference.' );
+		}
+
+		return $this->call( 'GET', '/v1/jobs?ref_prefix=' . rawurlencode( (string) $prefix ), null, false, self::DEFAULT_TIMEOUT, true, array(), false );
+	}
+
+	/**
+	 * Cancels a job. Parts that are not made yet are never made or billed; a
+	 * finished job is left as it is.
+	 *
+	 * @param string $id The job's id.
+	 *
+	 * @return Result data: job.
+	 */
+	public function cancel_job( $id ) {
+		if ( ! self::is_token( $id, self::ID_CHARS ) ) {
+			return $this->refused( 'This is not a job id.' );
+		}
+
+		return $this->call( 'DELETE', '/v1/jobs/' . $id, null, false, self::DEFAULT_TIMEOUT, true );
+	}
+
+	/**
+	 * Reads what the service offers without a key: among other things the
+	 * hosts finished files are served from (file_hosts) and the job limits.
+	 *
+	 * @return Result data: file_hosts, jobs { max_chars, file_hours }, …
+	 */
+	public function health() {
+		return $this->call( 'GET', '/v1/health', null, false, 10, false );
+	}
+
+	/**
+	 * A key that makes a retry safe: the same reference and the same text
+	 * give the same key, so a second request for the same audio returns the
+	 * first job and is not billed again. A changed text gives another key.
+	 *
+	 * @param string $ref  The job's reference, e.g. "post:161:en".
+	 * @param string $text The whole text.
+	 *
+	 * @return string At most 128 characters the service accepts.
+	 */
+	public static function idempotency_key( $ref, $text ) {
+		$ref = preg_replace( '/[^A-Za-z0-9_.:-]/', '-', (string) $ref );
+
+		return substr( $ref, 0, 87 ) . ':' . sha1( (string) $text );
+	}
+
+	/**
+	 * A reference the service accepts: at most 128 characters, never content.
+	 *
+	 * @param string $ref The wanted reference.
+	 *
+	 * @return string
+	 */
+	public static function job_ref( $ref ) {
+		return substr( preg_replace( '/[^A-Za-z0-9_.:\/#@+-]/', '-', (string) $ref ), 0, 128 );
+	}
+
+	/**
+	 * Whether a value is a short word made of the given characters only.
+	 *
+	 * @param mixed  $value The value.
+	 * @param string $chars A character class without brackets.
+	 *
+	 * @return bool
+	 */
+	private static function is_token( $value, $chars ) {
+		return is_string( $value ) && 1 === preg_match( '/^[' . $chars . ']{1,128}$/', $value );
+	}
+
+	/**
+	 * A result for a call that was not sent because its input was wrong.
+	 *
+	 * @param string $reason Why.
+	 *
+	 * @return Result
+	 */
+	private function refused( $reason ) {
+		return new Result( 0, null, '', '', array(), (string) $reason, self::new_request_id() );
+	}
+
 	/**
 	 * Sends one call to the service.
 	 *
@@ -299,6 +470,28 @@ final class Client {
 	 * @throws \InvalidArgumentException When $path is not a route on the service (a programming mistake).
 	 */
 	public function request( $method, $path, $body = null, $raw = false, $timeout = self::DEFAULT_TIMEOUT, $with_key = true ) {
+		return $this->call( $method, $path, $body, $raw, $timeout, $with_key );
+	}
+
+	/**
+	 * Sends one call. request() and the job calls all end here.
+	 *
+	 * @param string     $method   HTTP method.
+	 * @param string     $path     Route on the service.
+	 * @param array|null $body     JSON body, or null.
+	 * @param bool       $raw      The answer is audio.
+	 * @param int        $timeout  Seconds to wait.
+	 * @param bool       $with_key Send the project key.
+	 * @param array      $extra    More headers, name => value. A value that is not one printable line is left out.
+	 * @param bool       $guarded  Obey and feed the circuit breaker. False for polling a job: the service
+	 *                             sets the pace of those calls itself, and a job must not be lost because
+	 *                             another route was down.
+	 *
+	 * @return Result
+	 *
+	 * @throws \InvalidArgumentException When $path is not a route on the service (a programming mistake).
+	 */
+	private function call( $method, $path, $body, $raw, $timeout, $with_key, array $extra = array(), $guarded = true ) {
 		$path = (string) $path;
 
 		// The key travels with this request, so the address must stay on the
@@ -313,6 +506,13 @@ final class Client {
 			'X-AtlasVoice-Client' => $this->config->client_name(),
 			'X-Request-Id'        => $request_id,
 		);
+
+		foreach ( $extra as $name => $value ) {
+			// One printable line each: a value can never add a second header.
+			if ( is_string( $name ) && preg_match( '/^[A-Za-z][A-Za-z0-9-]{0,63}$/', $name ) && is_string( $value ) && preg_match( '/^[\x21-\x7E]{1,256}$/', $value ) && ! isset( $headers[ $name ] ) ) {
+				$headers[ $name ] = $value;
+			}
+		}
 
 		$key = $with_key ? (string) $this->keys->get_key() : '';
 		if ( '' !== $key ) {
@@ -335,7 +535,7 @@ final class Client {
 
 		// A service that is down, or that asked for a pause, is not called: the
 		// caller gets the same "could not be reached" answer at once.
-		$wait = $this->breaker ? $this->breaker->seconds_to_wait() : 0;
+		$wait = ( $guarded && $this->breaker ) ? $this->breaker->seconds_to_wait() : 0;
 		if ( $wait > 0 ) {
 			$result = $this->read( Response::failed( sprintf( 'The AtlasVoice service is not answering. Calls are paused for %d seconds.', $wait ) ), $raw, $request_id );
 			$this->report( $method, $path, $result, $started, true );
@@ -350,7 +550,7 @@ final class Client {
 
 		$result = $this->read( $response, $raw, $request_id );
 
-		if ( $this->breaker ) {
+		if ( $guarded && $this->breaker ) {
 			$this->breaker->record( $result );
 		}
 

@@ -29,6 +29,18 @@ final class Error_Codes {
 	const QUOTA_EXCEEDED = 'quota_exceeded';
 	const DAILY_LIMIT    = 'daily_limit';
 
+	// Audio jobs.
+	const JOB_NOT_FOUND            = 'job_not_found';
+	const JOB_CANCELED             = 'job_canceled';
+	const IDEMPOTENCY_CONFLICT     = 'idempotency_conflict';
+	const INVALID_IDEMPOTENCY_KEY  = 'invalid_idempotency_key';
+	const INVALID_REF              = 'invalid_ref';
+	const INVALID_QUERY            = 'invalid_query';
+	const TOO_MANY_JOBS            = 'too_many_jobs';
+	const QUEUE_FULL               = 'queue_full';
+	const DAILY_CAP_REACHED        = 'daily_cap_reached';
+	const ENGINE_FAILED            = 'engine_failed';
+
 	// The text.
 	const TEXT_TOO_LONG        = 'text_too_long';
 	const EMPTY_TEXT           = 'empty_text';
@@ -61,6 +73,8 @@ final class Error_Codes {
 	const TEMPORARY = array(
 		self::RATE_LIMITED,
 		self::SERVER_BUSY,
+		self::TOO_MANY_JOBS,
+		self::QUEUE_FULL,
 		self::SERVICE_UNAVAILABLE,
 		self::LICENSE_CHECK_UNAVAILABLE,
 		self::UNREACHABLE,

@@ -139,4 +139,18 @@ final class Result {
 
 		return isset( $this->headers[ $name ] ) ? $this->headers[ $name ] : '';
 	}
+
+	/**
+	 * How long the service asked to wait before the next call, from its
+	 * Retry-After header.
+	 *
+	 * @param int $max The longest wait to accept, in seconds.
+	 *
+	 * @return int Seconds; 0 when the service did not ask.
+	 */
+	public function retry_after( $max = 900 ) {
+		$value = $this->header( 'retry-after' );
+
+		return ( is_string( $value ) && preg_match( '/^\d{1,6}$/', $value ) ) ? min( (int) $max, (int) $value ) : 0;
+	}
 }
