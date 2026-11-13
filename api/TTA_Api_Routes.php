@@ -49,6 +49,8 @@ class TTA_Api_Routes {
 		Plans_Controller::register_routes();
 		// TTS-347: the Home screen's summary, and hiding one of its items.
 		Home_Controller::register_routes();
+		// TTS-347: read, make and end the connection to AtlasVoice Cloud (Voice screen).
+		Cloud_Connection_Controller::register_routes();
 
 
 		// register listening route.

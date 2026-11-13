@@ -32,6 +32,7 @@ class Commands {
 			'atlasvoice account'       => Account_Command::class,
 			'atlasvoice plans'         => Plans_Command::class,
 			'atlasvoice status'        => Status_Command::class,
+			'atlasvoice cloud'         => Cloud_Command::class,
 		);
 
 		/**

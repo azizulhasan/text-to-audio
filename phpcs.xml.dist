@@ -19,6 +19,7 @@
 	<file>./api/Plans_Controller.php</file>
 	<file>./includes/Account</file>
 	<file>./api/Home_Controller.php</file>
+	<file>./api/Cloud_Connection_Controller.php</file>
 	<file>./includes/Home</file>
 	<file>./includes/Player</file>
 	<file>./includes/Cloud</file>
