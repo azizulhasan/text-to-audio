@@ -11,5 +11,6 @@ return array(
     'TTA_Admin\\' => array($baseDir . '/admin'),
     'TTA\\AtlasVoice\\' => array($baseDir . '/includes/atlasvoice'),
     'TTA\\' => array($baseDir . '/includes'),
+    'AtlasVoice\\Sdk\\' => array($baseDir . '/libs/AtlasVoice/Sdk'),
     'AtlasAiDev\\AppService\\' => array($baseDir . '/libs/AtlasAiDev'),
 );

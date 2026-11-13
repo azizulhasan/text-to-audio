@@ -17,6 +17,7 @@ class ComposerStaticInitd518cadaed440bd90dc9e4378262121d
         ),
         'A' => 
         array (
+            'AtlasVoice\\Sdk\\' => 15,
             'AtlasAiDev\\AppService\\' => 22,
         ),
     );
@@ -42,7 +43,11 @@ class ComposerStaticInitd518cadaed440bd90dc9e4378262121d
         array (
             0 => __DIR__ . '/../..' . '/includes',
         ),
-        'AtlasAiDev\\AppService\\' => 
+        'AtlasVoice\\Sdk\\' =>
+        array (
+            0 => __DIR__ . '/../..' . '/libs/AtlasVoice/Sdk',
+        ),
+        'AtlasAiDev\\AppService\\' =>
         array (
             0 => __DIR__ . '/../..' . '/libs/AtlasAiDev',
         ),

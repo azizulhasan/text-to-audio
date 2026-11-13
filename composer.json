@@ -14,7 +14,8 @@
             "TTA_Admin\\": "admin",
             "TTA_Public\\": "public",
             "TTA_Api\\": "api",
-            "AtlasAiDev\\AppService\\": "libs/AtlasAiDev"
+            "AtlasAiDev\\AppService\\": "libs/AtlasAiDev",
+            "AtlasVoice\\Sdk\\": "libs/AtlasVoice/Sdk"
         }
     },
     "require": {}

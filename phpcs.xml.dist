@@ -16,6 +16,8 @@
 	<file>./api/Pronunciation_Controller.php</file>
 	<file>./api/Read_Along_Controller.php</file>
 	<file>./includes/Player</file>
+	<file>./includes/Cloud</file>
+	<file>./libs/AtlasVoice</file>
 	<file>./admin/Admin_App.php</file>
 	<file>./tests/phpunit</file>
 
@@ -44,6 +46,21 @@
 				<element value="text-to-audio"/>
 			</property>
 		</properties>
+	</rule>
+
+	<!--
+		"wordpress" in lower case is the platform id the AtlasVoice service expects.
+		The auto-fixer would capitalise it and change what is sent.
+	-->
+	<rule ref="WordPress.WP.CapitalPDangit">
+		<exclude-pattern>*/libs/AtlasVoice/*</exclude-pattern>
+		<exclude-pattern>*/includes/Cloud/*</exclude-pattern>
+		<exclude-pattern>*/tests/phpunit/*</exclude-pattern>
+	</rule>
+
+	<!-- A test file may hold its small stand-in classes beside the test. -->
+	<rule ref="Generic.Files.OneObjectStructurePerFile">
+		<exclude-pattern>*/tests/phpunit/*</exclude-pattern>
 	</rule>
 
 	<!-- Tests are not shipped and read better without a doc block on every method. -->
