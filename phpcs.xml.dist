@@ -8,6 +8,7 @@
 		is rebuilt, so the list only grows.
 	-->
 	<file>./includes/Settings</file>
+	<file>./includes/Help</file>
 	<file>./admin/Admin_App.php</file>
 	<file>./tests/phpunit</file>
 
