@@ -33,6 +33,8 @@ class TTA_Reset {
             'tta_record_settings',
             'tta_analytics_settings',
             'tta__button_text_arr',
+            // TTS-347: the optional AI notice of the player.
+            'tta_ai_notice_settings',
             'tta_alias_settings',
             'tts_text_aliases',
             'tta_compatible_data',

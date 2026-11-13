@@ -27,6 +27,7 @@
 	<file>./api/Placement_Controller.php</file>
 	<file>./api/Look_Controller.php</file>
 	<file>./api/Words_Controller.php</file>
+	<file>./api/AI_Notice_Controller.php</file>
 	<file>./includes/Voice</file>
 	<file>./includes/Home</file>
 	<file>./includes/Player</file>

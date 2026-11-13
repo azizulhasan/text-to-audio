@@ -40,6 +40,7 @@ class Commands {
 			'atlasvoice placement'     => Placement_Command::class,
 			'atlasvoice look'          => Look_Command::class,
 			'atlasvoice words'         => Words_Command::class,
+			'atlasvoice ai-notice'     => AI_Notice_Command::class,
 		);
 
 		/**

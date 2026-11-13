@@ -492,6 +492,12 @@ function tta_get_button_content($atts, $is_block = false, $tag_content = '')
     do_action('tts_enqueue_button_scripts', $params);
     $data = apply_filters('tts__listening_button', $button, $player_number, $class, $post);
 
+    // TTS-347: the optional AI notice, above or below the player. Off by default;
+    // added after the filter, so Pro's players (2-7) get it too.
+    if (class_exists('\TTA\Player\AI_Notice')) {
+        $data = \TTA\Player\AI_Notice::add_to((string) $data);
+    }
+
     // TTS-351: after the filter, so Pro's players (2-7) get the staging note too.
     if (class_exists('\\TTA\\AtlasVoice\\Mode')) {
         $data .= \TTA\AtlasVoice\Mode::staging_note_html(isset($post->ID) ? (int) $post->ID : 0);

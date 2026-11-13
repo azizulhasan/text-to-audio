@@ -65,6 +65,8 @@ class TTA_Api_Routes {
 		Look_Controller::register_routes();
 		// TTS-347: the words, tooltips and icons of the player button (Player > Buttons & words).
 		Words_Controller::register_routes();
+		// TTS-347: the optional line that says the voice is made by AI (Player > AI notice).
+		AI_Notice_Controller::register_routes();
 
 
 		// register listening route.

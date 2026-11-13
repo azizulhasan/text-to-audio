@@ -1461,6 +1461,27 @@ body.atlasvoice-app-page #atlasvoice-app {
 	color: var(--atlasvoice-text-weak);
 }
 
+/* ---------- Player AI notice ---------- */
+.atlasvoice-root .atlasvoice-preview-player {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	gap: 10px;
+	height: 44px;
+	border-radius: 8px;
+	background: #184c53;
+	color: #fff;
+	font-weight: 600;
+	line-height: 1;
+}
+
+.atlasvoice-root .atlasvoice-ai-notice-preview {
+	margin: 6px 0;
+	font-size: 13px;
+	line-height: 1.4;
+	opacity: 0.8;
+}
+
 .atlasvoice-root .atlasvoice-voice-form {
 	display: flex;
 	flex-direction: column;
