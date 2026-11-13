@@ -1376,6 +1376,63 @@ body.atlasvoice-app-page #atlasvoice-app {
 	margin: 0;
 }
 
+/* ---------- Player look ---------- */
+.atlasvoice-root .atlasvoice-presets {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 8px;
+}
+
+.atlasvoice-root .atlasvoice-preset {
+	display: inline-flex;
+	align-items: center;
+	gap: 8px;
+	min-height: 40px;
+	padding: 6px 10px 6px 14px;
+	border: 1px solid var(--atlasvoice-line);
+	border-radius: var(--atlasvoice-radius-lg);
+	background: var(--atlasvoice-surface);
+	color: inherit;
+	font: inherit;
+	cursor: pointer;
+}
+
+.atlasvoice-root .atlasvoice-preset.is-on {
+	border-color: var(--atlasvoice-accent);
+	box-shadow: 0 0 0 1px var(--atlasvoice-accent);
+}
+
+.atlasvoice-root .atlasvoice-preset:focus-visible {
+	outline: 2px solid var(--atlasvoice-accent);
+	outline-offset: 2px;
+}
+
+.atlasvoice-root .atlasvoice-look-player {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	gap: 10px;
+	box-sizing: border-box;
+	max-width: 100%;
+	font-weight: 600;
+	line-height: 1;
+	overflow: hidden;
+}
+
+.atlasvoice-root .atlasvoice-look-player:focus-visible {
+	outline: 2px solid var(--atlasvoice-accent);
+	outline-offset: 2px;
+}
+
+.atlasvoice-root .atlasvoice-more summary {
+	font-weight: 600;
+	cursor: pointer;
+}
+
+.atlasvoice-root .atlasvoice-more[open] summary {
+	margin-bottom: 16px;
+}
+
 .atlasvoice-root .atlasvoice-voice-form {
 	display: flex;
 	flex-direction: column;

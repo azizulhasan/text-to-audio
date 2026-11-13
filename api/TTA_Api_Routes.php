@@ -61,6 +61,8 @@ class TTA_Api_Routes {
 		Providers_Controller::register_routes();
 		// TTS-347: where the player sits and who gets it (Player > Placement).
 		Placement_Controller::register_routes();
+		// TTS-347: the colours, size, border and spacing of the player (Player > Look).
+		Look_Controller::register_routes();
 
 
 		// register listening route.
