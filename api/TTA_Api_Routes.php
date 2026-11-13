@@ -37,6 +37,9 @@ class TTA_Api_Routes {
 	 * Register Routes
 	 */
 	public function tta_speech_register_routes() {
+		// TTS-374: which admin UI the site uses, and the one-time welcome.
+		Admin_Ui_Controller::register_routes();
+
 
 		// register listening route.
 		register_rest_route(

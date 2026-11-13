@@ -42,6 +42,8 @@ class TTA_Activator {
 		if ( ! get_option( 'tta_has_been_activated_before', false ) ) {
 			set_transient( 'tta_activation_redirect', true, 60 );
 			update_option( 'tta_has_been_activated_before', true, false );
+			// TTS-374: a new install has nothing that "moved", so no update-day welcome.
+			\TTA_Admin\Admin_App::mark_new_install();
 		}
 
 		// Store activation timestamp for smart review notice timing.

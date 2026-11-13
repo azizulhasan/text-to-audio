@@ -100,7 +100,7 @@ class AdminAppTest extends WP_UnitTestCase {
 		$json = wp_json_encode( $data );
 
 		$this->assertSame(
-			array( 'version', 'restUrl', 'restNonce', 'logoUrl', 'classicUrl', 'isPro', 'proVersion', 'mode', 'setupFinished', 'helpTopics', 'docsUrl', 'supportUrl' ),
+			array( 'version', 'restUrl', 'restNonce', 'logoUrl', 'classicUrl', 'isPro', 'proVersion', 'mode', 'setupFinished', 'helpTopics', 'docsUrl', 'supportUrl', 'showWelcome' ),
 			array_keys( $data )
 		);
 		$this->assertStringNotContainsString( 'sk_secret_eleven_123', $json );
