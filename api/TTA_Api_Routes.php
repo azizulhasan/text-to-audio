@@ -69,6 +69,8 @@ class TTA_Api_Routes {
 		AI_Notice_Controller::register_routes();
 		// TTS-347: the shortcode and block reference, read-only (Player > Shortcode & block).
 		Embed_Controller::register_routes();
+		// TTS-347: which posts get a player (What is read > Where it appears).
+		Where_Controller::register_routes();
 
 
 		// register listening route.

@@ -39,6 +39,11 @@ const BUILT_IN = {
 			/* webpackChunkName: "screen-account-usage" */ './AccountUsage'
 		)
 	),
+	'content:where': lazy( () =>
+		import(
+			/* webpackChunkName: "screen-content-where" */ './ContentWhere'
+		)
+	),
 	'player:ai': lazy( () =>
 		import(
 			/* webpackChunkName: "screen-player-ai-notice" */ './PlayerAiNotice'

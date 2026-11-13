@@ -42,6 +42,7 @@ class Commands {
 			'atlasvoice words'         => Words_Command::class,
 			'atlasvoice ai-notice'     => AI_Notice_Command::class,
 			'atlasvoice embed'         => Embed_Command::class,
+			'atlasvoice where'         => Where_Command::class,
 		);
 
 		/**
