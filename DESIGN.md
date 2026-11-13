@@ -5,9 +5,14 @@ description: A calm, native wp-admin home for a site's voice. WordPress parts, o
 colors:
   brand: "#5646e5"
   brand-hover: "#4536c9"
+  brand-press: "#3a2db3"
   brand-ground: "#eeedfd"
+  brand-line: "#d6d3fb"
   brand-ink: "#3a2db3"
   on-brand: "#ffffff"
+  brand-on-dark: "#8481f8"
+  signal: "#ff7853"
+  on-signal: "#1e1e1e"
   canvas: "#f0f0f1"
   surface: "#ffffff"
   surface-sunken: "#f6f7f7"
@@ -177,8 +182,25 @@ Named rules:
 - `surface-selected` marks the selected row or item; it is the only tinted background a list uses.
 - Status never relies on color alone: every chip has a word ("Live", "Staging", "Ready",
   "Outdated", "Failed", "Connected").
-- No gradients anywhere. The aqua "signal" colour and the web fonts of the earlier TTS-347 draft
-  are dropped.
+- **Voice Indigo is the one brand colour (owner approved 2026-11-13).** White text on `brand`
+  is 6.17:1, on `brand-hover` 8.00:1 and on `brand-press` 9.52:1; `brand` on a white page is
+  6.17:1 and on the WordPress grey page 5.42:1. So one colour is the logo tile, the primary
+  button, the link and the focus ring. (AtlasMCP needs a separate darker ink for buttons because
+  its teal is light; AtlasVoice does not.)
+- Button states: rest `brand`, hover `brand-hover`, pressed `brand-press`. A secondary button is
+  white with a `brand` border and text; on hover it fills with `brand-ground` and its text and
+  border become `brand-ink`. Disabled is WordPress's own grey.
+- `brand-ground` with `brand-line` as its border is the only brand tint (selected item, quiet
+  upsell card). Text on it is `brand-ink` (8.23:1).
+- `signal` (#ff7853, the coral of the pre-redesign buttons) is the secondary colour, and a
+  **fill only**: the sound wave in the logo and marketing art, and the "New" badge. Text on it is
+  `on-signal` (6.40:1). It is never a button, a link or text: white on it is 2.60:1.
+- The logo is a white mark on a `brand` tile. (New artwork, banner and screenshots come later;
+  only the colour is decided.)
+- `brand-on-dark` (#8481f8, 5.95:1 on #0b0d1c) is the same brand on dark surfaces, as
+  atlasvoice.cloud uses it, with dark text on a filled button. wp-admin never uses it.
+- No gradients anywhere. The aqua colour and the web fonts of the earlier TTS-347 draft are
+  dropped.
 - The Pro badge is dark ink with a gold label, the same treatment every AtlasAiDev plugin uses.
 - `player-default` (#184c53, "Classic teal") is the front-end player colour existing sites already
   have; it is a preset, not a brand colour.
@@ -532,4 +554,5 @@ The 5,000+ sites that update must not feel lost:
 | 2026-11-13 | v3: colours are compact rows that open a palette | The block editor's own pattern; the Look tab is half as long |
 | 2026-11-13 | v3: "licence full" removed; "licence not activated on this site" added | Owner rule 27 Oct: Freemius decides Premium (TTS-353) |
 | 2026-11-13 | v3 is designed against 2.4.0-beta.11 / 3.5.0-beta.11 (`feature/TTS-266`) | The new UI is built on the beta with develop merged in |
+| 2026-11-13 | Colours decided: Voice Indigo #5646e5 (hover #4536c9, pressed #3a2db3, ground #eeedfd), coral #ff7853 as a fill-only secondary, Pro badge #1d2327 / #f3d27a, logo white on indigo | Owner approved. Indigo matches atlasvoice.cloud and is clearly different from AtlasMCP's teal in the WordPress menu; coral keeps a link to the old screens but fails as a button (white on it is 2.60:1). Replaces "no second accent" of 2026-10-26 |
 | 2026-10-27 | MP3 generation for players 3–7 becomes server-side **Audio Jobs** (TTS-354): one job per post + language + voice + text fingerprint; screens are the editor's AtlasVoice → Audio tab, Audio library (All posts · Clean up · Settings) with a bulk queue, status-bar usage and the posts-list Audio column | Fixes duplicate paid generation, partial or overwritten MP3s, stuck "Generating…", stale audio and bulk/page differences. The engine has its own branch and the screens use it only through REST. Design: canvas TVKNutmwFhhTs4b9Xqt7JC, `docs/design/audio-jobs-prototype.html` |

@@ -42,7 +42,13 @@ body { background: #f0f0f1; overflow: hidden; font-family: -apple-system, system
 	--atlasvoice-info: var(--wpds-color-foreground-content-info, #006bd7);
 	--atlasvoice-info-bg: var(--wpds-color-background-surface-info-weak, #f3f9ff);
 	--atlasvoice-accent: var(--wp-admin-theme-color, #5646e5);
-	--atlasvoice-pro: #1e1e1e;
+	--atlasvoice-accent-hover: #4536c9;
+	--atlasvoice-accent-press: #3a2db3;
+	--atlasvoice-brand-ink: #3a2db3;
+	--atlasvoice-brand-line: #d6d3fb;
+	--atlasvoice-signal: #ff7853;
+	--atlasvoice-on-signal: #1e1e1e;
+	--atlasvoice-pro: #1d2327;
 	--atlasvoice-on-pro: #f3d27a;
 	--atlasvoice-radius: var(--wpds-border-radius-md, 4px);
 	--atlasvoice-radius-lg: var(--wpds-border-radius-lg, 8px);
@@ -148,7 +154,7 @@ body { background: #f0f0f1; overflow: hidden; font-family: -apple-system, system
 .atlasvoice-idbox .atlasvoice-mono { flex: 1; min-width: 0; overflow-wrap: anywhere; }
 .atlasvoice-readbox { padding: 12px; border: 1px solid var(--atlasvoice-line); border-radius: var(--atlasvoice-radius-lg); line-height: 1.6; white-space: pre-line; }
 .atlasvoice-readbox p { margin-top: 8px; font-size: 12px; color: #50575e; }
-.atlasvoice-upsell { margin-top: 12px; padding: 14px; border: 1px solid #d6d3fb; background: #f4f3fe; border-radius: var(--atlasvoice-radius-lg); }
+.atlasvoice-upsell { margin-top: 12px; padding: 14px; border: 1px solid var(--atlasvoice-brand-line); background: var(--atlasvoice-brand-weak); border-radius: var(--atlasvoice-radius-lg); }
 .atlasvoice-upsell ul { margin: 8px 0 12px; padding-left: 18px; }
 .atlasvoice-upsell li { margin: 2px 0; }
 .atlasvoice-params { border: 1px solid var(--atlasvoice-line); border-radius: var(--atlasvoice-radius-lg); overflow: hidden; }
@@ -202,6 +208,7 @@ body { background: #f0f0f1; overflow: hidden; font-family: -apple-system, system
 .atlasvoice-dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; background: currentColor; flex: none; }
 .atlasvoice-pro { display: inline-flex; align-items: center; height: 18px; padding: 0 6px; border-radius: 2px; background: var(--atlasvoice-pro); color: var(--atlasvoice-on-pro); font-size: 10px; font-weight: 600; letter-spacing: .04em; flex: none; }
 .atlasvoice-count { display: inline-flex; align-items: center; justify-content: center; min-width: 18px; height: 18px; padding: 0 5px; border-radius: 9px; background: #e0e0e0; font-size: 11px; font-weight: 600; color: #1e1e1e; }
+.atlasvoice-chip.is-new { background: var(--atlasvoice-signal); color: var(--atlasvoice-on-signal); }
 .atlasvoice-count.is-brand { background: var(--atlasvoice-accent); color: #fff; }
 .atlasvoice-trp { display: inline-flex; gap: 4px; }
 .atlasvoice-trp button { width: 24px; justify-content: center; cursor: pointer; }
