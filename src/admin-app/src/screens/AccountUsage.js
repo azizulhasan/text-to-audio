@@ -23,7 +23,7 @@ import { useCallback, useEffect, useState } from '@wordpress/element';
 import { request } from '../api';
 import { useApp } from '../app-context';
 import Slot from '../extend/Slot';
-import { Chip, Empty, Pane, Scroll, Section } from '../shell/parts';
+import { Chip, Empty, Facts, Pane, Scroll, Section } from '../shell/parts';
 import {
 	engineName,
 	formatDay,
@@ -35,28 +35,6 @@ import {
 } from './account-format';
 
 const ROUTE = 'tta/v1/cloud/account';
-
-/**
- * A list of name and value pairs.
- *
- * @param {Object} props
- * @param {Array}  props.rows [ name, value ] pairs; a pair without a value is left out.
- * @return {*} The list.
- */
-function Facts( { rows } ) {
-	return (
-		<dl className="atlasvoice-facts">
-			{ rows
-				.filter( ( row ) => row[ 1 ] !== '' && row[ 1 ] !== null )
-				.map( ( [ name, value ] ) => (
-					<div key={ name } className="atlasvoice-fact">
-						<dt>{ name }</dt>
-						<dd>{ value }</dd>
-					</div>
-				) ) }
-		</dl>
-	);
-}
 
 /**
  * The plan and this month's usage.

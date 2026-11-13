@@ -1214,6 +1214,23 @@ body.atlasvoice-app-page #atlasvoice-app {
 	}
 }
 
+/* ---------- Voice ---------- */
+.atlasvoice-root .atlasvoice-notice-gap {
+	margin-bottom: 12px;
+}
+
+.atlasvoice-root .atlasvoice-connect-lead {
+	margin: 0 0 16px;
+	max-width: 640px;
+}
+
+.atlasvoice-root .atlasvoice-connect {
+	display: flex;
+	flex-direction: column;
+	gap: 16px;
+	max-width: 640px;
+}
+
 /* ---------- the Plans tab ---------- */
 .atlasvoice-root .atlasvoice-grid.is-3 {
 	grid-template-columns: repeat(3, minmax(0, 1fr));

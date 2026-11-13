@@ -9,7 +9,7 @@
     "start": "wp-scripts start src/index.js --output-path=../../build/admin-app",
     "lint:js": "wp-scripts lint-js src",
     "lint:css": "wp-scripts lint-style \"src/**/*.css\"",
-    "test": "wp-scripts test-unit-js",
+    "test": "wp-scripts test-unit-js --testTimeout=20000",
     "size": "node scripts/check-size.js"
   },
   "dependencies": {

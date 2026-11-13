@@ -71,6 +71,8 @@ export async function request(
 		);
 		failure.status = response.status;
 		failure.code = body?.code;
+		// What the site added to its refusal, e.g. who owns a site that is already connected.
+		failure.data = body?.data;
 		throw failure;
 	}
 

@@ -173,3 +173,25 @@ export function ProNote( { children, onSeePro } ) {
 		</div>
 	);
 }
+
+/**
+ * A list of name and value pairs.
+ *
+ * @param {Object} props
+ * @param {Array}  props.rows [ name, value ] pairs; a pair without a value is left out.
+ * @return {*} The list.
+ */
+export function Facts( { rows } ) {
+	return (
+		<dl className="atlasvoice-facts">
+			{ rows
+				.filter( ( row ) => row[ 1 ] !== '' && row[ 1 ] !== null )
+				.map( ( [ name, value ] ) => (
+					<div key={ name } className="atlasvoice-fact">
+						<dt>{ name }</dt>
+						<dd>{ value }</dd>
+					</div>
+				) ) }
+		</dl>
+	);
+}

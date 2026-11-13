@@ -13,6 +13,9 @@ import { lazy } from '@wordpress/element';
 import { applyFilters } from '@wordpress/hooks';
 
 const BUILT_IN = {
+	'voice:voice': lazy( () =>
+		import( /* webpackChunkName: "screen-voice-voice" */ './VoiceVoice' )
+	),
 	overview: lazy( () =>
 		import( /* webpackChunkName: "screen-home" */ './Home' )
 	),
