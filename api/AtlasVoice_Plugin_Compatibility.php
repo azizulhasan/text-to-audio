@@ -25,6 +25,12 @@ class AtlasVoice_Plugin_Compatibility {
 		if ( 'post' == $request['method'] ) {
 			$fields = json_decode( $request['fields'] );
 
+			// TTS-370: keep every stored field the screen did not send.
+			$fields = \TTA\Settings\Settings_Store::prepare( 'tta_compatible_data', $fields );
+			if ( is_wp_error( $fields ) ) {
+				return $fields;
+			}
+
 			update_option( 'tta_compatible_data', $fields, false );
 
 			$response['data'] = get_option( 'tta_compatible_data' );

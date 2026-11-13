@@ -137,3 +137,8 @@ languages/*.po
 languages/*.mo
 languages/text-to-audio-*.json
 
+
+# TTS-371: test tools are installed locally, never committed or shipped
+tests/phpunit/vendor/
+tests/phpunit/composer.lock
+.phpunit.result.cache

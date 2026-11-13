@@ -790,9 +790,10 @@ class TTA_Api_Routes {
 			// TTS-266: screens save only their own fields (free Listening for players 1/3,
 			// the setup wizard), so replacing the option wiped Pro's voice and language
 			// mapping. Sent fields win; everything else stays as saved.
-			$previous = get_option( 'tta_listening_settings', array() );
-			if ( is_object( $fields ) && ( is_object( $previous ) || is_array( $previous ) ) ) {
-				$fields = (object) array_merge( (array) $previous, (array) $fields );
+			// TTS-370: the merge now lives in Settings_Store, shared by every settings route.
+			$fields = \TTA\Settings\Settings_Store::prepare( 'tta_listening_settings', $fields );
+			if ( is_wp_error( $fields ) ) {
+				return $fields;
 			}
 
             if(TTA_Helper::is_listening_lang_or_voice_changed($fields)) {
@@ -825,10 +826,6 @@ class TTA_Api_Routes {
 		if ( 'post' == $request['method'] ) {
 			$fields = json_decode( $request['fields'] );
 
-            if(TTA_Helper::is_player_number_changed($fields)) {
-                TTA_Helper::delete_post_meta();
-            }
-
 			// Extract & save per-player button texts (TTS-241).
 			// They travel under the same /customize payload to keep one round-trip.
 			if ( is_object( $fields ) && property_exists( $fields, 'button_texts' ) ) {
@@ -845,6 +842,18 @@ class TTA_Api_Routes {
 					$existing['players'] = \TTA\TTA_Player_Icons::sanitize_players( $players );
 					update_option( 'tta__button_text_arr', $existing );
 				}
+			}
+
+			// TTS-370: keep every stored field the screen did not send. It runs after the
+			// button texts are taken out (they have their own sanitiser) and before the
+			// player check, which would read a missing player id as "changed to player 1".
+			$fields = \TTA\Settings\Settings_Store::prepare( 'tta_customize_settings', $fields );
+			if ( is_wp_error( $fields ) ) {
+				return $fields;
+			}
+
+			if ( TTA_Helper::is_player_number_changed( $fields ) ) {
+				TTA_Helper::delete_post_meta();
 			}
 
 			update_option( 'tta_customize_settings', $fields );
@@ -978,10 +987,20 @@ class TTA_Api_Routes {
 				}
 			}
 
+			// TTS-370: read the wizard's flag from what was sent, not from the merged value,
+			// so an old stored flag cannot mark the wizard finished again on a later save.
+			$onboarding_completed = is_object( $fields ) && ! empty( $fields->tta_onboarding_completed );
+
+			// TTS-370: keep every stored field the screen did not send.
+			$fields = \TTA\Settings\Settings_Store::prepare( 'tta_settings_data', $fields );
+			if ( is_wp_error( $fields ) ) {
+				return $fields;
+			}
+
 			update_option( 'tta_settings_data', $fields );
 
 			// Mark onboarding as completed if flag is present.
-			if ( isset( $fields->tta_onboarding_completed ) && $fields->tta_onboarding_completed ) {
+			if ( $onboarding_completed ) {
 				update_option( 'tta_onboarding_completed', true, false );
 			}
 
@@ -1017,6 +1036,9 @@ class TTA_Api_Routes {
 		if ( 'post' == $request['method'] ) {
 			$fields = json_decode( $request['fields'], true );
 			$fields = is_array( $fields ) ? $fields : array();
+
+			// TTS-370: a field that was not sent keeps its saved value instead of the default.
+			$fields = \TTA\Settings\Settings_Store::merge( get_option( 'tta_highlight_settings', array() ), $fields );
 
 			$mode = isset( $fields['tta__highlight_mode'] ) ? $fields['tta__highlight_mode'] : 'sentence';
 			if ( ! in_array( $mode, array( 'word_sentence', 'word', 'sentence' ), true ) ) {

@@ -386,6 +386,12 @@ class AtlasVoice_Analytics {
 			return rest_ensure_response( $response );
 		}
 
+		// TTS-370: keep every stored field the screen did not send.
+		$body = \TTA\Settings\Settings_Store::prepare( 'tta_analytics_settings', $body );
+		if ( is_wp_error( $body ) ) {
+			return $body;
+		}
+
 		update_option( 'tta_analytics_settings', $body, false );
 
 		$saved_data = get_option( 'tta_analytics_settings' );
