@@ -51,6 +51,8 @@ class TTA_Api_Routes {
 		Home_Controller::register_routes();
 		// TTS-347: read, make and end the connection to AtlasVoice Cloud (Voice screen).
 		Cloud_Connection_Controller::register_routes();
+		// TTS-347: read and change the voice that reads the posts (Voice screen).
+		Voice_Controller::register_routes();
 
 
 		// register listening route.
