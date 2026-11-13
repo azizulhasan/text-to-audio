@@ -30,6 +30,7 @@ class Commands {
 			'atlasvoice pronunciation' => Pronunciation_Command::class,
 			'atlasvoice read-along'    => Read_Along_Command::class,
 			'atlasvoice account'       => Account_Command::class,
+			'atlasvoice plans'         => Plans_Command::class,
 		);
 
 		/**

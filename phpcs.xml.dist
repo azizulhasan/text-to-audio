@@ -16,6 +16,8 @@
 	<file>./api/Pronunciation_Controller.php</file>
 	<file>./api/Read_Along_Controller.php</file>
 	<file>./api/Cloud_Account_Controller.php</file>
+	<file>./api/Plans_Controller.php</file>
+	<file>./includes/Account</file>
 	<file>./includes/Player</file>
 	<file>./includes/Cloud</file>
 	<file>./libs/AtlasVoice</file>

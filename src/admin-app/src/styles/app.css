@@ -1019,10 +1019,105 @@ body.atlasvoice-app-page #atlasvoice-app {
 	font-weight: 500;
 }
 
+/* ---------- the Plans tab ---------- */
+.atlasvoice-root .atlasvoice-grid.is-3 {
+	grid-template-columns: repeat(3, minmax(0, 1fr));
+	align-items: stretch;
+}
+
+.atlasvoice-root .atlasvoice-features {
+	margin: 0;
+	padding: 0;
+	list-style: none;
+	align-items: stretch;
+}
+
+.atlasvoice-root .atlasvoice-features li {
+	margin: 0;
+}
+
+.atlasvoice-root .atlasvoice-features .components-card {
+	height: 100%;
+}
+
+.atlasvoice-root .atlasvoice-feature-text {
+	margin: 4px 0 0;
+}
+
+.atlasvoice-root .atlasvoice-compare th[scope="row"] {
+	height: 44px;
+	padding: 8px 12px 8px 16px;
+	border-bottom: 1px solid var(--atlasvoice-line-weak);
+	font-size: 13px;
+	color: var(--atlasvoice-text);
+	white-space: normal;
+}
+
+.atlasvoice-root .atlasvoice-compare tr:last-child th {
+	border-bottom: 0;
+}
+
+.atlasvoice-root .atlasvoice-compare b {
+	font-weight: 500;
+}
+
+.atlasvoice-root .atlasvoice-toggle {
+	display: inline-flex;
+	gap: 4px;
+}
+
+.atlasvoice-root .atlasvoice-card-best {
+	box-shadow: 0 0 0 2px var(--atlasvoice-accent);
+}
+
+.atlasvoice-root .atlasvoice-plan {
+	display: flex;
+	flex-direction: column;
+	gap: 8px;
+}
+
+.atlasvoice-root .atlasvoice-plan-flag {
+	min-height: 22px;
+}
+
+.atlasvoice-root .atlasvoice-plan-name {
+	margin: 0;
+	font-size: 14px;
+	font-weight: 600;
+}
+
+.atlasvoice-root .atlasvoice-price {
+	margin: 0 0 8px;
+	font-size: 28px;
+	font-weight: 600;
+	line-height: 1.2;
+}
+
+.atlasvoice-root .atlasvoice-price-per {
+	margin-left: 6px;
+	font-size: 13px;
+	font-weight: 400;
+	color: var(--atlasvoice-text-weak);
+}
+
+.atlasvoice-root .atlasvoice-btn-full {
+	width: 100%;
+	justify-content: center;
+}
+
+.atlasvoice-root .atlasvoice-plans-note {
+	margin: 12px 0 0;
+}
+
 @media (max-width: 959px) {
 
-	.atlasvoice-root .atlasvoice-grid.is-2 {
+	.atlasvoice-root .atlasvoice-grid.is-2,
+	.atlasvoice-root .atlasvoice-grid.is-3 {
 		grid-template-columns: minmax(0, 1fr);
+	}
+
+	.atlasvoice-root .atlasvoice-plan-flag {
+		min-height: 0;
 	}
 }
 
