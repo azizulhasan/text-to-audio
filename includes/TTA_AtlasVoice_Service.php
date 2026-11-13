@@ -461,43 +461,20 @@ class TTA_AtlasVoice_Service {
 	 * @return array{status:int, data:mixed, headers:array, error:string}
 	 */
 	private static function request( $method, $path, $body = null, $raw = false, $timeout = 30 ) {
-		$state   = self::get();
-		$headers = array(
-			'Accept'              => $raw ? 'audio/mpeg' : 'application/json',
-			'X-AtlasVoice-Client' => 'wordpress/' . ( defined( 'TEXT_TO_AUDIO_VERSION' ) ? TEXT_TO_AUDIO_VERSION : '0' ),
-		);
+		// TTS-378: the call itself is made by the platform-free client
+		// (libs/AtlasVoice/Sdk), which WordPress reaches through Cloud\Cloud. This
+		// method keeps its old result shape, so nothing that calls it changes.
+		$result = \TTA\Cloud\Cloud::client()->request( $method, $path, $body, $raw, $timeout );
 
-		if ( '' !== $state['api_key'] ) {
-			$headers['Authorization'] = 'Bearer ' . $state['api_key'];
+		if ( ! $result->reached() ) {
+			return array( 'status' => 0, 'data' => null, 'headers' => array(), 'error' => $result->transport_error );
 		}
-
-		$args = array(
-			'method'  => $method,
-			'timeout' => $timeout,
-			'headers' => $headers,
-		);
-
-		if ( null !== $body ) {
-			$args['headers']['Content-Type'] = 'application/json';
-			$args['body']                    = wp_json_encode( $body );
-		}
-
-		$response = wp_remote_request( self::base_url() . $path, $args );
-
-		if ( is_wp_error( $response ) ) {
-			return array( 'status' => 0, 'data' => null, 'headers' => array(), 'error' => $response->get_error_message() );
-		}
-
-		$status = (int) wp_remote_retrieve_response_code( $response );
-		$text   = wp_remote_retrieve_body( $response );
-		$type   = (string) wp_remote_retrieve_header( $response, 'content-type' );
-		$data   = ( $raw && 200 === $status && false === strpos( $type, 'json' ) ) ? $text : json_decode( $text, true );
 
 		return array(
-			'status'  => $status,
-			'data'    => $data,
-			'headers' => wp_remote_retrieve_headers( $response ),
-			'error'   => ( $status >= 400 && is_array( $data ) && isset( $data['error']['code'] ) ) ? $data['error']['code'] : '',
+			'status'  => $result->status,
+			'data'    => $result->data,
+			'headers' => $result->headers,
+			'error'   => $result->error,
 		);
 	}
 
