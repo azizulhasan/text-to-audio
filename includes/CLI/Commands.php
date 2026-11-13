@@ -25,8 +25,9 @@ class Commands {
 	 */
 	public static function register() {
 		$commands = array(
-			'atlasvoice ui'   => Ui_Command::class,
-			'atlasvoice mode' => Mode_Command::class,
+			'atlasvoice ui'            => Ui_Command::class,
+			'atlasvoice mode'          => Mode_Command::class,
+			'atlasvoice pronunciation' => Pronunciation_Command::class,
 		);
 
 		/**
