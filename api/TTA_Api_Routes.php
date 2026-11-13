@@ -55,6 +55,8 @@ class TTA_Api_Routes {
 		Voice_Controller::register_routes();
 		// TTS-378: start, read and cancel a post's audio job on AtlasVoice Cloud.
 		Cloud_Jobs_Controller::register_routes();
+		// TTS-347: the languages of the site, read-only (Voice > Languages).
+		Languages_Controller::register_routes();
 
 
 		// register listening route.

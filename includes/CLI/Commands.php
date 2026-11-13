@@ -35,6 +35,7 @@ class Commands {
 			'atlasvoice cloud'         => Cloud_Command::class,
 			'atlasvoice voice'         => Voice_Command::class,
 			'atlasvoice job'           => Job_Command::class,
+			'atlasvoice languages'     => Languages_Command::class,
 		);
 
 		/**

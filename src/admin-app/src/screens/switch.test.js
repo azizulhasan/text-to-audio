@@ -273,7 +273,7 @@ describe( 'screen registry', () => {
 		expect( getScreenComponent( 'help:moved' ) ).toBeTruthy();
 		// A screen that is not rebuilt yet (Voice › Voice was the example
 		// here until it was built).
-		expect( getScreenComponent( 'voice:languages' ) ).toBeNull();
+		expect( getScreenComponent( 'library:all' ) ).toBeNull();
 		expect( getScreenComponent( '__proto__' ) ).toBeNull();
 		expect( getScreenComponent( 'constructor' ) ).toBeNull();
 	} );

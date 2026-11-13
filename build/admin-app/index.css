@@ -1386,6 +1386,20 @@ body.atlasvoice-app-page #atlasvoice-app {
 	max-width: 640px;
 }
 
+/* ---------- Languages ---------- */
+.atlasvoice-root .atlasvoice-lang-lead,
+.atlasvoice-root .atlasvoice-lang-list {
+	margin: 0;
+}
+
+.atlasvoice-root .atlasvoice-lang-others {
+	margin: 6px 0 0;
+}
+
+.atlasvoice-root .atlasvoice-lang-list {
+	overflow-wrap: anywhere;
+}
+
 /* ---------- the Plans tab ---------- */
 .atlasvoice-root .atlasvoice-grid.is-3 {
 	grid-template-columns: repeat(3, minmax(0, 1fr));
