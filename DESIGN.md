@@ -195,8 +195,12 @@ Named rules:
 - `signal` (#ff7853, the coral of the pre-redesign buttons) is the secondary colour, and a
   **fill only**: the sound wave in the logo and marketing art, and the "New" badge. Text on it is
   `on-signal` (6.40:1). It is never a button, a link or text: white on it is 2.60:1.
-- The logo is a white mark on a `brand` tile. (New artwork, banner and screenshots come later;
-  only the colour is decided.)
+- **The logo is the Voice A (owner approved 2026-11-13):** a white letter A on a `brand` tile
+  whose crossbar is three `signal` sound bars. A is for Atlas; the bars are the voice. Below
+  32 px the small form is used (the three bars merge into one). The WordPress admin menu uses
+  the one-colour small form. The bars may animate once where motion is allowed, never under
+  reduced motion. Files and rules: `docs/design/logo/`. The WordPress.org icon,
+  banner and screenshots are still to be made from it.
 - `brand-on-dark` (#8481f8, 5.95:1 on #0b0d1c) is the same brand on dark surfaces, as
   atlasvoice.cloud uses it, with dark text on a filled button. wp-admin never uses it.
 - No gradients anywhere. The aqua colour and the web fonts of the earlier TTS-347 draft are
@@ -446,6 +450,85 @@ The 5,000+ sites that update must not feel lost:
 - **AtlasMCP** is offered once on the setup finish screen and in Help → More plugins, never as a
   sidebar card on settings screens.
 
+## Upgrade to Pro in the free plugin (v3.1)
+
+One calm path to Pro, never a nag. WordPress.org guideline 5 holds everywhere: links and text
+only, never a Pro form and never a disabled Pro control. Guideline 11 holds too: nothing outside
+the AtlasVoice screens, no pop-up, no banner over the work.
+
+**Where it goes.** Every upgrade prompt inside the app opens **Account & plans → Plans**. That
+tab is the only place with the outgoing button, **Upgrade to Pro**, which opens the pricing page
+on atlasaidev.com in a new tab (`utm_source=text-to-audio&utm_medium=plugin_admin&utm_campaign=free_to_pro&utm_content=<place>`,
+the pattern the plugin uses today). The one exception is the "free characters used up" state,
+whose button goes straight to pricing because the user is blocked. No trial is promised; the
+Plans tab states the 14-day money-back guarantee.
+
+| Place | Component | Words | Shown |
+|---|---|---|---|
+| Rail, bottom | Secondary button, full width, with "You are on the Free plan" under it | **Upgrade to Pro** | Always in Free. Hidden when the rail is icons only |
+| Home | One tinted card (`brand-ground`, `brand-line`), Pro badge, three benefits | Title **Do more with Pro**; **See Pro plans** · Hear the Pro voices · Not now | After setup is finished. "Not now" hides it for 30 days for that user |
+| Where a Pro feature would sit | Dashed line: PRO · what it adds · link | **See Pro** | At most one per screen or tab |
+| Rail item with a Pro screen (SEO & AI Search) | Pro badge on the item; the screen is a description page | **See plans** · Hear a demo | Always in Free |
+| Account & plans → Plans | Side-by-side table and price cards | **Upgrade to Pro** (primary) | Always |
+| Setup, last step | One text line under the summary, never a button | "Want natural voices on every post? **See what Pro adds**" | Once, on the Done step |
+| Usage at 80% | Status bar meter turns amber; a line in Usage | "80% of this month's free characters used. **See plans**" | While at or above 80% |
+| Usage at 95% | One notice in the bell | "4% of your characters left this month." **See usage** | Once per month |
+| Usage at 100% | Voice screen state and bell notice | "This month's free characters are used. Visitors hear the device voice until 1 December." **Upgrade for unlimited** (primary) · Wait until it resets | Until the month resets |
+| Plugins list (WordPress) | Action link under the plugin name | **Upgrade to Pro** | Always in Free, as today |
+
+Rules:
+- **One per screen.** A screen shows at most one dashed Pro line, plus the rail button. Home is
+  the only screen with the card. Never two upgrade buttons side by side.
+- **Never primary**, except on the Plans tab and in the 100% state. The screen's own action
+  (Save changes, Go live) stays the one primary button.
+- **Never during setup.** No upgrade prompt before the Done step.
+- **Honest words.** Say what Pro adds in plain numbers; no countdowns, no fake discounts, no
+  "limited time" unless a real dated offer exists.
+- **Can be hidden.** The Home card and the bell notices can be dismissed; the choice is kept per
+  user (`atlasvoice_dismissed` user meta, a new key; nothing existing changes).
+- **Pro installed, licence not activated here:** no upgrade prompts at all. The rail foot shows
+  "Not activated" with **Licence**, the Voice screen offers **Activate the licence on this
+  site**, and the Plans tab says "You own Pro. Activate it on this site."
+- **Pro active:** no upgrade prompts. The Plans tab becomes "Upgrade or add sites".
+- Each place sends its own `utm_content`, so we can see which prompt earns its place and remove
+  the ones that do not.
+
+## Help on every screen (v3.1)
+
+Owner rule: every screen, tab, setup step and task shows how to finish it, and if that is not
+enough, one documentation page and one YouTube video are right there. **All documentation and
+videos are new, made for the new screens.** Every topic has exactly one guide, and every guide
+has exactly one video. The old documentation stays online for sites on the classic screens.
+
+- **"How to" button** in the header of every screen, before the bell. It opens the help for
+  exactly where the user is: the screen, the open tab, or the current setup step.
+- **Help drawer** (the standard right-side drawer, 420 px):
+  1. *Do it in N steps*: three to five short steps, written in the plugin and translatable, so
+     the help works with no internet and in the user's language.
+  2. *Read the guide*: opens the documentation page in a new tab.
+  3. *Watch the video · length*: opens YouTube in a new tab. **Never embedded**, so the admin
+     loads nothing from a third party and nothing needs disclosing.
+  4. Footer: **All guides** (Help → Documentation) and **Contact support**.
+- **"?" icon beside a section title** only where the section is a task of its own (cloud
+  storage, read-along highlighting, page areas, when audio is made). It opens the same drawer on
+  that section's topic. Ordinary sections use the screen's "How to".
+- **Setup wizard:** the same "How to" button follows the step (`setup:voice`, `setup:live`, …).
+- **Post editor panel:** a "How to" link at the bottom of the AtlasVoice panel (topic `editor`).
+- **When something is missing:** the steps are always there, because they ship in the plugin.
+  A topic with no video yet shows no video row; a topic with no guide yet links to the
+  documentation home. Never a dead link, never "coming soon".
+- **The header "?" menu stays** for things that are not about one screen: all documentation,
+  keyboard shortcuts, view as a visitor, the voice demo, contact support.
+- **Data:** one list keyed by route id (`screen`, `screen:tab`, `screen:tab#section`), each
+  entry `{ title, steps[], docUrl, videoUrl, videoLength, pro }`. The plugin ships it from PHP
+  and passes it through the `atlasvoice_help_topics` filter, so Pro adds its topics the same way
+  and a link can be corrected without touching the screens. Documentation addresses follow one
+  pattern, `https://atlasaidev.com/docs/atlasvoice/<slug>/`, so guides can be written before the
+  release. The full list of 39 topics, with the guide and video to make for each, is in
+  `docs/design/help-topics.md` (source: `mockup/atlasvoice-help-topics.js`).
+- **Accessibility:** the button has a visible text label; the drawer is a dialog that takes
+  focus and returns it; links say they open a new tab.
+
 ## Do's and Don'ts
 
 - Do use a WordPress component whenever one exists, and style it only through tokens.
@@ -555,4 +638,7 @@ The 5,000+ sites that update must not feel lost:
 | 2026-11-13 | v3: "licence full" removed; "licence not activated on this site" added | Owner rule 27 Oct: Freemius decides Premium (TTS-353) |
 | 2026-11-13 | v3 is designed against 2.4.0-beta.11 / 3.5.0-beta.11 (`feature/TTS-266`) | The new UI is built on the beta with develop merged in |
 | 2026-11-13 | Colours decided: Voice Indigo #5646e5 (hover #4536c9, pressed #3a2db3, ground #eeedfd), coral #ff7853 as a fill-only secondary, Pro badge #1d2327 / #f3d27a, logo white on indigo | Owner approved. Indigo matches atlasvoice.cloud and is clearly different from AtlasMCP's teal in the WordPress menu; coral keeps a link to the old screens but fails as a button (white on it is 2.60:1). Replaces "no second accent" of 2026-10-26 |
+| 2026-11-13 | Logo: the Voice A (white A, coral sound bars as the crossbar, indigo tile), with a small form below 32 px | Owner approved. One idea (Atlas + voice), still an A at 16 px, round line ends like the AtlasMCP mark; plain sound bars and a speech bubble were rejected as generic |
+| 2026-11-13 | v3.1: one upgrade path in Free: rail button, one Home card, one dashed line per screen, all leading to the Plans tab; never primary, never during setup, none when Pro is installed | Owner approved 2026-11-13. Owner asked for a proper upgrade prompt; it must stay inside WordPress.org guidelines 5 and 11 and not make the calm new UI feel like an advert |
+| 2026-11-13 | v3.1: "How to" on every screen, tab and setup step: steps in the plugin, one new guide and one new video per topic, both opened in a new tab | Owner approved 2026-11-13. Owner rule: every step has documentation and every documentation page has a video; all new for the new UI. Not embedded, so the admin loads nothing from YouTube |
 | 2026-10-27 | MP3 generation for players 3–7 becomes server-side **Audio Jobs** (TTS-354): one job per post + language + voice + text fingerprint; screens are the editor's AtlasVoice → Audio tab, Audio library (All posts · Clean up · Settings) with a bulk queue, status-bar usage and the posts-list Audio column | Fixes duplicate paid generation, partial or overwritten MP3s, stuck "Generating…", stale audio and bulk/page differences. The engine has its own branch and the screens use it only through REST. Design: canvas TVKNutmwFhhTs4b9Xqt7JC, `docs/design/audio-jobs-prototype.html` |

@@ -255,7 +255,7 @@
 				h( Card, null, h( ItemGroup, { isSeparated: true }, PROVIDERS.map( ( [ id, n, d ] ) => h( Item, { key: id, onClick: () => setOpen( id ) }, h( HStack, { wrap: true },
 					h( VStack, { spacing: 0, style: { flex: 1, minWidth: 200 } }, h( 'b', { style: { fontWeight: 500 } }, n ), h( 'span', { className: 'atlasvoice-weak' }, d ) ),
 					h( HStack, { justify: 'flex-end', expanded: false }, providers[ id ] ? h( AV.Chip, { tone: 'ok', dot: true }, 'Connected' ) : h( AV.Chip, null, 'Not connected' ), h( I, { icon: 'chevron-right' } ) ) ) ) ) ) ) ),
-			providers.google && h( AV.Section, { title: 'Keep a copy in Google Cloud Storage', desc: 'Your site keeps working if a local file is lost.' },
+			providers.google && h( AV.Section, { help: 'voice:providers#gcs', title: 'Keep a copy in Google Cloud Storage', desc: 'Your site keeps working if a local file is lost.' },
 				h( Card, null, h( ItemGroup, { isSeparated: true },
 					h( AV.Toggle, { label: 'Copy audio to Cloud Storage', help: 'Turning this off copies your files back to your site first.', checked: g.gcs, onChange: ( v ) => setG( { ...g, gcs: v } ) } ),
 					g.gcs && h( Item, null, h( HStack, { alignment: 'bottom', wrap: true }, h( 'div', { style: { flex: 1, minWidth: 200 } }, h( TextControl, { ...N, label: 'Bucket name', help: 'Lowercase letters, numbers and dashes.', value: g.bucket, onChange: ( v ) => setG( { ...g, bucket: v.toLowerCase() } ) } ) ), h( Button, { variant: 'secondary', __next40pxDefaultSize: true, disabled: ! /^[a-z0-9-]{3,63}$/.test( g.bucket ), onClick: () => notify( 'This bucket already exists and belongs to you. It is ready.' ) }, 'Create bucket' ) ) ),
@@ -365,7 +365,7 @@
 				! free && h( AV.Section, { title: 'Pro player with progress bar', desc: 'The browser-voice player with a progress bar now has its own words.' }, h( Card, null, h( CardBody, null, h( 'div', { className: 'atlasvoice-grid is-2' }, h( TextControl, { ...N, label: 'Before playing', value: w.p2listen, onChange: ( v ) => setW( { ...w, p2listen: v } ) } ), h( TextControl, { ...N, label: 'While playing', value: w.p2pause, onChange: ( v ) => setW( { ...w, p2pause: v } ) } ) ) ) ) ) );
 		} else if ( tab === 'read' ) {
 			body = h( Fragment, null,
-				h( AV.Section, { title: 'Highlight while reading', desc: 'Highlight the text as it is read, so listeners can follow. Off by default.' },
+				h( AV.Section, { help: 'player:read', title: 'Highlight while reading', desc: 'Highlight the text as it is read, so listeners can follow. Off by default.' },
 					h( Card, null, h( ItemGroup, { isSeparated: true },
 						h( AV.Toggle, { label: 'Highlight while reading', checked: r.on, onChange: ( v ) => setR( { ...r, on: v } ) } ),
 						r.on && h( Item, null, h( AV.TG, { label: 'What to highlight', value: r.mode, onChange: ( v ) => setR( { ...r, mode: v } ), options: [ [ 's', 'Sentence' ], [ 'w', 'Word' ], [ 'ws', 'Both' ] ] } ), h( 'p', { className: 'atlasvoice-weak', style: { marginTop: 8 } }, 'Word by word needs the browser voice, Google Cloud or ElevenLabs. Other voices highlight sentences.' ) ),
@@ -464,7 +464,7 @@
 					h( ToggleControl, { ...NM, label: 'Show audio status in the posts list', checked: f.status_col, onChange: ( v ) => up( { status_col: v } ) } ) ) ) ) );
 		} else {
 			body = h( Fragment, null,
-				h( AV.Section, { title: 'Page areas', desc: 'Which part of the page is read aloud. Click a rule to change it.', end: ! free && h( Button, { variant: 'secondary', icon: h( I, { icon: 'plus' } ), onClick: () => setDrawer( { id: 'new', name: 'New rule', kind: 'Content type', sel: '' } ) }, 'Add a rule' ) },
+				h( AV.Section, { help: 'content:areas', title: 'Page areas', desc: 'Which part of the page is read aloud. Click a rule to change it.', end: ! free && h( Button, { variant: 'secondary', icon: h( I, { icon: 'plus' } ), onClick: () => setDrawer( { id: 'new', name: 'New rule', kind: 'Content type', sel: '' } ) }, 'Add a rule' ) },
 					h( Card, null, h( AV.Table, { head: [ 'Applies to', 'Reads', 'Status' ] }, rules.map( ( r ) => h( 'tr', { key: r.id, className: 'is-clickable', tabIndex: 0, onClick: () => setDrawer( r ), onKeyDown: ( e ) => e.key === 'Enter' && setDrawer( r ) },
 						h( 'td', null, h( 'span', { className: 'atlasvoice-cell-title' }, r.name ), h( 'span', { className: 'atlasvoice-cell-sub' }, r.kind ) ),
 						h( 'td', { className: 'atlasvoice-cell-main' }, r.sel ? h( 'span', { className: 'atlasvoice-mono' }, r.sel ) : h( 'span', { className: 'atlasvoice-weak' }, 'Uses the whole-site rule' ) ),
@@ -529,7 +529,7 @@
 		const up = ( p ) => setF( ( x ) => ( { ...x, ...p } ) );
 		const num = ( v ) => Math.max( 0, parseInt( String( v ).replace( /\D/g, '' ), 10 ) || 0 );
 		return h( Fragment, null, h( AV.Scroll, { width: 960 },
-			h( AV.Section, { title: 'When audio is made' }, h( AV.Tiles, { value: f.when, onChange: ( v ) => up( { when: v } ), options: [
+			h( AV.Section, { help: 'library:settings', title: 'When audio is made' }, h( AV.Tiles, { value: f.when, onChange: ( v ) => up( { when: v } ), options: [
 				{ id: 'play', title: 'On the first play', badge: h( AV.Chip, { tone: 'brand' }, 'Recommended' ), text: 'Nothing is spent until someone listens. The first listener hears part 1 within seconds.' },
 				{ id: 'publish', title: 'When a post is published', text: 'Made in the background after Publish or Update, so nobody waits. Costs more for posts nobody plays.' },
 				{ id: 'manual', title: 'Only when an editor clicks', text: 'Full control. Posts without audio offer the device voice to visitors.' } ] } ) ),

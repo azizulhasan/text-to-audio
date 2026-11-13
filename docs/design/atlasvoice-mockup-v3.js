@@ -142,7 +142,7 @@
 			open && h( 'div', { className: 'atlasvoice-rail-backdrop', onClick: () => setOpen( false ) } ),
 			h( 'aside', { className: 'atlasvoice-rail' + ( open ? ' is-open' : '' ) },
 				h( 'div', { className: 'atlasvoice-rail-brand' },
-					h( 'span', { className: 'atlasvoice-logo', style: { background: AV.BRAND } }, h( 'svg', { width: 18, height: 18, viewBox: '0 0 24 24', fill: 'none', stroke: 'currentColor', strokeWidth: 2.2, strokeLinecap: 'round', 'aria-hidden': true }, h( 'path', { d: 'M4 10v4M8 6v12M12 3v18M16 7v10M20 10v4' } ) ) ),
+					h( 'span', { className: 'atlasvoice-logo', style: { background: AV.BRAND } }, h( 'svg', { width: 32, height: 32, viewBox: '0 0 256 256', fill: 'none', strokeLinecap: 'round', 'aria-hidden': true }, h( 'path', { d: 'M66 198 128 62l62 136', stroke: '#fff', strokeWidth: 24, strokeLinejoin: 'round' } ), h( 'path', { d: 'M110 150v14M128 138v38M146 150v14', stroke: '#ff7853', strokeWidth: 11 } ) ) ),
 					h( 'div', { className: 'atlasvoice-rail-label' }, h( 'b', null, 'AtlasVoice', ! free && h( Fragment, null, ' ', h( AV.Pro ) ) ), h( 'small', null, free ? 'Free 2.5.0' : '2.5.0 · Pro 3.6.0' ) ),
 					open && h( Button, { className: 'atlasvoice-rail-close', icon: h( I, { icon: 'close' } ), label: 'Close menu', onClick: () => setOpen( false ) } ) ),
 				h( 'nav', { className: 'atlasvoice-rail-nav', 'aria-label': 'AtlasVoice' },
@@ -153,7 +153,7 @@
 							h( 'span', { className: 'atlasvoice-rail-end atlasvoice-rail-label' }, o.count && h( AV.Count, { brand: o.tone !== 'err' }, o.count ), o.pro && free && h( AV.Pro ) ) ) ) ) ) ),
 				h( 'div', { className: 'atlasvoice-rail-foot atlasvoice-rail-label' },
 					free
-						? h( Fragment, null, h( 'span', { className: 'atlasvoice-weak' }, 'Free plan' ), h( Button, { variant: 'link', onClick: () => go( 'plans' ) }, 'Compare plans' ) )
+						? h( Fragment, null, h( Button, { variant: 'secondary', className: 'atlasvoice-rail-upgrade', onClick: () => { go( 'plans' ); setOpen( false ); } }, 'Upgrade to Pro' ), h( 'span', { className: 'atlasvoice-weak' }, 'You are on the Free plan' ) )
 						: h( Fragment, null, h( AV.Chip, { tone: ctx.lic === 'active' ? 'ok' : 'warn', dot: true }, ctx.lic === 'active' ? 'Licensed' : ctx.lic === 'expired' ? 'Expired' : 'Not activated' ), h( Button, { variant: 'link', onClick: () => go( 'licence' ) }, 'Licence' ) ) ) ) );
 	};
 
@@ -189,5 +189,60 @@
 					h( VStack, { spacing: 0, style: { flex: 1, minWidth: 220 } }, h( 'b', { style: { fontWeight: 500 } }, t ), h( 'span', { className: 'atlasvoice-weak' }, d ) ),
 					h( Button, { variant: 'secondary', size: 'compact', onClick: fn }, b ) ) ) ) ) ) ),
 			h( 'p', { className: 'atlasvoice-weak' }, 'Error for support: GET /wp-json/tta/v1/settings answered 403. ', h( Button, { variant: 'link', onClick: () => AV.ext( ctx.notify, 'the contact form on atlasaidev.com' ) }, 'Contact support' ) ) ) );
+	};
+	/* ---------------------------------------------- help on every screen (v3.1) */
+	/* The topic for a route: the exact tab or step first, then its screen. */
+	AV.helpFor = ( route ) => {
+		const list = ( window.AVM_HELP || { topics: [] } ).topics;
+		const r = String( route || '' );
+		return list.find( ( t ) => t.key === r ) || list.find( ( t ) => t.key === r.split( '#' )[ 0 ] ) || list.find( ( t ) => t.key.split( ':' )[ 0 ] === r.split( ':' )[ 0 ] && ! t.key.includes( '#' ) ) || list[ 0 ];
+	};
+	AV.routeNow = () => ( location.hash || '#/overview' ).replace( /^#\/?/, '' ).replace( '/', ':' ) || 'overview';
+	AV.HelpDrawer = function HelpDrawer( { route, onClose } ) {
+		const ctx = useApp();
+		const t = AV.helpFor( route );
+		const url = window.AVM_HELP.base + t.doc + '/';
+		return h( AV.Drawer, { title: t.t, kicker: 'How to', onClose, width: 420,
+			footer: h( Fragment, null,
+				h( Button, { variant: 'tertiary', onClick: () => { onClose(); ctx.go( 'help' ); } }, 'All guides' ),
+				h( Button, { variant: 'secondary', icon: h( I, { icon: 'external' } ), onClick: () => AV.ext( ctx.notify, 'the contact form on atlasaidev.com' ) }, 'Contact support' ) ) },
+			h( AV.DS, { title: 'Do it in ' + t.steps.length + ' steps' }, h( 'ol', { className: 'atlasvoice-help-steps' }, t.steps.map( ( s ) => h( 'li', { key: s }, s ) ) ) ),
+			h( AV.DS, { title: 'Need more?' },
+				h( 'div', { className: 'atlasvoice-help-links' },
+					h( 'button', { type: 'button', className: 'atlasvoice-help-link', onClick: () => AV.ext( ctx.notify, 'the guide ' + url ) },
+						h( I, { icon: 'page' } ), h( 'span', null, h( 'b', null, 'Read the guide' ), h( 'small', null, 'Every step with pictures. Opens atlasaidev.com in a new tab.' ) ), h( I, { icon: 'external', size: 16 } ) ),
+					h( 'button', { type: 'button', className: 'atlasvoice-help-link', onClick: () => AV.ext( ctx.notify, 'the video on YouTube' ) },
+						h( 'span', { className: 'atlasvoice-help-play', 'aria-hidden': true }, '▶' ), h( 'span', null, h( 'b', null, 'Watch the video · ' + t.vid ), h( 'small', null, 'The same steps on screen. Opens YouTube in a new tab.' ) ), h( I, { icon: 'external', size: 16 } ) ) ) ) );
+	};
+	/* In the header of every screen: opens the help for the screen, tab or setup step you are on. */
+	AV.HelpButton = function HelpButton() {
+		const [ route, setRoute ] = useState( null );
+		return h( Fragment, null,
+			h( Button, { variant: 'tertiary', className: 'atlasvoice-howto', onClick: () => setRoute( AV.routeNow() ), 'aria-haspopup': 'dialog' }, 'How to' ),
+			route && h( AV.HelpDrawer, { route, onClose: () => setRoute( null ) } ) );
+	};
+	/* Next to a section title, when the section is a task of its own. */
+	AV.HelpIcon = function HelpIcon( { topic } ) {
+		const [ open, setOpen ] = useState( false );
+		const t = AV.helpFor( topic );
+		return h( Fragment, null,
+			h( Button, { className: 'atlasvoice-help-icon', icon: h( I, { icon: 'help', size: 20 } ), label: 'How to: ' + t.t, showTooltip: true, onClick: () => setOpen( true ) } ),
+			open && h( AV.HelpDrawer, { route: topic, onClose: () => setOpen( false ) } ) );
+	};
+
+	/* ------------------------------------------- upgrade to Pro, free only (v3.1) */
+	/* Home, after setup is finished. One card, can be hidden for 30 days. Links only: no Pro form. */
+	AV.ProCard = function ProCard() {
+		const ctx = useApp();
+		const [ hidden, setHidden ] = useState( false );
+		if ( hidden ) return null;
+		return h( 'div', { className: 'atlasvoice-section' }, h( 'div', { className: 'atlasvoice-procard' },
+			h( 'div', { className: 'atlasvoice-procard-text' },
+				h( 'h2', null, h( AV.Pro ), ' Do more with Pro' ),
+				h( 'ul', null, h( 'li', null, '380 natural voices in 43 languages, with no monthly limit' ), h( 'li', null, 'Audio for all your posts at once, in every language' ), h( 'li', null, 'Full listening statistics and a weekly email report' ) ) ),
+			h( 'div', { className: 'atlasvoice-procard-end' },
+				h( Button, { variant: 'secondary', onClick: () => ctx.go( 'plans' ) }, 'See Pro plans' ),
+				h( Button, { variant: 'link', onClick: () => AV.ext( ctx.notify, 'the demo page with every Pro voice' ) }, 'Hear the Pro voices' ),
+				h( Button, { variant: 'tertiary', onClick: () => { setHidden( true ); ctx.notify( 'Hidden for 30 days. Plans stay under Account & plans.' ); } }, 'Not now' ) ) ) );
 	};
 }( window.AVM ) );

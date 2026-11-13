@@ -96,7 +96,7 @@ body { background: #f0f0f1; overflow: hidden; font-family: -apple-system, system
 .atlasvoice-rail-backdrop { position: fixed; inset: 0; background: rgba(0, 0, 0, .35); z-index: 40; }
 
 /* ---------- Header (editor-style) ---------- */
-.atlasvoice-header { grid-column: 2; display: grid; grid-template-columns: minmax(0, 1fr) minmax(280px, 480px) minmax(0, 1fr); align-items: center; gap: 16px; padding: 0 16px; border-bottom: 1px solid var(--atlasvoice-line); background: var(--atlasvoice-surface); position: relative; z-index: 20; }
+.atlasvoice-header { grid-column: 2; display: grid; grid-template-columns: minmax(0, 1fr) minmax(220px, 420px) auto; align-items: center; gap: 16px; padding: 0 16px; border-bottom: 1px solid var(--atlasvoice-line); background: var(--atlasvoice-surface); position: relative; z-index: 20; }
 .atlasvoice-header-title { display: flex; align-items: center; gap: 8px; min-width: 0; }
 .atlasvoice-header-title h1 { font-size: 15px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .atlasvoice-menu-btn { display: none !important; }
@@ -208,6 +208,22 @@ body { background: #f0f0f1; overflow: hidden; font-family: -apple-system, system
 .atlasvoice-dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; background: currentColor; flex: none; }
 .atlasvoice-pro { display: inline-flex; align-items: center; height: 18px; padding: 0 6px; border-radius: 2px; background: var(--atlasvoice-pro); color: var(--atlasvoice-on-pro); font-size: 10px; font-weight: 600; letter-spacing: .04em; flex: none; }
 .atlasvoice-count { display: inline-flex; align-items: center; justify-content: center; min-width: 18px; height: 18px; padding: 0 5px; border-radius: 9px; background: #e0e0e0; font-size: 11px; font-weight: 600; color: #1e1e1e; }
+.atlasvoice-howto.components-button { height: 32px; padding: 0 10px; white-space: nowrap; }
+.atlasvoice-help-icon.components-button { min-width: 24px; width: 24px; height: 24px; padding: 0; margin-left: 4px; vertical-align: middle; color: var(--atlasvoice-text-weak); }
+.atlasvoice-help-steps { margin: 0; padding-left: 20px; display: flex; flex-direction: column; gap: 8px; font-size: 13px; line-height: 1.5; }
+.atlasvoice-help-links { display: flex; flex-direction: column; gap: 8px; }
+.atlasvoice-help-link { display: flex; align-items: center; gap: 12px; width: 100%; padding: 12px; text-align: left; background: #fff; border: 1px solid var(--atlasvoice-line); border-radius: var(--atlasvoice-radius-lg); cursor: pointer; font: inherit; color: var(--atlasvoice-text); }
+.atlasvoice-help-link:hover { border-color: var(--atlasvoice-accent); background: var(--atlasvoice-brand-weak); }
+.atlasvoice-help-link:focus-visible { outline: 2px solid var(--atlasvoice-accent); outline-offset: 2px; }
+.atlasvoice-help-link > span:nth-child(2) { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+.atlasvoice-help-link small { color: var(--atlasvoice-text-weak); font-size: 12px; }
+.atlasvoice-help-play { width: 24px; height: 24px; border-radius: 50%; background: var(--atlasvoice-accent); color: #fff; display: grid; place-items: center; font-size: 10px; flex: none; }
+.atlasvoice-rail-foot .atlasvoice-rail-upgrade.components-button { width: 100%; justify-content: center; }
+.atlasvoice-procard { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; padding: 16px; border: 1px solid var(--atlasvoice-brand-line); background: var(--atlasvoice-brand-weak); border-radius: var(--atlasvoice-radius-lg); }
+.atlasvoice-procard-text { flex: 1 1 320px; min-width: 0; }
+.atlasvoice-procard h2 { font-size: 15px; font-weight: 600; margin: 0 0 6px; display: flex; align-items: center; gap: 8px; }
+.atlasvoice-procard ul { margin: 0; padding-left: 18px; font-size: 13px; line-height: 1.6; }
+.atlasvoice-procard-end { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
 .atlasvoice-chip.is-new { background: var(--atlasvoice-signal); color: var(--atlasvoice-on-signal); }
 .atlasvoice-count.is-brand { background: var(--atlasvoice-accent); color: #fff; }
 .atlasvoice-trp { display: inline-flex; gap: 4px; }

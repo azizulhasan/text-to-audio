@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" role="img" aria-label="AtlasVoice">
+	<title>AtlasVoice icon for dark surfaces</title>
+	<rect width="256" height="256" rx="56" fill="#8481f8"/>
+	<path d="M66 198 128 62l62 136" fill="none" stroke="#0b0d1c" stroke-width="24" stroke-linecap="round" stroke-linejoin="round"/>
+	<path d="M110 150v14M128 138v38M146 150v14" fill="none" stroke="#0b0d1c" stroke-width="11" stroke-linecap="round"/>
+</svg>

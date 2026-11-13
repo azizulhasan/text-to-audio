@@ -53,8 +53,8 @@
 	AV.Count = ( { brand, children } ) => h( 'span', { className: 'atlasvoice-count' + ( brand ? ' is-brand' : '' ) }, children );
 	AV.KV = ( { rows } ) => h( 'dl', { className: 'atlasvoice-kv' }, rows.map( ( [ k, v ], i ) => h( Fragment, { key: i }, h( 'dt', null, k ), h( 'dd', null, v ) ) ) );
 	AV.H2 = ( { children } ) => h( 'h2', { className: 'atlasvoice-card-title' }, children );
-	AV.Section = ( { title, desc, end, children } ) => h( 'section', { className: 'atlasvoice-section' },
-		h( 'div', { className: 'atlasvoice-section-head' }, h( 'div', null, h( 'h2', null, title ), desc && h( 'p', null, desc ) ), end && h( 'div', { className: 'atlasvoice-section-end' }, end ) ), children );
+	AV.Section = ( { title, desc, end, help, children } ) => h( 'section', { className: 'atlasvoice-section' },
+		h( 'div', { className: 'atlasvoice-section-head' }, h( 'div', null, h( 'h2', null, title, help && h( AV.HelpIcon, { topic: help } ) ), desc && h( 'p', null, desc ) ), end && h( 'div', { className: 'atlasvoice-section-end' }, end ) ), children );
 	AV.Stats = ( { items } ) => h( Card, { size: 'small' }, h( 'div', { className: 'atlasvoice-stats', style: { '--atlasvoice-cols': items.length } },
 		items.map( ( [ label, value, note, color ], i ) => h( 'div', { className: 'atlasvoice-stat', key: i }, h( 'span', null, label ), h( 'b', { style: color ? { color } : null }, value ), note && h( 'small', null, note ) ) ) ) );
 	AV.Bars = ( { values, from, to } ) => h( Fragment, null,
@@ -307,7 +307,7 @@
 			open && h( 'div', { className: 'atlasvoice-rail-backdrop', onClick: () => setOpen( false ) } ),
 			h( 'aside', { className: 'atlasvoice-rail' + ( open ? ' is-open' : '' ) },
 				h( 'div', { className: 'atlasvoice-rail-brand' },
-					h( 'span', { className: 'atlasvoice-logo', style: { background: AV.BRAND } }, h( 'svg', { width: 18, height: 18, viewBox: '0 0 24 24', fill: 'none', stroke: 'currentColor', strokeWidth: 2.2, strokeLinecap: 'round' }, h( 'path', { d: 'M4 10v4M8 6v12M12 3v18M16 7v10M20 10v4' } ) ) ),
+					h( 'span', { className: 'atlasvoice-logo', style: { background: AV.BRAND } }, h( 'svg', { width: 32, height: 32, viewBox: '0 0 256 256', fill: 'none', strokeLinecap: 'round' }, h( 'path', { d: 'M66 198 128 62l62 136', stroke: '#fff', strokeWidth: 24, strokeLinejoin: 'round' } ), h( 'path', { d: 'M110 150v14M128 138v38M146 150v14', stroke: '#ff7853', strokeWidth: 11 } ) ) ),
 					h( 'div', { className: 'atlasvoice-rail-label' }, h( 'b', null, 'AtlasVoice', ! free && h( Fragment, null, ' ', h( AV.Pro ) ) ), h( 'small', null, free ? 'Free 2.5.0' : '2.5.0 · Pro 3.6.0' ) ),
 					open && h( Button, { className: 'atlasvoice-rail-close', icon: h( I, { icon: 'close' } ), label: 'Close menu', onClick: () => setOpen( false ) } ) ),
 				h( 'nav', { className: 'atlasvoice-rail-nav', 'aria-label': 'AtlasVoice' },
@@ -417,6 +417,7 @@
 			h( 'div', { className: 'atlasvoice-header-search' }, h( AV.Search, { compact: narrow } ) ),
 			h( 'div', { className: 'atlasvoice-header-end' },
 				h( 'span', { className: 'atlasvoice-header-actions' }, actions ),
+				h( AV.HelpButton ),
 				h( Dropdown, {
 					popoverProps: { placement: 'bottom-end' },
 					renderToggle: ( { isOpen, onToggle } ) => h( Button, { icon: h( I, { icon: 'bell' } ), label: 'Notices', onClick: onToggle, 'aria-expanded': isOpen, showTooltip: true }, notices.length > 0 && h( AV.Count, { brand: true }, notices.length ) ),
@@ -466,6 +467,7 @@
 			h( 'div', { className: 'atlasvoice-section' }, h( Notice, { status: live ? 'success' : 'warning', isDismissible: false, actions: live ? [ { label: 'View as a visitor', onClick: () => ctx.setView( 'front' ) }, { label: 'Change who sees it', onClick: () => go( 'player:place' ) } ] : [ { label: 'Go live…', variant: 'primary', onClick: () => ctx.askMode( 'live' ) }, { label: 'View as a visitor', onClick: () => ctx.setView( 'front' ) }, { label: 'Test on your phone', onClick: ctx.phone } ] },
 				h( 'b', null, live ? 'Right now, everyone can hear it. ' : 'Right now, only you can hear it. ' ), live ? 'On Posts' + ( free ? '' : ', Pages and Products' ) + ' · shown to everyone · except posts in Podcasts · download allowed for everyone.' : 'You are in staging, so only logged-in admins see the player.' ) ),
 			setup.finished && h( 'div', { className: 'atlasvoice-section' }, h( AV.Journey ) ),
+			free && setup.finished && h( AV.ProCard ),
 			! fresh && h( 'div', { className: 'atlasvoice-section' }, h( AV.Stats, { items: [ [ 'Plays, last 7 days', '1,284', '+18% on the week before', '#007f30' ], [ 'Listening time', '41 h', '+9%' ], [ 'Finished listening', '38%', '−2%' ], [ 'Posts with audio', '182 of 214', '32 still need audio' ] ] } ) ),
 			h( 'div', { className: 'atlasvoice-grid is-2 atlasvoice-section' },
 				! setup.finished ? h( Card, null,
