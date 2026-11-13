@@ -29,3 +29,6 @@ tests_add_filter(
 );
 
 require $atlasvoice_tests_dir . '/includes/bootstrap.php';
+
+// The CLI commands are tested against a stand-in for the WP-CLI runtime.
+require_once __DIR__ . '/includes/wp-cli-stub.php';

@@ -366,6 +366,11 @@ add_action('wp_initialize_site', function ($new_site) {
  */
 add_action('plugins_loaded', ['TTA\\TTA_Activator', 'maybe_set_default_mode'], 1);
 
+// TTS-376: everything an admin can do on a screen is also a WP-CLI command.
+if ( defined( 'WP_CLI' ) && WP_CLI ) {
+    add_action( 'plugins_loaded', array( '\TTA\CLI\Commands', 'register' ) );
+}
+
 /**
  * Redirect to settings page on first activation.
  * Uses a transient set in TTA_Activator::activate() to detect first-time activation.
