@@ -14,6 +14,8 @@
 	<file>./api/Admin_Ui_Controller.php</file>
 	<file>./api/Route_Access.php</file>
 	<file>./api/Pronunciation_Controller.php</file>
+	<file>./api/Read_Along_Controller.php</file>
+	<file>./includes/Player</file>
 	<file>./admin/Admin_App.php</file>
 	<file>./tests/phpunit</file>
 

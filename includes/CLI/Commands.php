@@ -28,6 +28,7 @@ class Commands {
 			'atlasvoice ui'            => Ui_Command::class,
 			'atlasvoice mode'          => Mode_Command::class,
 			'atlasvoice pronunciation' => Pronunciation_Command::class,
+			'atlasvoice read-along'    => Read_Along_Command::class,
 		);
 
 		/**
