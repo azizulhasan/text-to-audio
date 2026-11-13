@@ -13,6 +13,9 @@ import { lazy } from '@wordpress/element';
 import { applyFilters } from '@wordpress/hooks';
 
 const BUILT_IN = {
+	overview: lazy( () =>
+		import( /* webpackChunkName: "screen-home" */ './Home' )
+	),
 	'account:plans': lazy( () =>
 		import(
 			/* webpackChunkName: "screen-account-plans" */ './AccountPlans'

@@ -391,5 +391,5 @@ describe( 'Account & plans › Plans', () => {
 			name: /See all plans and add sites/,
 		} );
 		expect( await axe( pro.container ) ).toHaveNoViolations();
-	} );
+	}, 20000 ); // Three accessibility scans in one test: slow on a busy machine.
 } );

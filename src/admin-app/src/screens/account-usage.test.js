@@ -537,5 +537,5 @@ describe( 'Account & plans › Usage', () => {
 		const empty = renderWithApp( <AccountUsage /> );
 		await screen.findByText( 'No AtlasVoice account connected yet' );
 		expect( await axe( empty.container ) ).toHaveNoViolations();
-	} );
+	}, 20000 ); // Three accessibility scans in one test: slow on a busy machine.
 } );

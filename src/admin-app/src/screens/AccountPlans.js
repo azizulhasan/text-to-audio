@@ -227,7 +227,7 @@ export default function AccountPlans() {
 				>
 					<ul className="atlasvoice-grid is-2 atlasvoice-features">
 						{ getProFeatures().map( ( [ title, text ] ) => (
-							<li key={ title }>
+							<li key={ title } className="atlasvoice-feature">
 								<Card size="small">
 									<CardBody>
 										<b>{ title }</b>
