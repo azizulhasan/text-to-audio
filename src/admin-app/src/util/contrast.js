@@ -69,3 +69,23 @@ export function contrastRatio( first, second ) {
 
 	return ( light + 0.05 ) / ( dark + 0.05 );
 }
+
+/**
+ * The colour a see-through colour becomes on a white page, as a hex value.
+ *
+ * @param {number[]} rgb   [ r, g, b ] from 0 to 255.
+ * @param {number}   alpha Opacity from 0 to 1.
+ * @return {string} A hex colour.
+ */
+export function onWhite( rgb, alpha ) {
+	return (
+		'#' +
+		rgb
+			.map( ( channel ) =>
+				Math.round( channel * alpha + 255 * ( 1 - alpha ) )
+					.toString( 16 )
+					.padStart( 2, '0' )
+			)
+			.join( '' )
+	);
+}

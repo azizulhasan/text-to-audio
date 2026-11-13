@@ -14,7 +14,10 @@ import useSettingsForm from '../hooks/use-settings-form';
 import ColorRow from '../shell/ColorRow';
 import { Chip, Pane, Section } from '../shell/parts';
 import SaveBar from '../shell/SaveBar';
-import { MIN_TEXT_CONTRAST, contrastRatio } from '../util/contrast';
+import { MIN_TEXT_CONTRAST, contrastRatio, onWhite } from '../util/contrast';
+
+// The colour the player fades text to (admin/js/tts/highlighter.js).
+const FADED_TEXT_RGB = [ 60, 64, 67 ];
 
 const SENTENCE_COLORS = [
 	{ name: __( 'Lavender', 'text-to-audio' ), color: '#e8e7fe' },
@@ -44,7 +47,9 @@ function ContrastLine( { text, background } ) {
 		return null;
 	}
 
-	const passes = ratio >= MIN_TEXT_CONTRAST;
+	// Judged on the number that is shown, so the word and the number never disagree.
+	const shown = Math.round( ratio * 10 ) / 10;
+	const passes = shown >= MIN_TEXT_CONTRAST;
 
 	return (
 		<span role="status">
@@ -59,7 +64,7 @@ function ContrastLine( { text, background } ) {
 					'Contrast %1$s to 1. Text needs at least %2$s to 1.',
 					'text-to-audio'
 				),
-				ratio.toFixed( 1 ),
+				shown.toFixed( 1 ),
 				MIN_TEXT_CONTRAST
 			) }
 		</span>
@@ -387,28 +392,45 @@ export default function PlayerReadAlong() {
 													}
 												/>
 												{ values.tta__highlight_dim_enabled && (
-													<RangeControl
-														__nextHasNoMarginBottom
-														__next40pxDefaultSize
-														label={ __(
-															'How visible the faded text stays (%)',
-															'text-to-audio'
-														) }
-														help={ __(
-															'Lower is more faded. 70 keeps the text readable.',
-															'text-to-audio'
-														) }
-														value={ visibility }
-														min={ 10 }
-														max={ 85 }
-														step={ 5 }
-														onChange={ ( value ) =>
-															set(
-																'tta__highlight_dim_opacity',
-																value / 100
-															)
-														}
-													/>
+													<div className="atlasvoice-form">
+														<RangeControl
+															__nextHasNoMarginBottom
+															__next40pxDefaultSize
+															label={ __(
+																'How visible the faded text stays (%)',
+																'text-to-audio'
+															) }
+															help={ __(
+																'Lower is more faded. 70 keeps the text readable.',
+																'text-to-audio'
+															) }
+															value={ visibility }
+															min={ 10 }
+															max={ 85 }
+															step={ 5 }
+															onChange={ (
+																value
+															) =>
+																set(
+																	'tta__highlight_dim_opacity',
+																	value / 100
+																)
+															}
+														/>
+														<div className="atlasvoice-color-row-note">
+															<ContrastLine
+																text={ onWhite(
+																	FADED_TEXT_RGB,
+																	values.tta__highlight_dim_opacity
+																) }
+																background="#ffffff"
+															/>{ ' ' }
+															{ __(
+																'Measured on a white page.',
+																'text-to-audio'
+															) }
+														</div>
+													</div>
 												) }
 												<ToggleControl
 													__nextHasNoMarginBottom

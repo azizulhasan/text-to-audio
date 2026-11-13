@@ -3,7 +3,12 @@ import { act, fireEvent, screen, within } from '@testing-library/react';
 import { axe, toHaveNoViolations } from 'jest-axe';
 
 import { renderWithApp } from '../test-utils';
-import { MIN_TEXT_CONTRAST, contrastRatio, parseHex } from '../util/contrast';
+import {
+	MIN_TEXT_CONTRAST,
+	contrastRatio,
+	onWhite,
+	parseHex,
+} from '../util/contrast';
 import PlayerReadAlong from './PlayerReadAlong';
 import { getScreenComponent } from './registry';
 
@@ -98,6 +103,14 @@ describe( 'contrast', () => {
 		expect( contrastRatio( '#202124', '#a5abf0' ) ).toBeGreaterThanOrEqual(
 			MIN_TEXT_CONTRAST
 		);
+	} );
+} );
+
+describe( 'onWhite', () => {
+	it( 'gives the colour a see-through colour has on a white page', () => {
+		expect( onWhite( [ 0, 0, 0 ], 1 ) ).toBe( '#000000' );
+		expect( onWhite( [ 0, 0, 0 ], 0 ) ).toBe( '#ffffff' );
+		expect( onWhite( [ 60, 64, 67 ], 0.7 ) ).toBe( '#77797b' );
 	} );
 } );
 
@@ -360,7 +373,11 @@ describe( 'Player › Read-along', () => {
 			} );
 			renderWithApp( <PlayerReadAlong /> );
 
-			expect( await screen.findByText( 'Easy to read' ) ).toBeVisible();
+			// Both the word and the default fade (70%) are readable.
+			expect( await screen.findAllByText( 'Easy to read' ) ).toHaveLength(
+				2
+			);
+			expect( screen.queryByText( 'Hard to read' ) ).toBeNull();
 		} );
 
 		it( 'warns, in words and with the ratio, when the word cannot be read', async () => {
@@ -373,10 +390,26 @@ describe( 'Player › Read-along', () => {
 			renderWithApp( <PlayerReadAlong /> );
 
 			expect( await screen.findByText( 'Hard to read' ) ).toBeVisible();
+			// One line for the word, one for the faded text.
 			expect(
-				screen.getByText( /Text needs at least 4\.5 to 1\./ )
-			).toBeVisible();
+				screen.getAllByText( /Text needs at least 4\.5 to 1\./ )
+			).toHaveLength( 2 );
 		} );
+	} );
+
+	it( 'warns when the faded text becomes hard to read, and not when it is readable', async () => {
+		fakeSite( { tta__highlight_enabled: true } );
+		renderWithApp( <PlayerReadAlong /> );
+		const slider = await screen.findByRole( 'slider' );
+
+		fireEvent.change( slider, { target: { value: '40' } } );
+		expect( screen.getByText( 'Hard to read' ) ).toBeVisible();
+
+		fireEvent.change( slider, { target: { value: '85' } } );
+		expect( screen.queryByText( 'Hard to read' ) ).toBeNull();
+		expect( screen.getAllByText( 'Easy to read' ).length ).toBeGreaterThan(
+			0
+		);
 	} );
 
 	it( 'names each colour button with what it is for and its value', async () => {
