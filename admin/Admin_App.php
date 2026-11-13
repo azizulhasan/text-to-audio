@@ -69,6 +69,26 @@ class Admin_App {
 	}
 
 	/**
+	 * The admin menu icon: the small one-colour "Voice A".
+	 *
+	 * WordPress recolours a menu icon by rewriting the `fill` of a base64 SVG,
+	 * so the three strokes of the logo are drawn here as filled rounded bars
+	 * in the same places (v3/logo/atlasvoice-mark-mono-small.svg).
+	 *
+	 * @return string A data URI for add_menu_page().
+	 */
+	public static function menu_icon() {
+		$svg = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256">'
+			. '<rect fill="black" x="-17" y="-17" width="192.4" height="34" rx="17" transform="translate(62 202) rotate(-65.38)"/>'
+			. '<rect fill="black" x="-17" y="-17" width="192.4" height="34" rx="17" transform="translate(128 58) rotate(65.38)"/>'
+			. '<rect fill="black" x="115" y="119" width="26" height="74" rx="13"/>'
+			. '</svg>';
+
+		// phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.obfuscation_base64_encode -- the format add_menu_page() documents for SVG icons.
+		return 'data:image/svg+xml;base64,' . base64_encode( $svg );
+	}
+
+	/**
 	 * Marks our screen on <body>, so the few rules the frame needs outside its
 	 * own root (wp-admin's padding and footer) can never reach another screen.
 	 *

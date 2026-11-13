@@ -155,6 +155,23 @@ class AdminAppTest extends WP_UnitTestCase {
 		);
 	}
 
+	public function test_menu_icon_is_a_local_svg_wordpress_can_recolour() {
+		$icon = Admin_App::menu_icon();
+
+		$this->assertStringStartsWith( 'data:image/svg+xml;base64,', $icon );
+
+		// phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.obfuscation_base64_decode
+		$svg = base64_decode( substr( $icon, strlen( 'data:image/svg+xml;base64,' ) ) );
+
+		$this->assertNotFalse( simplexml_load_string( $svg ), 'The icon is not valid XML.' );
+		// WordPress repaints "fill"; a stroke or currentColor would stay one colour.
+		$this->assertSame( 3, substr_count( $svg, 'fill="black"' ) );
+		$this->assertStringNotContainsString( 'stroke', $svg );
+		$this->assertStringNotContainsString( 'currentColor', $svg );
+		$this->assertStringNotContainsString( 'http://', str_replace( 'http://www.w3.org/2000/svg', '', $svg ) );
+		$this->assertStringNotContainsString( '<script', $svg );
+	}
+
 	public function return_new() {
 		return 'new';
 	}

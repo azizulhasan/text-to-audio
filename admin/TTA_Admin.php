@@ -912,7 +912,8 @@ class TTA_Admin
             'manage_options',
             TEXT_TO_AUDIO_TEXT_DOMAIN,
             array($this, "TTA_settings"),
-            'dashicons-controls-volumeon',
+            // TTS-373: the Voice A logo, in the menu's own colours.
+            Admin_App::menu_icon(),
             // TTS-247: moved off slot 20 (core Pages) to 80 — sits between
             // Tools and Settings, still top-level and discoverable, no
             // conflict with WP's core admin hierarchy.
@@ -1488,7 +1489,8 @@ class TTA_Admin
             'manage_network_options',
             TEXT_TO_AUDIO_TEXT_DOMAIN,
             array($this, 'TTA_network_page'),
-            'dashicons-controls-volumeon',
+            // TTS-373: the Voice A logo, in the menu's own colours.
+            Admin_App::menu_icon(),
             // Same slot as the per-site menu: between Tools and Settings.
             80
         );
