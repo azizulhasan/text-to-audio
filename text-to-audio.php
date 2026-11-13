@@ -373,6 +373,9 @@ add_action( 'admin_notices', array( '\TTA_Admin\Admin_App', 'classic_screen_noti
 // TTS-378: a new key, plan or licence makes the kept Cloud account answer out of date.
 add_action( 'update_option_tta_atlasvoice_service', array( '\TTA\Cloud\Account', 'forget_on_change' ), 10, 2 );
 
+// TTS-378: WP-Cron asks AtlasVoice Cloud how an audio job is going; never a page request.
+add_action( 'atlasvoice_cloud_job_poll', array( '\TTA\Cloud\Jobs', 'poll' ), 10, 2 );
+
 // TTS-376: everything an admin can do on a screen is also a WP-CLI command.
 if ( defined( 'WP_CLI' ) && WP_CLI ) {
     add_action( 'plugins_loaded', array( '\TTA\CLI\Commands', 'register' ) );

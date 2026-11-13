@@ -103,6 +103,8 @@ class TTA_Reset {
             // per-post UI). Shared between Free and Pro — Pro's uninstall.php
             // also clears it, but a Free "reset all data" should too.
             'tts_pro_custom_css_selectors',
+            // TTS-378: the audio jobs a post has on AtlasVoice Cloud.
+            '_atlasvoice_cloud_jobs',
         );
         foreach ( $meta_keys as $meta_key ) {
             // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
