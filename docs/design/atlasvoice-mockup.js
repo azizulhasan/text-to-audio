@@ -11,11 +11,14 @@
 	const { VStack } = AV;
 
 	const OLD = { '': 'overview', customize: 'player', listening: 'voice', integrations: 'providers', highlight: 'player:read', analytics: 'insights', seo: 'seo', compatibility: 'health', aliases: 'pronunciation', maintenance: 'library:clean', versions: 'versions', faq: 'docs', plugins: 'more' };
+	/* v3: ten destinations. Every v2 and classic address still lands on its new home. */
+	const ALIAS = { pronunciation: 'voice:pronunciation', languages: 'voice:languages', providers: 'voice:providers', account: 'account:usage', licence: 'account:licence', plans: 'account:plans', health: 'site:health', 'health:cors': 'site:cors', versions: 'site:versions', advanced: 'site:advanced', privacy: 'site:privacy', docs: 'help:docs', more: 'help:more' };
+	const norm = ( r ) => ALIAS[ r ] || ( r.indexOf( 'providers:' ) === 0 ? 'voice:providers' : r );
 	const parse = () => {
 		const raw = location.hash.replace( /^#\/?/, '' ).split( '?' )[ 0 ];
-		if ( OLD[ raw ] !== undefined && ! AV.TITLES[ raw ] ) return OLD[ raw ];
+		if ( OLD[ raw ] !== undefined && ! AV.TITLES[ raw ] && ! ALIAS[ raw ] ) return norm( OLD[ raw ] );
 		const [ s, sub ] = raw.split( '/' );
-		return AV.TITLES[ s ] ? s + ( sub ? ':' + sub : '' ) : 'overview';
+		return AV.TITLES[ s ] || ALIAS[ s ] ? norm( s + ( sub ? ':' + sub : '' ) ) : 'overview';
 	};
 
 	function GlobalModal( { m, onClose } ) {
@@ -24,7 +27,7 @@
 		return h( Modal, { title: m.title, onRequestClose: onClose, size: 'medium' }, h( VStack, { spacing: 4 },
 			m.body,
 			m.typed && h( TextControl, { ...AV.N, label: 'Type ' + m.typed + ' to confirm', value: typed, onChange: setTyped, autoComplete: 'off' } ),
-			h( 'div', { className: 'atlasvoice-modal-foot' }, m.onOk && h( Button, { variant: 'tertiary', onClick: onClose }, 'Cancel' ), h( Button, { variant: m.destructive ? 'primary' : 'primary', isDestructive: m.destructive, disabled: blocked, onClick: () => { onClose(); m.onOk && m.onOk(); } }, m.ok || 'OK' ) ) ) );
+			h( 'div', { className: 'atlasvoice-modal-foot' }, m.onOk && h( Button, { variant: 'tertiary', onClick: onClose }, m.cancel || 'Cancel' ), h( Button, { variant: m.destructive ? 'primary' : 'primary', isDestructive: m.destructive, disabled: blocked, onClick: () => { onClose(); m.onOk && m.onOk(); } }, m.ok || 'OK' ) ) ) );
 	}
 	function useWidth() {
 		const [ w, setW ] = useState( window.innerWidth );
@@ -40,12 +43,13 @@
 		const [ view, setViewState ] = useState( params.get( 'view' ) || 'app' );
 		const [ route, setRoute ] = useState( parse );
 		/* Pro-only places do not exist in free: their links land on the free home. */
-		const freeRoute = { licence: 'plans', 'library:clean': 'library' };
+		const freeRoute = { 'account:licence': 'account:plans', 'library:clean': 'library' };
 		const [ screen, sub ] = ( free && freeRoute[ route ] || route ).split( ':' );
 		const [ snacks, setSnacks ] = useState( [] );
 		const [ dialog, setDialog ] = useState( null );
 		const [ railOpen, setRailOpen ] = useState( false );
 		const [ picker, setPicker ] = useState( false );
+		const [ welcome, setWelcome ] = useState( scn0 === 'updated' );
 		const [ mode, setMode ] = useState( fresh ? 'staging' : 'live' );
 		const [ engine, setEngine ] = useState( fresh ? 'browser' : free ? 'atlas' : 'cloud' );
 		const [ voice, setVoice ] = useState( fresh ? 'gb' : free ? 'bf_emma' : 'sarah' );
@@ -61,7 +65,7 @@
 		const [ content, setContent ] = useState( { auto: true, types: free ? [ 'Posts' ] : [ 'Posts', 'Pages', 'Products' ], cats: [ 'Podcasts' ], tags: [], posts: [ 'Spring newsletter' ], status: 'publish', title: true, excerpt: false, intro: 'You are listening to The Reading Site.', outro: '', numbers: true, acf: [ 'Recipe intro' ], order: false, dom: false, wrap: true, status_col: true } );
 		const [ providers, setProviders ] = useState( { google: ! free, openai: false, eleven: ! free } );
 		const [ aliases, setAliases ] = useState( [ { id: 1, from: 'WP', to: 'WordPress', num: false } ].concat( free ? [] : [ { id: 2, from: 'AtlasVoice', to: 'Atlas Voice', num: false }, { id: 3, from: '2026', to: 'twenty twenty-six', num: true }, { id: 4, from: 'km', to: 'kilometres', num: false } ] ) );
-		const [ notices, setNotices ] = useState( [ fresh && { id: 'staging' }, scn === 'bad' && free && { id: 'usage' }, { id: 'update' }, { id: 'lang' }, ! fresh && { id: 'review' }, { id: 'other' } ].filter( Boolean ) );
+		const [ notices, setNotices ] = useState( [ scn === 'updated' && { id: 'classic' }, fresh && { id: 'staging' }, scn === 'bad' && free && { id: 'usage' }, { id: 'update' }, { id: 'lang' }, ! fresh && { id: 'review' }, { id: 'other' } ].filter( Boolean ) );
 		const setupSteps = [ [ 'hear', 'Hear it' ], [ 'where', 'Where' ], [ 'voice', 'Voice' ], [ 'look', 'Look' ], ! free && [ 'mp3', 'Audio files', true ], ! free && [ 'report', 'Reports', true ], [ 'live', 'Check and go live' ], [ 'done', 'Done' ] ].filter( Boolean ).map( ( [ id, label ] ) => ( { id, label } ) );
 		const [ setup, setSetup ] = useState( { current: 'hear', done: fresh ? [] : setupSteps.map( ( s ) => s.id ), finished: ! fresh, draft: { heard: false, types: [ 'Posts' ], engine: free ? 'atlas' : 'cloud', email: '', consent: false, provider: 'google', key: '', keyOk: false, preset: 'classic', shape: 'rounded', dl: 'all', from: '', to: '', report: true, freq: 'w', reportTo: 'rahima@example.com', checked: false, count: true, golive: 'live' } } );
 		/* Audio Jobs (TTS-354): shared by the Audio library, the editor panel, the
@@ -102,7 +106,15 @@
 
 		const notify = ( content2 ) => setSnacks( ( s ) => s.slice( -2 ).concat( { id: Date.now() + Math.random(), content: content2 } ) );
 		const writeUrl = ( r, v ) => { const u = new URL( location ); u.hash = '/' + r.replace( ':', '/' ); if ( v && v !== 'app' ) u.searchParams.set( 'view', v ); else u.searchParams.delete( 'view' ); try { history.replaceState( null, '', u ); } catch ( e ) {} };
-		const go = ( id ) => { setRoute( id ); setRailOpen( false ); writeUrl( id, 'app' ); setViewState( 'app' ); };
+		const go = ( id0, force ) => {
+			const id = norm( id0 );
+			if ( AV.dirty.current && ! force && view === 'app' && id.split( ':' )[ 0 ] !== screen ) {
+				setDialog( { title: 'Leave without saving?', body: h( 'p', null, 'You changed settings on this screen and have not saved them yet.' ), cancel: 'Keep editing', ok: 'Leave without saving', destructive: true, onOk: () => { AV.dirty.current = false; go( id, true ); } } );
+				return;
+			}
+			setRoute( id ); setRailOpen( false ); writeUrl( id, 'app' ); setViewState( 'app' );
+		};
+		const phone = () => setDialog( { title: 'Test on your phone', body: h( Fragment, null, h( AV.QR ), h( 'p', null, 'Scan this with your phone’s camera. It opens “How we restored the old mill” with the staging player, so you can hear it on a real phone before going live.' ), h( 'p', { className: 'atlasvoice-weak' }, 'The link works for 15 minutes and only shows the player; it does not log anyone in to WordPress.' ) ), ok: 'Done' } );
 		const setRouteSilently = ( id ) => writeUrl( id, view );
 		const setView = ( v ) => { setViewState( v ); if ( v !== 'front' ) setPicker( false ); writeUrl( route, v ); const s = document.getElementById( 'mock-view' ); if ( s ) s.value = v; };
 		const openPicker = () => { setPicker( true ); setView( 'front' ); setPicker( true ); };
@@ -119,7 +131,7 @@
 			return () => { window.removeEventListener( 'hashchange', f ); sel && sel.removeEventListener( 'change', onSel ); };
 		}, [ route ] );
 
-		const ctx = { screen, go, free, notify, modal: setDialog, scn, setScn, mode, setMode, askMode, engine, setEngine, voice, setVoice, browserStyle, setBrowserStyle, conn, setConn, usage, lic, setLic, analytics, setAnalytics, look, setLook, ai, setAi, place, setPlace, words, setWords, read, setRead, content, setContent, providers, setProviders, aliases, setAliases, notices, setNotices, setup, setSetup, setupSteps, setView, openPicker, picker, setPicker, setRouteSilently, posts, setPosts, makeAudio, today, audio, setAudio, queue, setQueue };
+		const ctx = { screen, go, free, notify, modal: setDialog, scn, setScn, mode, setMode, askMode, engine, setEngine, voice, setVoice, browserStyle, setBrowserStyle, conn, setConn, usage, lic, setLic, analytics, setAnalytics, look, setLook, ai, setAi, place, setPlace, words, setWords, read, setRead, content, setContent, providers, setProviders, aliases, setAliases, notices, setNotices, setup, setSetup, setupSteps, setView, openPicker, picker, setPicker, setRouteSilently, phone, posts, setPosts, makeAudio, today, audio, setAudio, queue, setQueue };
 		const issues = AV.issues( ctx );
 		const actions = {
 			overview: mode === 'staging' ? h( Button, { variant: 'primary', onClick: () => askMode( 'live' ) }, 'Go live…' ) : h( Button, { variant: 'secondary', icon: h( I, { icon: 'seen', size: 20 } ), onClick: () => setView( 'front' ) }, 'View as a visitor' ),
@@ -129,17 +141,18 @@
 		};
 		const chips = {
 			overview: h( AV.Chip, { tone: mode === 'live' ? 'ok' : 'warn', dot: true }, mode === 'live' ? 'Live' : 'Staging' ),
-			health: issues.length > 0 && h( AV.Chip, { tone: issues.some( ( x ) => x[ 0 ] === 'err' ) ? 'err' : 'warn' }, issues.length + ( issues.length === 1 ? ' thing needs you' : ' things need you' ) ),
+			site: issues.length > 0 && h( AV.Chip, { tone: issues.some( ( x ) => x[ 0 ] === 'err' ) ? 'err' : 'warn' }, issues.length + ( issues.length === 1 ? ' thing needs you' : ' things need you' ) ),
 			seo: free && h( AV.Pro ),
 		};
 		let inner;
 		if ( view === 'app' ) {
-			const Screen = AV.S[ screen ] || AV.S.overview;
+			const Screen = scn === 'api' ? AV.ApiError : AV.S[ screen ] || AV.S.overview;
 			inner = h( 'div', { className: 'atlasvoice-root' + ( width < 1280 && width >= 782 ? ' is-compact-rail' : '' ) },
 				h( AV.Rail, { open: railOpen, setOpen: setRailOpen } ),
 				h( AV.Header, { actions: actions[ screen ], chip: chips[ screen ], onMenu: () => setRailOpen( true ), narrow: width < 960 } ),
 				h( 'div', { className: 'atlasvoice-work' }, h( Screen, { key: route + free + scn, sub } ) ),
 				h( AV.StatusBar ),
+				welcome && h( AV.Welcome, { onClose: () => setWelcome( false ) } ),
 				dialog && h( GlobalModal, { m: dialog, onClose: () => setDialog( null ) } ),
 				h( 'div', { className: 'atlasvoice-snackbars' }, h( SnackbarList, { notices: snacks, onRemove: ( id ) => setSnacks( ( s ) => s.filter( ( x ) => x.id !== id ) ) } ) ) );
 		} else {

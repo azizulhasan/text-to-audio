@@ -43,7 +43,7 @@
 		wait: [ 'warning', 'One step left: approve this site from your email', 'We sent a link to rahima@example.com. Until you approve, posts use the browser voice.', [ 'Send the email again' ] ],
 		owned: [ 'warning', 'This site is connected to another AtlasVoice account', 'It belongs to ra••••@agency.com. If you own this site, move it to your email; we confirm it with a one-time check on your site.', [ 'Move this site to my email' ] ],
 		revoked: [ 'error', 'This site was disconnected', 'Its key was revoked from the AtlasVoice dashboard, so posts use the browser voice. Audio already made keeps playing.', [ 'Connect again' ] ],
-		seats: [ 'warning', 'Your Pro licence covers no more sites', 'So this site uses the free 100,000 characters a month. It becomes unlimited within an hour of freeing a site.', [ 'Manage your sites' ] ],
+		inactive: [ 'warning', 'Your AtlasVoice Pro licence isn’t activated on this site yet', 'Until it is, this site uses the Free allowance. Activate the licence here and the site becomes Premium right after. Local and common staging addresses don’t use up one of your sites.', [ 'Activate the licence on this site' ] ],
 	};
 	function ConnDrawer( { onClose } ) {
 		const ctx = useApp();
@@ -78,7 +78,7 @@
 		const engines = [
 			{ id: 'atlas', title: 'Natural voice', badge: free && h( AV.Chip, { tone: 'info' }, 'Recommended' ), text: 'AtlasVoice TTS, saved as MP3. ' + ( free ? '100,000 characters a month free.' : 'Unlimited with Pro.' ), icon: 'audio' },
 			{ id: 'browser', title: 'Browser voice', text: 'Free, no account. The voice changes from device to device.', icon: 'desktop' },
-			! free && { id: 'cloud', title: 'AtlasVoice Cloud', badge: h( AV.Chip, { tone: 'ok' }, 'In your licence' ), text: '374 studio voices in 43 languages.', icon: 'cloud' },
+			! free && { id: 'cloud', title: 'AtlasVoice Cloud', badge: h( AV.Chip, { tone: 'ok' }, 'In your licence' ), text: '380 studio voices in 43 languages.', icon: 'cloud' },
 			{ id: 'own', title: 'Your own provider', text: 'Google Cloud, OpenAI or ElevenLabs, billed by them.', icon: 'key' },
 		].filter( Boolean );
 		const groups = AV.VOICES[ d.engine ] || [];
@@ -90,10 +90,11 @@
 				h( AV.Scroll, { width: 860 },
 					h( AV.Section, { title: 'What makes the sound', desc: 'You can switch at any time. Audio already made keeps playing.' }, h( AV.Tiles, { value: d.engine, onChange: ( v ) => up( { engine: v, voice: AV.VOICES[ v ][ 0 ][ 2 ][ 0 ][ 0 ] } ), options: engines } ) ),
 					d.engine === 'atlas' && conn !== 'none' && h( 'div', { className: 'atlasvoice-section' },
-						h( AV.MockBar, { label: 'connection state', value: ctx.conn, onChange: ctx.setConn, options: [ [ 'ok', 'Connected' ], [ 'wait', 'Waiting for email' ], [ 'owned', 'Another account' ], [ 'revoked', 'Key revoked' ] ].concat( free ? [] : [ [ 'seats', 'Licence full' ] ] ) } ),
-						h( Notice, { status: CONN[ conn ][ 0 ], isDismissible: false, actions: [ { label: CONN[ conn ][ 3 ][ 0 ], onClick: () => conn === 'ok' ? setDrawer( 'conn' ) : conn === 'wait' ? notify( 'Sent again to rahima@example.com.' ) : conn === 'owned' ? ctx.modal( { title: 'Move this site to your email?', body: h( 'p', null, 'We place a one-time file on your site to confirm you own it, then move the site to rahima@example.com. Audio and settings are kept.' ), ok: 'Move it', onOk: () => { ctx.setConn( 'ok' ); notify( 'This site now belongs to rahima@example.com.' ); } } ) : conn === 'revoked' ? ( ctx.setConn( 'ok' ), notify( 'Connected again.' ) ) : AV.ext( notify, 'your sites on app.atlasvoice.cloud' ) } ] }, h( 'b', null, CONN[ conn ][ 1 ] + '. ' ), CONN[ conn ][ 2 ] ) ),
+						h( AV.MockBar, { label: 'connection state', value: ctx.conn, onChange: ctx.setConn, options: [ [ 'ok', 'Connected' ], [ 'wait', 'Waiting for email' ], [ 'owned', 'Another account' ], [ 'revoked', 'Key revoked' ] ].concat( free ? [] : [ [ 'inactive', 'Licence not activated here' ] ] ) } ),
+						h( Notice, { status: CONN[ conn ][ 0 ], isDismissible: false, actions: [ { label: CONN[ conn ][ 3 ][ 0 ], onClick: () => conn === 'ok' ? setDrawer( 'conn' ) : conn === 'wait' ? notify( 'Sent again to rahima@example.com.' ) : conn === 'owned' ? ctx.modal( { title: 'Move this site to your email?', body: h( 'p', null, 'We place a one-time file on your site to confirm you own it, then move the site to rahima@example.com. Audio and settings are kept.' ), ok: 'Move it', onOk: () => { ctx.setConn( 'ok' ); notify( 'This site now belongs to rahima@example.com.' ); } } ) : conn === 'revoked' ? ( ctx.setConn( 'ok' ), notify( 'Connected again.' ) ) : ctx.go( 'licence' ) } ] }, h( 'b', null, CONN[ conn ][ 1 ] + '. ' ), CONN[ conn ][ 2 ] ) ),
 					d.engine === 'atlas' && conn === 'none' && h( 'div', { className: 'atlasvoice-section' }, h( ConnectCard ) ),
 					d.engine === 'cloud' && h( 'div', { className: 'atlasvoice-section' }, h( Notice, { status: 'success', isDismissible: false, actions: [ { label: 'Connection details', onClick: () => setDrawer( 'conn' ) } ] }, h( 'b', null, 'Connected automatically with your Pro licence. ' ), 'Pro connected this site as admin@thereadingsite.com when the first audio was made; your licence lifts the monthly limit.' ) ),
+					d.engine === 'own' && ctx.providers.google && h( 'p', { className: 'atlasvoice-weak', style: { marginBottom: 12 } }, 'Google Cloud voices are matched to the language you choose, so a voice can never read the wrong language. Gemini voices are hidden because Google’s speech service does not offer them here.' ),
 					d.engine === 'own' && h( 'div', { className: 'atlasvoice-section' }, h( Notice, { status: ctx.providers.google ? 'success' : 'warning', isDismissible: false, actions: [ { label: 'Open Your own provider', onClick: () => ctx.go( 'providers' ) } ] }, ctx.providers.google ? 'Google Cloud is connected. Voices below come from your providers; they bill you directly.' : 'Connect a provider first. Until then, posts use the browser voice.' ) ),
 					d.engine === 'browser' && ! free && h( 'div', { className: 'atlasvoice-section' }, h( AV.TG, { label: 'Button style', value: d.style, onChange: ( v ) => up( { style: v } ), options: [ [ 'simple', 'Simple button' ], [ 'pro', 'Pro player with progress bar' ] ] } ) ),
 					h( AV.Section, { title: 'Voice', desc: 'Press play to hear the voice read your latest post.', end: h( 'div', { style: { width: 220 } }, h( SelectControl, { ...N, label: 'Language', value: 'en-GB', onChange: () => notify( 'Language changed for the mockup.' ), options: opt( [ [ 'en-GB', 'English (UK)' ], [ 'en-US', 'English (US)' ], [ 'es-ES', 'Español' ], [ 'fr-FR', 'Français' ], [ 'bn-BD', 'বাংলা' ] ].concat( d.engine === 'cloud' ? [ [ 'uk-UA', 'Українська · new' ] ] : [] ) ) } ) ) },
@@ -101,7 +102,7 @@
 							h( 'span', { className: 'atlasvoice-weak' }, 'English (UK) has:' ), h( AV.Chip, null, 'Browser voice' ), h( AV.Chip, { tone: 'ok' }, 'Natural · free' ), h( AV.Chip, { tone: 'brand' }, 'Studio · Pro' ), h( Button, { variant: 'link', onClick: () => setDrawer( 'langs' ) }, 'See every language' ) ),
 						d.engine === 'cloud' && h( HStack, { justify: 'flex-start', wrap: true, style: { marginBottom: 12 } },
 							h( AV.TG, { label: 'Show', hide: true, value: d.filter, onChange: ( v ) => up( { filter: v } ), options: [ [ 'all', 'All' ], [ '0', 'Natural' ], [ '1', 'Fast' ], [ '2', 'Higher quality' ], [ 'fav', '★ Favourites' ] ] } ),
-							h( 'div', { style: { width: 200 } }, h( SearchControl, { ...NM, size: 'compact', value: d.q, onChange: ( v ) => up( { q: v } ), placeholder: 'Search 374 voices' } ) ) ),
+							h( 'div', { style: { width: 200 } }, h( SearchControl, { ...NM, size: 'compact', value: d.q, onChange: ( v ) => up( { q: v } ), placeholder: 'Search 380 voices' } ) ) ),
 						groups.map( ( g, gi ) => {
 							if ( d.filter !== 'all' && d.filter !== 'fav' && d.filter !== String( gi ) ) return null;
 							const vs = g[ 2 ].filter( ( v ) => ( d.filter !== 'fav' || favs[ v[ 0 ] ] ) && ( ! d.q || v[ 1 ].toLowerCase().includes( d.q.toLowerCase() ) ) );
@@ -114,7 +115,7 @@
 									h( Button, { size: 'small', icon: h( I, { icon: favs[ v[ 0 ] ] ? 'star-filled' : 'star-empty', size: 20 } ), label: ( favs[ v[ 0 ] ] ? 'Remove ' : 'Add ' ) + v[ 1 ] + ' to favourites', isPressed: !! favs[ v[ 0 ] ], onClick: ( e ) => { e.stopPropagation(); setFavs( { ...favs, [ v[ 0 ] ]: ! favs[ v[ 0 ] ] } ); } } ),
 									h( Button, { size: 'small', variant: 'secondary', label: 'Play a sample of ' + v[ 1 ], onClick: ( e ) => { e.stopPropagation(); setSt( 'playing' ); notify( 'Playing ' + v[ 1 ] + ' reading the first paragraph.' ); } }, 'Play' ) ) ) ) );
 						} ),
-						free && h( AV.ProNote, null, '374 studio voices in 43 languages, included in the licence.' ) ),
+						free && h( AV.ProNote, null, '380 studio voices in 43 languages, included in the licence.' ) ),
 					h( Card, null, h( C.PanelBody, { title: 'Speed' + ( d.engine === 'browser' ? ', pitch and volume' : '' ), initialOpen: false },
 						h( VStack, { spacing: 4 },
 							h( RangeControl, { ...NM, label: 'Speed', value: d.rate, min: 0.5, max: 2, step: 0.1, onChange: ( v ) => up( { rate: v } ) } ),
@@ -285,9 +286,9 @@
 				h( Card, null, h( CardHeader, null, h( AV.H2, null, 'Usage by month' ) ), h( CardBody, null, h( AV.Bars, { values: [ 41, 55, 62, 48, 71, u.pct ], from: 'May', to: 'Oct' } ) ) ),
 				h( Card, null, h( CardHeader, null, h( AV.H2, null, 'Posts that used the most characters' ) ), h( AV.Table, { head: [ 'Post', 'Characters', 'Languages' ] }, [ [ 'The history of the weir', '9,880', 'EN' ], [ 'Ten walks along the river', '7,920', free ? 'EN' : 'EN, ES' ], [ 'How we restored the old mill', '6,140', 'EN' ], [ 'Bread from the old mill flour', '3,310', 'EN' ] ].map( ( r ) => h( 'tr', { key: r[ 0 ] }, h( 'td', { className: 'atlasvoice-cell-main' }, r[ 0 ] ), h( 'td', null, r[ 1 ] ), h( 'td', null, r[ 2 ] ) ) ) ) ) ),
 			free ? h( Card, null, h( CardHeader, null, h( AV.H2, null, 'Need more?' ) ), h( ItemGroup, { isSeparated: true },
-				h( AV.Row, { title: 'Upgrade to Pro', help: 'Unlimited natural voice, 374 studio voices in 43 languages, and audio for many posts at once.' }, h( Button, { variant: 'secondary', onClick: () => ctx.go( 'plans' ) }, 'See plans' ) ),
+				h( AV.Row, { title: 'Upgrade to Pro', help: 'Unlimited natural voice, 380 studio voices in 43 languages, and audio for many posts at once.' }, h( Button, { variant: 'secondary', onClick: () => ctx.go( 'plans' ) }, 'See plans' ) ),
 				h( AV.Row, { title: '“Voiced by AtlasVoice”', help: 'A small line under free natural-voice audio, only when the service asks for it. Pro removes it.' } ) ) )
-				: h( Card, null, h( CardHeader, null, h( AV.H2, null, 'Licence seats' ) ), h( ItemGroup, { isSeparated: true }, h( AV.Row, { title: 'This site uses 1 of your 5 sites', help: 'If the licence is full, the site falls back to the free 100,000 characters.' }, h( Button, { variant: 'secondary', onClick: () => AV.ext( notify, 'your sites on app.atlasvoice.cloud' ) }, 'Manage sites' ) ) ) ) ),
+				: h( Card, null, h( CardHeader, null, h( AV.H2, null, 'Licence on this site' ), h( AV.Chip, { tone: 'ok', dot: true }, 'Activated' ) ), h( ItemGroup, { isSeparated: true }, h( AV.Row, { title: 'Premium comes from your licence', help: 'Freemius, our licensing partner, decides it: the licence must be activated on this site. Local and common staging addresses don’t use up one of your sites.' }, h( Button, { variant: 'secondary', onClick: () => ctx.go( 'licence' ) }, 'Open Licence' ) ) ) ) ),
 			drawer && h( ConnDrawer, { onClose: () => setDrawer( false ) } ) );
 	};
 
@@ -321,21 +322,23 @@
 				h( AV.Section, { title: 'Style', desc: 'Start from a style, then fine-tune. Your current colours are kept as “Classic teal”.' },
 					h( 'div', { className: 'atlasvoice-presets', role: 'radiogroup', 'aria-label': 'Style' }, AV.PRESETS.map( ( pr ) => h( 'button', { key: pr[ 0 ], className: 'atlasvoice-preset' + ( L.preset === pr[ 0 ] ? ' is-on' : '' ), role: 'radio', 'aria-checked': L.preset === pr[ 0 ], onClick: () => upL( { preset: pr[ 0 ], bg: pr[ 2 ], fg: pr[ 3 ] } ) }, h( 'span', { style: { background: pr[ 2 ] } } ), pr[ 1 ] ) ) ) ),
 				h( Card, { className: 'atlasvoice-section' }, h( CardBody, null, h( VStack, { spacing: 5 },
-					h( C.BaseControl, { ...NM, label: 'Background', id: 'av-bg' }, h( C.ColorPalette, { colors: COLORS, value: L.bg, onChange: ( v ) => v && upL( { bg: v, preset: 'custom' } ), clearable: false } ) ),
-					h( C.BaseControl, { ...NM, label: 'Text and icons', id: 'av-fg', help: h( 'span', { style: { color: ratio >= 4.5 ? '#007f30' : '#cc1818' } }, 'Contrast ' + ratio.toFixed( 1 ) + ':1 · ' + ( ratio >= 4.5 ? 'easy to read' : 'too low, pick a darker or lighter text colour' ) ) }, h( C.ColorPalette, { colors: COLORS, value: L.fg, onChange: ( v ) => v && upL( { fg: v, preset: 'custom' } ), clearable: false } ) ),
+					h( ItemGroup, { isBordered: true, isSeparated: true },
+						h( Item, null, h( AV.ColorRow, { label: 'Background', colors: COLORS, value: L.bg, onChange: ( v ) => upL( { bg: v, preset: 'custom' } ) } ) ),
+						h( Item, null, h( AV.ColorRow, { label: 'Text and icons', colors: COLORS, value: L.fg, onChange: ( v ) => upL( { fg: v, preset: 'custom' } ), note: 'Contrast ' + ratio.toFixed( 1 ) + ':1 · ' + ( ratio >= 4.5 ? 'easy to read' : 'too low, pick a darker or lighter text colour' ), bad: ratio < 4.5 } ) ) ),
 					h( HStack, { wrap: true, alignment: 'top', spacing: 6, justify: 'flex-start' },
 						h( AV.TG, { label: 'Shape', value: L.shape, onChange: ( v ) => upL( { shape: v } ), options: [ [ 'square', 'Square' ], [ 'rounded', 'Rounded' ], [ 'pill', 'Pill' ] ] } ),
 						h( AV.TG, { label: 'Size', value: L.size, onChange: ( v ) => upL( { size: v } ), options: [ [ 's', 'Small' ], [ 'm', 'Medium' ], [ 'l', 'Large' ] ] } ),
 						h( AV.TG, { label: 'Width', value: L.width, onChange: ( v ) => upL( { width: v } ), options: [ [ 'full', 'Full width' ], [ 'auto', 'Fit to content' ] ] } ) ),
 					h( 'p', { className: 'atlasvoice-weak' }, 'On phones the player always uses the full width, so its controls never get cut off.' ) ) ) ),
 				h( Card, null, h( C.PanelBody, { title: 'More style options', initialOpen: false }, h( VStack, { spacing: 5 },
-					h( C.BaseControl, { ...NM, label: 'Hover background', id: 'av-hbg' }, h( C.ColorPalette, { colors: COLORS, value: L.hoverBg, onChange: ( v ) => upL( { hoverBg: v } ) } ) ),
-					h( C.BaseControl, { ...NM, label: 'Hover text', id: 'av-htx' }, h( C.ColorPalette, { colors: COLORS, value: L.hoverFg, onChange: ( v ) => upL( { hoverFg: v } ) } ) ),
+					h( ItemGroup, { isBordered: true, isSeparated: true },
+						h( Item, null, h( AV.ColorRow, { label: 'Hover background', colors: COLORS, value: L.hoverBg, onChange: ( v ) => upL( { hoverBg: v } ) } ) ),
+						h( Item, null, h( AV.ColorRow, { label: 'Hover text', colors: COLORS, value: L.hoverFg, onChange: ( v ) => upL( { hoverFg: v } ) } ) ),
+						h( Item, null, h( AV.ColorRow, { label: 'Border colour', colors: COLORS, value: L.borderColor, onChange: ( v ) => upL( { borderColor: v } ) } ) ) ),
 					h( 'div', { className: 'atlasvoice-grid is-3' },
 						AV.UnitControl && h( AV.UnitControl, { __next40pxDefaultSize: true, label: 'Border width', value: L.border, units: [ { value: 'px', label: 'px' } ], onChange: ( v ) => upL( { border: v } ) } ),
 						AV.UnitControl && h( AV.UnitControl, { __next40pxDefaultSize: true, label: 'Text size', value: L.fontSize, units: [ { value: 'px', label: 'px' } ], onChange: ( v ) => upL( { fontSize: v } ) } ),
 						AV.UnitControl && h( AV.UnitControl, { __next40pxDefaultSize: true, label: 'Corner radius', value: L.radius, units: [ { value: 'px', label: 'px' } ], onChange: ( v ) => upL( { radius: v } ) } ) ),
-					h( C.BaseControl, { ...NM, label: 'Border colour', id: 'av-bc' }, h( C.ColorPalette, { colors: COLORS, value: L.borderColor, onChange: ( v ) => upL( { borderColor: v } ) } ) ),
 					AV.BoxControl && h( AV.BoxControl, { __next40pxDefaultSize: true, label: 'Space around the player', values: L.margin, units: [ { value: 'px', label: 'px' }, { value: '%', label: '%' } ], onChange: ( v ) => upL( { margin: v } ) } ),
 					h( 'p', { className: 'atlasvoice-weak' }, 'Each side keeps the unit it was saved with. Need more? Add CSS in Appearance → Customize → Additional CSS; player classes start with .atlasvoice-player-.' ) ) ) ) );
 		} else if ( tab === 'place' ) {
@@ -366,8 +369,8 @@
 					h( Card, null, h( ItemGroup, { isSeparated: true },
 						h( AV.Toggle, { label: 'Highlight while reading', checked: r.on, onChange: ( v ) => setR( { ...r, on: v } ) } ),
 						r.on && h( Item, null, h( AV.TG, { label: 'What to highlight', value: r.mode, onChange: ( v ) => setR( { ...r, mode: v } ), options: [ [ 's', 'Sentence' ], [ 'w', 'Word' ], [ 'ws', 'Both' ] ] } ), h( 'p', { className: 'atlasvoice-weak', style: { marginTop: 8 } }, 'Word by word needs the browser voice, Google Cloud or ElevenLabs. Other voices highlight sentences.' ) ),
-						r.on && h( Item, null, h( C.BaseControl, { ...NM, label: 'Sentence colour', id: 'av-sc' }, h( C.ColorPalette, { colors: [ { name: 'Lavender', color: '#e8e7fe' }, { name: 'Aqua', color: '#cffafe' }, { name: 'Yellow', color: '#fef3c7' } ], value: r.sentence, onChange: ( v ) => setR( { ...r, sentence: v } ) } ) ) ),
-						r.on && r.mode !== 's' && h( Item, null, h( C.BaseControl, { ...NM, label: 'Word colour', id: 'av-wc' }, h( C.ColorPalette, { colors: [ { name: 'Periwinkle', color: '#a5abf0' }, { name: 'Amber', color: '#fcd34d' } ], value: r.word, onChange: ( v ) => setR( { ...r, word: v } ) } ) ) ),
+						r.on && h( Item, null, h( AV.ColorRow, { label: 'Sentence colour', colors: [ { name: 'Lavender', color: '#e8e7fe' }, { name: 'Aqua', color: '#cffafe' }, { name: 'Yellow', color: '#fef3c7' } ], value: r.sentence, onChange: ( v ) => setR( { ...r, sentence: v } ) } ) ),
+						r.on && r.mode !== 's' && h( Item, null, h( AV.ColorRow, { label: 'Word colour', colors: [ { name: 'Periwinkle', color: '#a5abf0' }, { name: 'Amber', color: '#fcd34d' } ], value: r.word, onChange: ( v ) => setR( { ...r, word: v } ) } ) ),
 						r.on && h( Item, null, h( ToggleControl, { ...NM, label: 'Fade the rest of the article', checked: r.dim, onChange: ( v ) => setR( { ...r, dim: v } ) } ), r.dim && h( 'div', { style: { marginTop: 12 } }, h( RangeControl, { ...NM, label: 'How much to fade', value: r.dimBy, min: 10, max: 90, step: 5, onChange: ( v ) => setR( { ...r, dimBy: v } ) } ) ) ),
 						r.on && h( AV.Toggle, { label: 'Scroll to follow the reading', help: 'Stops following when the reader scrolls.', checked: r.follow, onChange: ( v ) => setR( { ...r, follow: v } ) } ) ) ) ),
 				h( AV.Section, { title: 'Listen to a selection', desc: 'Readers select any text and press Listen.' },
@@ -391,7 +394,7 @@
 						h( AV.Table, { label: 'Shortcode options', head: [ 'Option', 'What it does', 'Example' ] }, [ [ 'id', 'Reads another post', 'id="128"' ], [ 'text_to_read', 'Reads your own text instead', 'text_to_read="Welcome"' ], [ 'lang, voice', 'Language and voice for this player', 'lang="es-ES"' ], [ 'listen_text … replay_text', 'Button words (also pause, resume, start, stop)', 'listen_text="Hear it"' ], [ 'backgroundColor, color, width', 'Colours and width', 'backgroundColor="#184c53"' ], [ 'class', 'Adds your own CSS class', 'class="my-player"' ], [ 'position', 'Wraps content: player before or after it', '[atlasvoice position="after"]…[/atlasvoice]' ] ].map( ( x ) => h( 'tr', { key: x[ 0 ] }, h( 'td', null, h( 'span', { className: 'atlasvoice-mono' }, x[ 0 ] ) ), h( 'td', { className: 'atlasvoice-cell-main' }, x[ 1 ] ), h( 'td', null, h( 'span', { className: 'atlasvoice-mono' }, x[ 2 ] ) ) ) ) ) ) ),
 				h( 'div', { className: 'atlasvoice-grid is-2' },
 					h( Card, null, h( CardHeader, null, h( AV.H2, null, 'Block' ) ), h( CardBody, null, h( 'p', { className: 'atlasvoice-weak' }, 'Add the “AtlasVoice player” block in the block editor. It uses this screen’s style; you can change colour and width for one post in the block settings.' ) ) ),
-					h( Card, null, h( CardHeader, null, h( AV.H2, null, 'Elementor widget' ), h( AV.Chip, { tone: 'info' }, 'New' ) ), h( CardBody, null, h( 'p', { className: 'atlasvoice-weak' }, 'Drag “AtlasVoice player” into any Elementor layout. It shows the real player in the editor and has the same options as the shortcode, because it is a thin wrapper around it.' ) ) ) ) );
+					h( Card, null, h( CardHeader, null, h( AV.H2, null, 'Elementor widget' ), h( AV.Chip, { tone: 'new' }, 'New' ) ), h( CardBody, null, h( 'p', { className: 'atlasvoice-weak' }, 'Drag “AtlasVoice player” into any Elementor layout. It shows the real player in the editor and has the same options as the shortcode, because it is a thin wrapper around it.' ) ) ) ) );
 		}
 		const extra = tab === 'place' && p.dock !== 'none' ? 'dock' : tab === 'words' && w.gear ? 'pop' : null;
 		return h( Fragment, null,
@@ -803,6 +806,7 @@
 			h( AV.Section, { title: 'Maintenance' }, h( Card, null, h( ItemGroup, { isSeparated: true },
 				h( AV.Row, { title: 'Clear AtlasVoice cache', help: 'Use after changing your theme or caching plugin.' }, h( Button, { variant: 'secondary', onClick: () => notify( 'AtlasVoice cache cleared.' ) }, 'Clear cache' ) ),
 				h( AV.Toggle, { label: 'Delete all AtlasVoice data when the plugin is deleted', help: 'Settings, statistics and audio files' + ( free ? '' : ', plus Pro’s keys, folder and schedules' ) + '. Off by default.', checked: f.del, onChange: ( v ) => up( { del: v } ) } ),
+				h( AV.Row, { title: 'Use the classic screens', help: 'The screens from before 2.5 stay available until 2.7. Your settings are the same in both, so you can switch back and forth.' }, h( Button, { variant: 'secondary', onClick: () => ctx.modal( { title: 'Switch to the classic screens?', body: h( 'p', null, 'Nothing is lost: both use the same saved settings. A link at the top of the classic screens brings you back here.' ), ok: 'Switch', onOk: () => notify( 'In the plugin this reloads AtlasVoice in the classic screens.' ) } ) }, 'Switch' ) ),
 				h( AV.Row, { title: 'Run the setup wizard again', help: 'Starts from your current settings.' }, h( Button, { variant: 'secondary', onClick: () => { ctx.setSetup( ( s ) => ( { ...s, finished: false, done: [], current: 'hear' } ) ); ctx.go( 'setup' ); } }, 'Open setup' ) ) ) ) ) ) );
 	};
 
@@ -827,11 +831,12 @@
 		const { free, notify } = ctx;
 		const [ bill, setBill ] = useState( 'y' );
 		const plans = [ [ '1 site', '$59', '$149' ], [ '5 sites', '$119', '$299' ], [ '10 sites', '$179', '$449' ] ];
-		const feats = [ [ '374 studio voices', 'AtlasVoice Cloud is included: 43 languages, no keys to set up.' ], [ 'Every content type', 'Players on posts, pages, products and custom types, each with its own rules.' ], [ 'Audio for many posts at once', 'Prepare audio for hundreds of posts, in every language, after checking the text.' ], [ 'A voice per language', 'WPML, Polylang, TranslatePress and GTranslate read each post in its own language.' ], [ 'Skip parts of the page', 'Leave out share bars, captions and phrases like “Read more”.' ], [ 'Audio in search', 'Audio structured data that joins Yoast, Rank Math or AIOSEO.' ], [ 'Deeper insights', '90 days and all time, busiest hours, export and email reports.' ] ];
+		const feats = [ [ '380 studio voices', 'AtlasVoice Cloud is included: 43 languages, no keys to set up.' ], [ 'Every content type', 'Players on posts, pages, products and custom types, each with its own rules.' ], [ 'Audio for many posts at once', 'Prepare audio for hundreds of posts, in every language, after checking the text.' ], [ 'A voice per language', 'WPML, Polylang, TranslatePress and GTranslate read each post in its own language.' ], [ 'Skip parts of the page', 'Leave out share bars, captions and phrases like “Read more”.' ], [ 'Audio in search', 'Audio structured data that joins Yoast, Rank Math or AIOSEO.' ], [ 'Deeper insights', '90 days and all time, busiest hours, export and email reports.' ] ];
 		return h( AV.Pane, { canvas: true }, h( AV.Scroll, { width: 1000 },
 			! free && h( 'div', { className: 'atlasvoice-section' }, h( Notice, { status: 'success', isDismissible: false, actions: [ { label: 'Licence & account', onClick: () => ctx.go( 'licence' ) } ] }, h( 'b', null, 'Pro is active on this site. ' ), '5-site plan, used on 3 of 5 sites, renews 3 March 2027.' ) ),
 			h( AV.Section, { title: free ? 'What AtlasVoice Pro adds' : 'What your Pro licence includes', desc: 'Everything in the free plugin stays free and works on its own. Your own provider keys are free in both.' },
 				h( 'div', { className: 'atlasvoice-grid is-2' }, feats.map( ( f ) => h( Card, { key: f[ 0 ], size: 'small' }, h( CardBody, null, h( 'b', null, f[ 0 ] ), h( 'p', { className: 'atlasvoice-weak' }, f[ 1 ] ) ) ) ) ) ),
+			h( AV.Section, { title: 'Free and Pro side by side' }, h( Card, null, h( AV.Table, { label: 'Free and Pro compared', head: [ '', 'Free', 'Pro' ] }, AV.COMPARE.map( ( r ) => h( 'tr', { key: r[ 0 ] }, h( 'td', { className: 'atlasvoice-cell-main' }, h( 'span', { className: 'atlasvoice-cell-title' }, r[ 0 ] ) ), h( 'td', null, r[ 1 ] ), h( 'td', null, h( 'b', { style: { fontWeight: 500 } }, r[ 2 ] ) ) ) ) ) ) ),
 			h( AV.Section, { title: free ? 'Plans' : 'Upgrade or add sites', desc: 'Example prices for the mockup. 14-day money-back guarantee.', end: h( AV.TG, { label: 'Billing', hide: true, value: bill, onChange: setBill, options: [ [ 'y', 'Yearly' ], [ 'l', 'Lifetime' ] ] } ) },
 				h( 'div', { className: 'atlasvoice-grid is-3' }, plans.map( ( p, i ) => h( Card, { key: p[ 0 ], className: i === 1 ? 'atlasvoice-card-best' : '' }, h( CardBody, null, h( VStack, { spacing: 3 },
 					i === 1 ? h( AV.Chip, { tone: 'brand' }, 'Most popular' ) : h( 'span', { style: { height: 20 } } ), h( 'b', null, p[ 0 ] ), h( 'span', { className: 'atlasvoice-price' }, bill === 'y' ? p[ 1 ] : p[ 2 ], h( 'span', { className: 'atlasvoice-weak', style: { fontSize: 13, fontWeight: 400 } }, bill === 'y' ? ' / year' : ' once' ) ),

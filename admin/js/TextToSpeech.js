@@ -4,6 +4,7 @@
 import Speech from "./tts/speak-tts/lib/speak-tts.js";
 import BrowserSupport from './tts/BrowserSupport.js'
 import {addHoverColor, getButtonSVGIcon, setSvgColorOnEvent, splitSentences} from "./tts/utilities.js";
+import {sentencesFrom} from "./tts/speech-queue.js";
 import AtlasVoiceAnalytics from "./AtlasVoiceAnalytics";
 import AliasEngine from "./AliasEngine";
 // TTS-256: read-along highlighter — registers wp.hooks listeners on import
@@ -345,13 +346,18 @@ export default class TextToSpeech {
             .speak({
                 text: content,
                 queue: false,
+                // TTS-367: iPhone/iPad drop the sentences after the first when they are
+                // all queued at once, so there we hand the engine one sentence at a time.
+                sequential: this.browser.isIOS(),
                 listeners: {
-                    onstart: (utterance) => {
+                    onstart: (utterance, spoken) => {
                         console.log("Start utterance");
                         this.utterence = utterance
                         // TTS-256: remember the sentence so onboundary can resolve words
                         // against it; the highlighter re-anchors on this sentence text.
-                        this._activeSentence = (utterance?.currentTarget?.text) || (utterance?.target?.text) || ''
+                        // TTS-367: some engines send the event without a target, so fall
+                        // back to the utterance itself.
+                        this._activeSentence = (utterance?.currentTarget?.text) || (utterance?.target?.text) || (spoken?.text) || ''
                         wp.hooks.doAction('tts_high_light_sentence', this._activeSentence, this.buttonId, splitSentences)
                     },
                     onend: (utterance) => {
@@ -471,8 +477,9 @@ export default class TextToSpeech {
         }
 
         // update current content
-        let currentIndex = this.splittedSentances.indexOf(this.utterence?.target?.text || '');
-        this.splittedSentances = this.splittedSentances.slice(currentIndex)
+        // TTS-367: an unknown sentence used to give index -1, and slice(-1) kept only
+        // the last sentence, so Resume jumped to the end of the article.
+        this.splittedSentances = sentencesFrom(this.splittedSentances, this.utterence?.target?.text || this._activeSentence)
         this.content = this.splittedSentances.join(' ')
 
         this.listenStatus = 'resume';

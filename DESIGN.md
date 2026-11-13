@@ -5,9 +5,14 @@ description: A calm, native wp-admin home for a site's voice. WordPress parts, o
 colors:
   brand: "#5646e5"
   brand-hover: "#4536c9"
+  brand-press: "#3a2db3"
   brand-ground: "#eeedfd"
+  brand-line: "#d6d3fb"
   brand-ink: "#3a2db3"
   on-brand: "#ffffff"
+  brand-on-dark: "#8481f8"
+  signal: "#ff7853"
+  on-signal: "#1e1e1e"
   canvas: "#f0f0f1"
   surface: "#ffffff"
   surface-sunken: "#f6f7f7"
@@ -117,7 +122,7 @@ Every screen answers those from one fixed frame that fits the window, the way a 
 
 **Product context:** the admin dashboard of the AtlasVoice free plugin (`text-to-audio`, wp.org
 title "Text To Speech TTS Accessibility") and its Pro add-on (`text-to-audio-pro`), inside
-wp-admin. Users are bloggers, publishers, schools, councils, ESL teachers and agencies; 4,000+
+wp-admin. Users are bloggers, publishers, schools, councils, ESL teachers and agencies; 5,000+
 active sites. AtlasVoice is also a SaaS client: the natural voice (player 3) and AtlasVoice Cloud
 (player 7) are made on atlasvoice.cloud with a monthly character allowance. Peers in the same
 family follow the same rules: AtlasMCP (`--atlasmcp-*`), Smart Local AI (`--atlasai-*`) and
@@ -177,8 +182,25 @@ Named rules:
 - `surface-selected` marks the selected row or item; it is the only tinted background a list uses.
 - Status never relies on color alone: every chip has a word ("Live", "Staging", "Ready",
   "Outdated", "Failed", "Connected").
-- No gradients anywhere. The aqua "signal" colour and the web fonts of the earlier TTS-347 draft
-  are dropped.
+- **Voice Indigo is the one brand colour (owner approved 2026-11-13).** White text on `brand`
+  is 6.17:1, on `brand-hover` 8.00:1 and on `brand-press` 9.52:1; `brand` on a white page is
+  6.17:1 and on the WordPress grey page 5.42:1. So one colour is the logo tile, the primary
+  button, the link and the focus ring. (AtlasMCP needs a separate darker ink for buttons because
+  its teal is light; AtlasVoice does not.)
+- Button states: rest `brand`, hover `brand-hover`, pressed `brand-press`. A secondary button is
+  white with a `brand` border and text; on hover it fills with `brand-ground` and its text and
+  border become `brand-ink`. Disabled is WordPress's own grey.
+- `brand-ground` with `brand-line` as its border is the only brand tint (selected item, quiet
+  upsell card). Text on it is `brand-ink` (8.23:1).
+- `signal` (#ff7853, the coral of the pre-redesign buttons) is the secondary colour, and a
+  **fill only**: the sound wave in the logo and marketing art, and the "New" badge. Text on it is
+  `on-signal` (6.40:1). It is never a button, a link or text: white on it is 2.60:1.
+- The logo is a white mark on a `brand` tile. (New artwork, banner and screenshots come later;
+  only the colour is decided.)
+- `brand-on-dark` (#8481f8, 5.95:1 on #0b0d1c) is the same brand on dark surfaces, as
+  atlasvoice.cloud uses it, with dark text on a filled button. wp-admin never uses it.
+- No gradients anywhere. The aqua colour and the web fonts of the earlier TTS-347 draft are
+  dropped.
 - The Pro badge is dark ink with a gold label, the same treatment every AtlasAiDev plugin uses.
 - `player-default` (#184c53, "Classic teal") is the front-end player colour existing sites already
   have; it is a preset, not a brand colour.
@@ -201,9 +223,9 @@ system stack too, so it never pulls a font into the visitor's page.
 │ left rail  │ sub-tabs (TabPanel)                          │ drawer 560px  │
 │ 232px      │ main pane (its own scroll) │ live preview    │ slides in over│
 │ grouped:   │ cards, tables, forms       │ 400px (Voice,   │ a dim page on │
-│ Voice ·    │                            │ Player, SEO)    │ row or Edit   │
-│ On your    ├────────────────────────────┴─────────────────┤               │
-│ site · …   │ sticky footer: Unsaved changes · Save        │               │
+│ Set up ·   │                            │ Player, SEO)    │ row or Edit   │
+│ Every day ·├────────────────────────────┴─────────────────┤               │
+│ Look after │ sticky footer: Unsaved changes · Save        │               │
 ├────────────┴─────────────────────────────────────────────┴───────────────┤
 │ status bar: ● Live · Emma · Natural voice · ▬ 23% of characters ·         │
 │             182 of 214 posts have audio · Pro licensed · Live for visitors│
@@ -212,10 +234,17 @@ system stack too, so it never pulls a font into the visitor's page.
 
 - The shell is `height: calc(100vh - var(--wp-admin--admin-bar--height, 32px))`, sticks under the
   admin bar and never makes the page scroll. Only the main pane, the preview and the drawer scroll.
-- **Rail groups:** (top) Overview, Setup (until finished) · **Voice**: Voice, Pronunciation,
-  Languages, Your own provider, AtlasVoice account · **On your site**: Player, What is read, Audio
-  library · **Results**: Insights, SEO & AI Search · **Site health**: Health, Versions, Advanced,
-  Privacy · **Help**: Licence & account (Pro only), Plans & pricing, Documentation, More plugins.
+- **Rail: ten destinations, in the order people work (v3).** (top) Home, Setup (until
+  finished) · **Set up**: Voice, Player, What is read · **Every day**: Audio library, Insights,
+  SEO & AI Search · **Look after**: Site health, Account & plans, Help. The nine screens that
+  left the rail are tabs of their group, and the search still lists each one by name:
+  - Voice: Voice · Pronunciation · Languages · Your own provider
+  - Site health: Health · Versions · Advanced · Privacy
+  - Account & plans: Usage · Licence (Pro) · Plans
+  - Help: Documentation · Where things moved · More plugins
+- **Home shows the journey.** Under the "who can hear it" line, a four-step strip (Voice →
+  Player → What is read → Live) shows the current value of each step and opens it. New
+  installs see the Setup progress card instead until setup is finished.
 - **One main action per screen** in the top bar: Overview → Go live (staging) or View as a visitor;
   Player → View as a visitor; What is read → Pick on a page; Audio library (Pro) → Make missing
   audio. Everything else lives in the pane.
@@ -239,6 +268,8 @@ system stack too, so it never pulls a font into the visitor's page.
 - **Live preview column** (Voice, Player, SEO): a real post in a browser frame with the player in
   every state, light/dark site and desktop/phone. It updates before Save, so the owner sees the
   result first. Below 1100px it moves under the form.
+- **Unsaved changes are never lost silently (v3).** Leaving a screen or a tab with unsaved
+  changes asks "Leave without saving?" with "Keep editing" as the safe choice.
 - **Save model:** forms keep a Save button, now in the sticky footer with "Unsaved changes / All
   changes saved". Instant actions (Go live, connect, delete) confirm and act at once. The save
   moment and the stored options are the same as today (see "Nothing stored changes").
@@ -384,6 +415,37 @@ player that visitors use.
   - Still to do in the build: a manual screen-reader pass (NVDA and VoiceOver) and a
     keyboard-only run of every flow, as part of the QA subtask.
 
+## Update day for existing sites (v3)
+
+The 5,000+ sites that update must not feel lost:
+
+- **A welcome, once.** "AtlasVoice has a new look. Nothing you saved has changed", with three
+  lines on what is different and three choices: Start using it, Show me what moved, Use the
+  classic screens for now.
+- **Where things moved** (Help tab): every old menu item and every old setting name, its new
+  home and an Open button, with a filter box. The top search finds old names too.
+- **Classic screens stay until 2.7** (Site health → Advanced → Use the classic screens). Both
+  read and write the same saved settings (`tta_admin_ui` only remembers which one is shown), so
+  switching back and forth is safe.
+- **One notice in the bell**, never a banner over the screen.
+
+## States added from the 2.4.0 beta (v3)
+
+- **Test on your phone** (TTS-351): a link in the staging note under the player and on Home
+  opens a QR code for the post, valid for 15 minutes.
+- **Licence not activated on this site** (TTS-353): Freemius alone decides Premium. The service
+  never counts sites, so there is no "licence full" state. The Voice screen says the licence
+  isn't activated here and offers "Activate the licence on this site"; local and common staging
+  addresses don't use up a site.
+- **Can't reach the site's API** (TTS-361): a full-screen state that says visitors are not
+  affected, lists the three likely causes with one action each (plain permalinks cache, http/https
+  address, REST blocked), and gives the error line for support.
+- **Google Cloud voices** (TTS-356): matched to the chosen language; Gemini voices hidden.
+- **The real reason for editors** (TTS-368): when a provider refuses, editors see the provider's
+  own message; visitors still only get the device voice.
+- **AtlasMCP** is offered once on the setup finish screen and in Help → More plugins, never as a
+  sidebar card on settings screens.
+
 ## Do's and Don'ts
 
 - Do use a WordPress component whenever one exists, and style it only through tokens.
@@ -408,7 +470,7 @@ player that visitors use.
 
 ## Nothing stored changes (existing users first)
 
-4,000+ sites keep working through the update:
+5,000+ sites keep working through the update:
 
 - Every option and meta key, field name and value format stays as it is today: `tta_settings_data`,
   `tta_customize_settings` (incl. `buttonSettings.id` 1–7), `tta_listening_settings`,
@@ -440,12 +502,12 @@ player that visitors use.
 | Customization: shortcode | Player → Shortcode & block (with every option, block, Elementor widget) | `#/customize` |
 | Customization: MP3 date range | Audio library (Pro setup step "Audio files") | `#/customize` |
 | Listening (`#/listening`): language, voice, speed, pitch, volume; AtlasVoice TTS connect | Voice | `#/listening`, `#/listening?setup=atlasvoice-tts` |
-| Listening: ChatGPT, ElevenLabs, Cloud voice settings | Voice (engine) + Your own provider (provider drawer) | `#/listening` |
-| Listening: multilingual mapping (Pro) | Languages | `#/listening` |
-| Integrations (`#/integrations`): Google key, GCS, OpenAI, ElevenLabs keys | Your own provider (free since 26 Oct) | `#/integrations` → Your own provider |
-| AtlasVoice service usage, plan, seats (SaaS) | AtlasVoice account (new) | — |
+| Listening: ChatGPT, ElevenLabs, Cloud voice settings | Voice (engine) + Voice → Your own provider (provider drawer) | `#/listening` |
+| Listening: multilingual mapping (Pro) | Voice → Languages | `#/listening` |
+| Integrations (`#/integrations`): Google key, GCS, OpenAI, ElevenLabs keys | Voice → Your own provider (free since 26 Oct) | `#/integrations` → Your own provider |
+| AtlasVoice service usage and plan (SaaS) | Account & plans → Usage (new) | — |
 | Highlight (`#/highlight`) | Player → Read-along | `#/highlight` |
-| Aliases (`#/aliases`) | Pronunciation (table + drawer + Try it) | `#/aliases` |
+| Aliases (`#/aliases`) | Voice → Pronunciation (table + drawer + Try it) | `#/aliases` |
 | Analytics (`#/analytics`): charts, range, export, schedule report, tracking switches | Insights: Overview · Posts · Listeners · Tracking; Email report drawer | `#/analytics` |
 | SEO & AI Search (`#/seo`) | SEO & AI Search (Pro); description page in free | `#/seo` |
 | Compatibility (`#/compatibility`) | Site health → Health (checks + plugins we work with); ACF → What is read → Text to read | `#/compatibility` |
@@ -454,8 +516,8 @@ player that visitors use.
 | Docs / FAQ (`#/faq`) | Help → Documentation | `#/faq` |
 | Our Plugins (`#/plugins`) | Help → More plugins | `#/plugins` |
 | Bulk MP3 Generate (`page=bulk-mp3-generate`) | Audio library → All posts (review drawer, queue) and Audio library → Settings, run by Audio Jobs (TTS-354) | old slug redirects |
-| Pricing (`page=tta-pricing` / `atlasvoice-pricing`) | Help → Plans & pricing | old slugs redirect |
-| Freemius Account / Contact / Affiliation (`page=text-to-audio-account` …) | Help → Licence & account (Pro) | Freemius pages stay reachable |
+| Pricing (`page=tta-pricing` / `atlasvoice-pricing`) | Account & plans → Plans | old slugs redirect |
+| Freemius Account / Contact / Affiliation (`page=text-to-audio-account` …) | Account & plans → Licence (Pro) | Freemius pages stay reachable |
 | Free setup wizard (6 steps) and Pro wizard (7 steps) | Setup: Hear it · Where · Voice · Look · (Pro: Audio files · Reports) · Check and go live · Done | `&reset_onboard=true` unchanged |
 | Post editor meta box + audio side panel | Editor sidebar tab "AtlasVoice" (Audio · On this post · Listening · Shortcode); Classic Editor side box | — |
 | Notices, toolbar node, Plugins row links, deactivation rescue, dashboard widget, Network Admin | Same places, WordPress components, one notice per screen | — |
@@ -463,7 +525,7 @@ player that visitors use.
 ## Decisions Log
 | Date | Decision | Rationale |
 |------|----------|-----------|
-| 2026-10-20 | TTS-347 redesign: free to change the UI, never the stored data | Owner rule; 4,000+ live sites |
+| 2026-10-20 | TTS-347 redesign: free to change the UI, never the stored data | Owner rule; 5,000+ live sites |
 | 2026-10-21 | WordPress 6.6 minimum from Free 2.5.0 / Pro 3.6.0 | 9 of 457 tracked sites (2.0%) run older |
 | 2026-10-21 | Ships from 2.5.0 / 3.6.0, after 2.4.0 is stable; nothing in 2.4.x | Owner |
 | 2026-10-21 | New player look opt-in for existing sites, default for new installs | Existing users first |
@@ -484,4 +546,13 @@ player that visitors use.
 | 2026-10-26 | Search matches old setting names | Existing users find moved settings without a map |
 | 2026-10-26 | Hash routes kept (`#/screen/sub`), every old route aliased | The current dashboard uses HashRouter; bookmarks and support links keep working |
 | 2026-10-26 | No Pro forms or disabled Pro controls in free; Pro renders through hooks | WordPress.org guideline 5 |
+| 2026-11-13 | **Owner approved v3** as the design to build on the beta | Review of v2 by request; v2 kept for reference |
+| 2026-11-13 | v3: rail cut from 19 items to 10, grouped Set up · Every day · Look after; nine screens become tabs | Users say the plugin is complicated; 19 destinations repeated that. The order now teaches the product |
+| 2026-11-13 | v3: Home shows the four-step journey with current values | One glance answers "what is set, and is it live?" |
+| 2026-11-13 | v3: welcome on update day, "Where things moved", classic screens until 2.7 | 5,000+ existing sites must never feel lost or forced |
+| 2026-11-13 | v3: leaving with unsaved changes asks first | v2 dropped changes silently |
+| 2026-11-13 | v3: colours are compact rows that open a palette | The block editor's own pattern; the Look tab is half as long |
+| 2026-11-13 | v3: "licence full" removed; "licence not activated on this site" added | Owner rule 27 Oct: Freemius decides Premium (TTS-353) |
+| 2026-11-13 | v3 is designed against 2.4.0-beta.11 / 3.5.0-beta.11 (`feature/TTS-266`) | The new UI is built on the beta with develop merged in |
+| 2026-11-13 | Colours decided: Voice Indigo #5646e5 (hover #4536c9, pressed #3a2db3, ground #eeedfd), coral #ff7853 as a fill-only secondary, Pro badge #1d2327 / #f3d27a, logo white on indigo | Owner approved. Indigo matches atlasvoice.cloud and is clearly different from AtlasMCP's teal in the WordPress menu; coral keeps a link to the old screens but fails as a button (white on it is 2.60:1). Replaces "no second accent" of 2026-10-26 |
 | 2026-10-27 | MP3 generation for players 3–7 becomes server-side **Audio Jobs** (TTS-354): one job per post + language + voice + text fingerprint; screens are the editor's AtlasVoice → Audio tab, Audio library (All posts · Clean up · Settings) with a bulk queue, status-bar usage and the posts-list Audio column | Fixes duplicate paid generation, partial or overwritten MP3s, stuck "Generating…", stale audio and bulk/page differences. The engine has its own branch and the screens use it only through REST. Design: canvas TVKNutmwFhhTs4b9Xqt7JC, `docs/design/audio-jobs-prototype.html` |
