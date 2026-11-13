@@ -1,12 +1,10 @@
 /**
  * Voice › Voice.
  *
- * Built so far: the voice the site uses now (read only), and the connection
- * to AtlasVoice Cloud for the natural voice: connect, see it, disconnect,
- * and move a site that is registered to another email.
- *
- * Choosing the engine, the language and the voice is still done on the
- * classic screen; this screen links to it and says so.
+ * Two things live here: the voice choice (what makes the sound, the
+ * language, the voice; see VoiceChoice) and the connection to AtlasVoice
+ * Cloud for the natural voice: connect, see it, disconnect, and move a site
+ * that is registered to another email.
  *
  * Connecting sends the site's address, its name and the owner's email to
  * AtlasVoice Cloud. Nothing is sent before the owner ticks the box and
@@ -29,12 +27,14 @@ import { useCallback, useEffect, useState } from '@wordpress/element';
 
 import { request } from '../api';
 import { useApp } from '../app-context';
-import { classicHashFor } from '../routes';
+import useSettingsForm from '../hooks/use-settings-form';
 import { Chip, Facts, Pane, Scroll, Section } from '../shell/parts';
+import SaveBar from '../shell/SaveBar';
 import { safeWebLink } from './home-words';
+import VoiceChoice from './VoiceChoice';
 
 const CONNECTION = 'tta/v1/cloud/connection';
-const SUMMARY = 'tta/v1/home';
+const CHOICE = 'tta/v1/voice';
 
 /**
  * Whether a line of text looks like an email address. The site checks it
@@ -45,87 +45,6 @@ const SUMMARY = 'tta/v1/home';
  */
 export function looksLikeEmail( value ) {
 	return /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test( String( value ).trim() );
-}
-
-/**
- * The voice the site uses now.
- *
- * @param {Object} props
- * @param {Object} props.voice `voice` of the Home summary, or null when it could not be read.
- * @return {*} The section.
- */
-function CurrentVoice( { voice } ) {
-	const { boot } = useApp();
-
-	return (
-		<Section
-			title={ __( 'The voice that reads your posts', 'text-to-audio' ) }
-			description={ __(
-				'Audio that is already made keeps playing when you change the voice.',
-				'text-to-audio'
-			) }
-		>
-			<Card>
-				<CardBody>
-					{ voice ? (
-						<Facts
-							rows={ [
-								[
-									__(
-										'What makes the sound',
-										'text-to-audio'
-									),
-									voice.engine,
-								],
-								[
-									__( 'Language', 'text-to-audio' ),
-									voice.language,
-								],
-								[ __( 'Voice', 'text-to-audio' ), voice.voice ],
-								[
-									__( 'Audio', 'text-to-audio' ),
-									voice.stores_audio
-										? __(
-												'Saved as MP3 files on your site',
-												'text-to-audio'
-										  )
-										: __(
-												'Read by the visitor’s browser',
-												'text-to-audio'
-										  ),
-								],
-							] }
-						/>
-					) : (
-						<p className="atlasvoice-weak">
-							{ __(
-								'The current voice could not be read just now.',
-								'text-to-audio'
-							) }
-						</p>
-					) }
-					<div className="atlasvoice-actions">
-						<Button
-							variant="secondary"
-							href={
-								boot.classicUrl +
-								classicHashFor( 'voice:voice' )
-							}
-							__next40pxDefaultSize
-						>
-							{ __( 'Change the voice', 'text-to-audio' ) }
-						</Button>
-						<span className="atlasvoice-weak">
-							{ __(
-								'This opens the classic screen. Choosing the voice moves here in a later update.',
-								'text-to-audio'
-							) }
-						</span>
-					</div>
-				</CardBody>
-			</Card>
-		</Section>
-	);
 }
 
 /**
@@ -348,7 +267,13 @@ function ConnectedCard( { state, busy, onDisconnect } ) {
 export default function VoiceVoice() {
 	const { boot, confirm, go, isPro, notify } = useApp();
 	const [ state, setState ] = useState( null );
-	const [ voice, setVoice ] = useState( null );
+	const form = useSettingsForm(
+		CHOICE,
+		__(
+			'Voice saved. Each post gets audio in the new voice the next time it is played.',
+			'text-to-audio'
+		)
+	);
 	const [ failure, setFailure ] = useState( '' );
 	const [ busy, setBusy ] = useState( false );
 	// A site that belongs to another email: { email, ownerHint, canMove, message }.
@@ -367,13 +292,6 @@ export default function VoiceVoice() {
 			);
 		} catch ( error ) {
 			setFailure( error.message );
-		}
-		try {
-			const summary = await request( boot, SUMMARY );
-			setVoice( summary?.voice || null );
-		} catch ( error ) {
-			// The connection is the point of this screen; the voice line is extra.
-			setVoice( null );
 		}
 	}, [ boot ] );
 
@@ -512,9 +430,52 @@ export default function VoiceVoice() {
 	}
 
 	return (
-		<Pane canvas>
+		<Pane
+			canvas
+			footer={
+				<SaveBar
+					dirty={ form.dirty }
+					saving={ form.saving }
+					onSave={ form.save }
+				/>
+			}
+		>
 			<Scroll width={ 860 }>
-				<CurrentVoice voice={ voice } />
+				{ form.values ? (
+					<VoiceChoice form={ form } connected={ state.connected } />
+				) : (
+					<div className="atlasvoice-section">
+						{ form.failure ? (
+							<Notice
+								status="error"
+								isDismissible={ false }
+								actions={ [
+									{
+										label: __(
+											'Try again',
+											'text-to-audio'
+										),
+										onClick: form.reload,
+									},
+								] }
+							>
+								{ sprintf(
+									/* translators: %s: error message from the site. */
+									__(
+										'The voice could not be loaded: %s',
+										'text-to-audio'
+									),
+									form.failure
+								) }
+							</Notice>
+						) : (
+							<div className="atlasvoice-loading" role="status">
+								<Spinner />
+								{ __( 'Loading…', 'text-to-audio' ) }
+							</div>
+						) }
+					</div>
+				) }
 
 				<Section
 					title={ __( 'Natural voice', 'text-to-audio' ) }

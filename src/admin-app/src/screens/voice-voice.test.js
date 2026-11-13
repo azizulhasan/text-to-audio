@@ -36,29 +36,38 @@ const CONNECTED = {
 	plan: 'free',
 };
 
-const VOICE = {
-	player_id: 3,
-	engine: 'AtlasVoice TTS',
-	stores_audio: true,
-	language: 'en-GB',
-	voice: 'Emma',
+const CHOICE = {
+	player_id: 1,
+	language: '',
+	voice: '',
+	rate: 1,
+	volume: 1,
+	pitch: 1,
+	connected: false,
+	natural_player_id: 3,
+	site_language: 'en-US',
+	players: [
+		{ id: 1, name: 'Default', pro: false, stores_audio: false },
+		{ id: 3, name: 'AtlasVoice TTS', pro: false, stores_audio: true },
+	],
 };
 
 /**
- * A stand-in for the site: the connection route and the Home summary.
+ * A stand-in for the site: the connection route and the voice route.
  *
  * @param {Object}   start             The connection at the start.
  * @param {Object}   options
  * @param {Function} options.onConnect Receives the POST body; returns { body, ok, status }.
  * @param {Object}   options.failLoad  { status, message } to refuse the first load.
- * @param {boolean}  options.noSummary Refuse the Home summary.
+ * @param {Object}   options.choice    The voice choice at the start.
+ * @param {boolean}  options.noChoice  Refuse the voice route.
  * @return {Object} { calls, state }.
  */
 function fakeSite(
 	start = NOT_CONNECTED,
-	{ onConnect, failLoad, noSummary } = {}
+	{ onConnect, failLoad, choice = CHOICE, noChoice } = {}
 ) {
-	const site = { calls: [], state: start };
+	const site = { calls: [], state: start, choice };
 	const reply = ( body, ok = true, status = 200 ) =>
 		Promise.resolve( { ok, status, json: async () => body } );
 	let failed = false;
@@ -68,10 +77,15 @@ function fakeSite(
 		const body = options.body ? JSON.parse( options.body ) : undefined;
 		site.calls.push( { url, method, body } );
 
-		if ( url.includes( 'tta/v1/home' ) ) {
-			return noSummary
-				? reply( { message: 'nope' }, false, 500 )
-				: reply( { voice: VOICE } );
+		if ( url.includes( 'tta/v1/voice' ) ) {
+			if ( noChoice ) {
+				return reply( { message: 'nope' }, false, 500 );
+			}
+			if ( method === 'POST' ) {
+				site.choice = { ...site.choice, ...body };
+			}
+
+			return reply( site.choice );
 		}
 
 		if ( method === 'POST' ) {
@@ -107,7 +121,18 @@ function fakeSite(
 	return site;
 }
 
-const posts = ( site ) => site.calls.filter( ( c ) => c.method === 'POST' );
+const posts = ( site ) =>
+	site.calls.filter(
+		( c ) => c.method === 'POST' && c.url.includes( 'cloud/connection' )
+	);
+const voicePosts = ( site ) =>
+	site.calls.filter(
+		( c ) => c.method === 'POST' && c.url.includes( 'tta/v1/voice' )
+	);
+const save = async () => {
+	fireEvent.click( screen.getByRole( 'button', { name: 'Save' } ) );
+	await act( async () => {} );
+};
 const type = ( value ) =>
 	fireEvent.change( screen.getByLabelText( 'Email for usage notices' ), {
 		target: { value },
@@ -125,6 +150,8 @@ const pressConnect = async () => {
 
 afterEach( () => {
 	delete window.fetch;
+	delete window.speechSynthesis;
+	delete window.SpeechSynthesisUtterance;
 } );
 
 describe( 'looksLikeEmail', () => {
@@ -151,52 +178,355 @@ describe( 'Voice › Voice', () => {
 
 		await screen.findByText( 'Connect the natural voice' );
 
-		expect( site.calls.map( ( c ) => c.method + ' ' + c.url ) ).toEqual( [
+		expect(
+			site.calls.map( ( c ) => c.method + ' ' + c.url ).sort()
+		).toEqual( [
 			'GET https://site.test/wp-json/tta/v1/cloud/connection?refresh=true',
-			'GET https://site.test/wp-json/tta/v1/home',
+			'GET https://site.test/wp-json/tta/v1/voice',
 		] );
 	} );
 
-	describe( 'the voice in use', () => {
-		it( 'shows the engine, the language, the voice and where the audio lives', async () => {
+	describe( 'what makes the sound', () => {
+		const browserVoices = [
+			{ name: 'Samantha', lang: 'en-US' },
+			{ name: 'Daniel', lang: 'en-GB' },
+			{ name: 'Thomas', lang: 'fr-FR' },
+			{ name: 'Amelie', lang: 'fr-FR' },
+		];
+		const giveBrowserVoices = () => {
+			window.speechSynthesis = {
+				getVoices: () => browserVoices,
+				addEventListener: jest.fn(),
+				removeEventListener: jest.fn(),
+				cancel: jest.fn(),
+				speak: jest.fn(),
+			};
+			window.SpeechSynthesisUtterance = function ( text ) {
+				this.text = text;
+			};
+		};
+
+		it( 'offers the browser voice and the natural voice, and marks the one in use', async () => {
 			fakeSite();
 			renderWithApp( <VoiceVoice /> );
 
 			expect(
-				await screen.findByText( 'AtlasVoice TTS' )
-			).toBeInTheDocument();
-			expect( screen.getByText( 'en-GB' ) ).toBeInTheDocument();
-			expect( screen.getByText( 'Emma' ) ).toBeInTheDocument();
+				await screen.findByRole( 'radio', { name: /Browser voice/ } )
+			).toBeChecked();
 			expect(
-				screen.getByText( 'Saved as MP3 files on your site' )
+				screen.getByRole( 'radio', { name: /Natural voice/ } )
+			).not.toBeChecked();
+			expect( screen.getAllByRole( 'radio' ) ).toHaveLength( 2 );
+		} );
+
+		it( 'does not let the natural voice be chosen before the site is connected', async () => {
+			fakeSite();
+			renderWithApp( <VoiceVoice /> );
+
+			const natural = await screen.findByRole( 'radio', {
+				name: /Natural voice/,
+			} );
+			expect( natural ).toBeDisabled();
+			expect( natural ).toHaveAccessibleDescription(
+				/Connect it below to choose it\./
+			);
+		} );
+
+		it( 'follows the connection made on this screen, not the first answer', async () => {
+			fakeSite();
+			renderWithApp( <VoiceVoice /> );
+			await screen.findByText( 'Connect the natural voice' );
+
+			agree();
+			await pressConnect();
+
+			expect(
+				await screen.findByRole( 'radio', { name: /Natural voice/ } )
+			).toBeEnabled();
+		} );
+
+		it( 'writes nothing until Save is pressed', async () => {
+			giveBrowserVoices();
+			const site = fakeSite();
+			renderWithApp( <VoiceVoice /> );
+
+			fireEvent.change( await screen.findByLabelText( 'Language' ), {
+				target: { value: 'fr-FR' },
+			} );
+
+			expect( voicePosts( site ) ).toHaveLength( 0 );
+			expect( screen.getByText( 'Unsaved changes' ) ).toBeInTheDocument();
+		} );
+
+		it( 'chooses a voice of the new language with the language, and saves both', async () => {
+			giveBrowserVoices();
+			const site = fakeSite( NOT_CONNECTED, {
+				choice: { ...CHOICE, language: 'en-US', voice: 'Samantha' },
+			} );
+			renderWithApp( <VoiceVoice /> );
+
+			fireEvent.change( await screen.findByLabelText( 'Language' ), {
+				target: { value: 'fr-FR' },
+			} );
+			expect( screen.getByLabelText( 'Voice' ) ).toHaveValue( 'Thomas' );
+
+			fireEvent.change( screen.getByLabelText( 'Voice' ), {
+				target: { value: 'Amelie' },
+			} );
+			await save();
+
+			expect( voicePosts( site ) ).toHaveLength( 1 );
+			expect( voicePosts( site )[ 0 ].body ).toEqual( {
+				language: 'fr-FR',
+				voice: 'Amelie',
+			} );
+			expect(
+				await screen.findByText( 'All changes saved' )
 			).toBeInTheDocument();
 		} );
 
-		it( 'links to the classic screen to change it, and says so', async () => {
+		it( 'keeps a saved voice on the list when this browser does not have it', async () => {
+			giveBrowserVoices();
+			fakeSite( NOT_CONNECTED, {
+				choice: {
+					...CHOICE,
+					language: 'bn-BD',
+					voice: 'A phone-only voice',
+				},
+			} );
+			renderWithApp( <VoiceVoice /> );
+
+			expect( await screen.findByLabelText( 'Language' ) ).toHaveValue(
+				'bn-BD'
+			);
+			expect( screen.getByLabelText( 'Voice' ) ).toHaveValue(
+				'A phone-only voice'
+			);
+			expect(
+				screen.getByText( 'All changes saved' )
+			).toBeInTheDocument();
+		} );
+
+		it( 'saves the speed, the volume and the pitch of the browser voice', async () => {
+			giveBrowserVoices();
+			const site = fakeSite( NOT_CONNECTED, {
+				choice: { ...CHOICE, language: 'en-US', voice: 'Samantha' },
+			} );
+			renderWithApp( <VoiceVoice /> );
+
+			fireEvent.change( await screen.findByLabelText( 'Pitch' ), {
+				target: { value: '2' },
+			} );
+			fireEvent.change(
+				screen.getByRole( 'spinbutton', { name: 'Speed' } ),
+				{ target: { value: '1.5' } }
+			);
+			await save();
+
+			expect( voicePosts( site )[ 0 ].body ).toEqual( {
+				pitch: 2,
+				rate: 1.5,
+			} );
+		} );
+
+		it( 'plays a sample with the voice on screen', async () => {
+			giveBrowserVoices();
+			fakeSite( NOT_CONNECTED, {
+				choice: { ...CHOICE, language: 'en-GB', voice: 'Daniel' },
+			} );
+			renderWithApp( <VoiceVoice /> );
+
+			fireEvent.click(
+				await screen.findByRole( 'button', { name: 'Play a sample' } )
+			);
+
+			expect( window.speechSynthesis.cancel ).toHaveBeenCalled();
+			const spoken = window.speechSynthesis.speak.mock.calls[ 0 ][ 0 ];
+			expect( spoken.voice ).toEqual( { name: 'Daniel', lang: 'en-GB' } );
+			expect( spoken.lang ).toBe( 'en-GB' );
+			expect( spoken.rate ).toBe( 1 );
+		} );
+
+		it( 'says so when the browser offers no voices', async () => {
 			fakeSite();
 			renderWithApp( <VoiceVoice /> );
 
-			const link = await screen.findByRole( 'link', {
-				name: 'Change the voice',
+			expect(
+				await screen.findByText( /This browser offers no voices/ )
+			).toBeInTheDocument();
+			expect(
+				screen.queryByRole( 'button', { name: 'Play a sample' } )
+			).not.toBeInTheDocument();
+		} );
+
+		it( 'gives the natural voice a language it can speak when it is chosen', async () => {
+			giveBrowserVoices();
+			const site = fakeSite( CONNECTED, {
+				choice: {
+					...CHOICE,
+					connected: true,
+					language: 'en-US',
+					voice: 'Samantha',
+				},
 			} );
-			expect( link ).toHaveAttribute(
+			renderWithApp( <VoiceVoice /> );
+
+			fireEvent.click(
+				await screen.findByRole( 'radio', { name: /Natural voice/ } )
+			);
+			expect( screen.getByLabelText( 'Language' ) ).toHaveValue(
+				'en-us'
+			);
+			expect(
+				screen.queryByLabelText( 'Voice' )
+			).not.toBeInTheDocument();
+
+			await save();
+
+			expect( voicePosts( site )[ 0 ].body ).toEqual( {
+				player_id: 3,
+				language: 'en-us',
+			} );
+		} );
+
+		it( 'lists the languages of the natural voice by name', async () => {
+			fakeSite( CONNECTED, {
+				choice: { ...CHOICE, player_id: 3, language: 'fr' },
+			} );
+			renderWithApp( <VoiceVoice /> );
+
+			const language = await screen.findByLabelText( 'Language' );
+			expect( language ).toHaveValue( 'fr' );
+			expect(
+				screen.getByRole( 'option', { name: 'French' } )
+			).toBeInTheDocument();
+			expect(
+				screen.getByRole( 'option', { name: 'English' } )
+			).toBeInTheDocument();
+		} );
+
+		it( 'gives the browser voice a voice it has when it is chosen again', async () => {
+			giveBrowserVoices();
+			const site = fakeSite( CONNECTED, {
+				choice: { ...CHOICE, player_id: 3, language: 'fr' },
+			} );
+			renderWithApp( <VoiceVoice /> );
+
+			fireEvent.click(
+				await screen.findByRole( 'radio', { name: /Browser voice/ } )
+			);
+			expect( screen.getByLabelText( 'Language' ) ).toHaveValue(
+				'fr-FR'
+			);
+			expect( screen.getByLabelText( 'Voice' ) ).toHaveValue( 'Thomas' );
+
+			await save();
+
+			expect( voicePosts( site )[ 0 ].body ).toEqual( {
+				player_id: 1,
+				language: 'fr-FR',
+				voice: 'Thomas',
+			} );
+		} );
+
+		it( 'names a Pro engine that is in use and links to the classic screen for its voices', async () => {
+			fakeSite( CONNECTED, {
+				choice: {
+					...CHOICE,
+					player_id: 6,
+					language: 'en',
+					voice: 'uLJQ::jephthah',
+					players: [
+						...CHOICE.players,
+						{
+							id: 6,
+							name: 'ElevenLabs TTS',
+							pro: true,
+							stores_audio: true,
+						},
+						{
+							id: 7,
+							name: 'AtlasVoice Cloud',
+							pro: true,
+							stores_audio: true,
+						},
+					],
+				},
+			} );
+			renderWithApp( <VoiceVoice />, { boot: { isPro: true } } );
+
+			expect(
+				await screen.findByRole( 'radio', { name: /ElevenLabs TTS/ } )
+			).toBeChecked();
+			// Only the Pro engine in use is listed, not every Pro engine.
+			expect( screen.getAllByRole( 'radio' ) ).toHaveLength( 3 );
+
+			// Trying another engine does not take the Pro engine off the
+			// list: the owner can go back to it without leaving the screen.
+			fireEvent.click(
+				screen.getByRole( 'radio', { name: /Browser voice/ } )
+			);
+			fireEvent.click(
+				screen.getByRole( 'radio', { name: /ElevenLabs TTS/ } )
+			);
+			expect(
+				screen.getByRole( 'radio', { name: /ElevenLabs TTS/ } )
+			).toBeChecked();
+			expect( screen.getByText( 'jephthah' ) ).toBeInTheDocument();
+			expect(
+				screen.getByRole( 'link', {
+					name: 'Change the voice on the classic screen',
+				} )
+			).toHaveAttribute(
 				'href',
 				'https://site.test/wp-admin/admin.php?page=text-to-audio&atlasvoice_ui=classic#/listening'
 			);
-			expect(
-				screen.getByText( /This opens the classic screen/ )
-			).toBeInTheDocument();
 		} );
 
-		it( 'still works when the voice cannot be read', async () => {
-			fakeSite( NOT_CONNECTED, { noSummary: true } );
+		it( 'shows why a save was refused and keeps the change on screen', async () => {
+			giveBrowserVoices();
+			const site = fakeSite( NOT_CONNECTED, {
+				choice: { ...CHOICE, language: 'en-US', voice: 'Samantha' },
+			} );
+			const { context } = renderWithApp( <VoiceVoice /> );
+			fireEvent.change( await screen.findByLabelText( 'Pitch' ), {
+				target: { value: '0' },
+			} );
+
+			const real = window.fetch;
+			window.fetch = jest.fn( ( url, options = {} ) =>
+				options.method === 'POST'
+					? Promise.resolve( {
+							ok: false,
+							status: 400,
+							json: async () => ( {
+								message: 'The pitch must be 0, 1 or 2.',
+							} ),
+					  } )
+					: real( url, options )
+			);
+			await save();
+
+			expect( context.notify ).toHaveBeenCalledWith(
+				'Not saved: The pitch must be 0, 1 or 2.',
+				'error'
+			);
+			expect( screen.getByLabelText( 'Pitch' ) ).toHaveValue( '0' );
+			expect( screen.getByText( 'Unsaved changes' ) ).toBeInTheDocument();
+			expect( voicePosts( site ) ).toHaveLength( 0 );
+		} );
+
+		it( 'still shows the connection when the voice cannot be loaded', async () => {
+			fakeSite( NOT_CONNECTED, { noChoice: true } );
 			renderWithApp( <VoiceVoice /> );
 
 			expect(
-				await screen.findByText(
-					'The current voice could not be read just now.'
-				)
-			).toBeInTheDocument();
+				(
+					await screen.findAllByText(
+						'The voice could not be loaded: nope'
+					)
+				).length
+			).toBeGreaterThan( 0 );
 			expect(
 				screen.getByText( 'Connect the natural voice' )
 			).toBeInTheDocument();
@@ -217,9 +547,9 @@ describe( 'Voice › Voice', () => {
 					name: 'Send post text to AtlasVoice to make the audio',
 				} )
 			).not.toBeChecked();
-			expect( screen.getByRole( 'status' ) ).toHaveTextContent(
-				'Tick the box to continue.'
-			);
+			expect(
+				screen.getByText( 'Tick the box to continue.' )
+			).toHaveAttribute( 'role', 'status' );
 		} );
 
 		it( 'says exactly what is sent, before anything is sent', async () => {
@@ -253,9 +583,9 @@ describe( 'Voice › Voice', () => {
 			await pressConnect();
 
 			expect( posts( site ) ).toHaveLength( 0 );
-			expect( screen.getByRole( 'status' ) ).toHaveTextContent(
-				'Add your email first.'
-			);
+			expect(
+				screen.getByText( 'Add your email first.' )
+			).toHaveAttribute( 'role', 'status' );
 		} );
 
 		it( 'connects after the email and the tick, and sends consent', async () => {
@@ -280,7 +610,9 @@ describe( 'Voice › Voice', () => {
 				},
 			] );
 			expect(
-				await screen.findByText( 'Connected' )
+				await screen.findByRole( 'heading', {
+					name: 'Natural voice connection',
+				} )
 			).toBeInTheDocument();
 			expect( context.notify ).toHaveBeenCalledWith(
 				'Connected. New audio uses the natural voice.'
@@ -457,7 +789,9 @@ describe( 'Voice › Voice', () => {
 				share_diagnostics: false,
 			} );
 			expect(
-				await screen.findByText( 'Connected' )
+				await screen.findByRole( 'heading', {
+					name: 'Natural voice connection',
+				} )
 			).toBeInTheDocument();
 		} );
 

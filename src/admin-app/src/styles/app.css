@@ -1215,6 +1215,55 @@ body.atlasvoice-app-page #atlasvoice-app {
 }
 
 /* ---------- Voice ---------- */
+.atlasvoice-root .atlasvoice-tiles {
+	display: grid;
+	grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+	gap: 12px;
+	margin: 0;
+	padding: 0;
+	border: 0;
+}
+
+.atlasvoice-root .atlasvoice-tile {
+	display: grid;
+	grid-template-columns: auto minmax(0, 1fr);
+	gap: 4px 10px;
+	align-items: center;
+	padding: 14px 16px;
+	border: 1px solid var(--atlasvoice-line);
+	border-radius: var(--atlasvoice-radius-lg);
+	background: var(--atlasvoice-surface);
+}
+
+.atlasvoice-root .atlasvoice-tile.is-on {
+	border-color: var(--atlasvoice-accent);
+	box-shadow: 0 0 0 1px var(--atlasvoice-accent);
+}
+
+.atlasvoice-root .atlasvoice-tile input[type="radio"] {
+	margin: 0;
+}
+
+.atlasvoice-root .atlasvoice-tile label {
+	display: flex;
+	align-items: center;
+	flex-wrap: wrap;
+	gap: 8px;
+	font-weight: 600;
+}
+
+.atlasvoice-root .atlasvoice-tile-text {
+	grid-column: 2;
+	margin: 0;
+}
+
+.atlasvoice-root .atlasvoice-voice-form {
+	display: flex;
+	flex-direction: column;
+	gap: 16px;
+	max-width: 520px;
+}
+
 .atlasvoice-root .atlasvoice-notice-gap {
 	margin-bottom: 12px;
 }
