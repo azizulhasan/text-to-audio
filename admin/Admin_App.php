@@ -37,6 +37,18 @@ class Admin_App {
 	const DEFAULT_UI = self::UI_CLASSIC;
 
 	/**
+	 * Whether the new screens are offered to people at all. It stays false
+	 * while they are being built: a site can still be switched by hand (WP-CLI,
+	 * the option) for testing, but nobody is invited to placeholders.
+	 */
+	const AVAILABLE = false;
+
+	/**
+	 * Nonce action of the link that switches the UI from a classic screen.
+	 */
+	const SWITCH_ACTION = 'atlasvoice_switch_ui';
+
+	/**
 	 * Remembers the one-time welcome for sites that update: 'none' for a new
 	 * install, 'seen' once it was closed. A site without the option was
 	 * installed before the new screens existed, so its welcome is pending.
@@ -120,6 +132,80 @@ class Admin_App {
 		 * @param bool $ready False until Pro says it does.
 		 */
 		return (bool) apply_filters( 'atlasvoice_admin_app_pro_ready', false );
+	}
+
+	/**
+	 * Whether the new screens are offered on this site.
+	 *
+	 * @return bool
+	 */
+	public static function is_available() {
+		/**
+		 * Filters whether the new admin screens are offered to the site's admins.
+		 *
+		 * @param bool $available Default: the plugin's own setting.
+		 */
+		return (bool) apply_filters( 'atlasvoice_admin_app_available', self::AVAILABLE ) && self::is_built() && self::pro_is_ready();
+	}
+
+	/**
+	 * A link that switches the UI when clicked. It changes what is saved, so
+	 * it carries a nonce and is only honoured for an administrator.
+	 *
+	 * @param string $ui 'new' or 'classic'.
+	 *
+	 * @return string
+	 */
+	public static function switch_url( $ui ) {
+		return wp_nonce_url(
+			add_query_arg(
+				array(
+					'page'                 => 'text-to-audio',
+					'atlasvoice_switch_ui' => $ui,
+				),
+				admin_url( 'admin.php' )
+			),
+			self::SWITCH_ACTION
+		);
+	}
+
+	/**
+	 * Handles a click on a switch link, then reloads without the link's
+	 * arguments so a refresh or a bookmark cannot switch again. Runs on admin_init.
+	 */
+	public static function handle_switch_link() {
+		if ( ! isset( $_GET['atlasvoice_switch_ui'], $_GET['page'] ) || 'text-to-audio' !== $_GET['page'] ) {
+			return;
+		}
+
+		check_admin_referer( self::SWITCH_ACTION );
+
+		if ( ! current_user_can( 'manage_options' ) ) {
+			wp_die( esc_html__( 'You do not have permission to do this.', 'text-to-audio' ), 403 );
+		}
+
+		self::set_ui( sanitize_key( wp_unslash( $_GET['atlasvoice_switch_ui'] ) ) );
+
+		wp_safe_redirect( admin_url( 'admin.php?page=text-to-audio' ) );
+		exit;
+	}
+
+	/**
+	 * On the classic AtlasVoice screen: one notice with the way to the new
+	 * screens. Runs on admin_notices; prints nothing anywhere else.
+	 */
+	public static function classic_screen_notice() {
+		if ( ! \TTA\TTA_Helper::is_text_to_audio_page() || ! self::is_available() || self::UI_NEW === self::get_ui() || ! current_user_can( 'manage_options' ) ) {
+			return;
+		}
+
+		printf(
+			'<div class="notice notice-info"><p><strong>%1$s</strong> %2$s <a class="button button-secondary" href="%3$s">%4$s</a></p></div>',
+			esc_html__( 'AtlasVoice has new screens.', 'text-to-audio' ),
+			esc_html__( 'They use the same saved settings, so you can switch back at any time.', 'text-to-audio' ),
+			esc_url( self::switch_url( self::UI_NEW ) ),
+			esc_html__( 'Try the new screens', 'text-to-audio' )
+		);
 	}
 
 	/**

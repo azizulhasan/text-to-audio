@@ -366,6 +366,10 @@ add_action('wp_initialize_site', function ($new_site) {
  */
 add_action('plugins_loaded', ['TTA\\TTA_Activator', 'maybe_set_default_mode'], 1);
 
+// TTS-374: the link and the notice that take a site from the classic screens to the new ones.
+add_action( 'admin_init', array( '\TTA_Admin\Admin_App', 'handle_switch_link' ) );
+add_action( 'admin_notices', array( '\TTA_Admin\Admin_App', 'classic_screen_notice' ) );
+
 // TTS-376: everything an admin can do on a screen is also a WP-CLI command.
 if ( defined( 'WP_CLI' ) && WP_CLI ) {
     add_action( 'plugins_loaded', array( '\TTA\CLI\Commands', 'register' ) );
