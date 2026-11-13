@@ -373,11 +373,13 @@ describe( 'Player › Read-along', () => {
 			} );
 			renderWithApp( <PlayerReadAlong /> );
 
-			// Both the word and the default fade (70%) are readable.
+			// The word colours pass. The default fade (70%) is 4.4 to 1 on a
+			// white page, just under 4.5, and the screen says so.
 			expect( await screen.findAllByText( 'Easy to read' ) ).toHaveLength(
-				2
+				1
 			);
-			expect( screen.queryByText( 'Hard to read' ) ).toBeNull();
+			expect( screen.getByText( /Contrast 7\.4 to 1\./ ) ).toBeVisible();
+			expect( screen.getByText( /Contrast 4\.4 to 1\./ ) ).toBeVisible();
 		} );
 
 		it( 'warns, in words and with the ratio, when the word cannot be read', async () => {
@@ -389,8 +391,10 @@ describe( 'Player › Read-along', () => {
 			} );
 			renderWithApp( <PlayerReadAlong /> );
 
-			expect( await screen.findByText( 'Hard to read' ) ).toBeVisible();
-			// One line for the word, one for the faded text.
+			// One line for the word, one for the faded text: both fail here.
+			expect( await screen.findAllByText( 'Hard to read' ) ).toHaveLength(
+				2
+			);
 			expect(
 				screen.getAllByText( /Text needs at least 4\.5 to 1\./ )
 			).toHaveLength( 2 );
@@ -398,6 +402,7 @@ describe( 'Player › Read-along', () => {
 	} );
 
 	it( 'warns when the faded text becomes hard to read, and not when it is readable', async () => {
+		// Sentence mode: the only contrast line on screen is the one for the fade.
 		fakeSite( { tta__highlight_enabled: true } );
 		renderWithApp( <PlayerReadAlong /> );
 		const slider = await screen.findByRole( 'slider' );
@@ -407,9 +412,7 @@ describe( 'Player › Read-along', () => {
 
 		fireEvent.change( slider, { target: { value: '85' } } );
 		expect( screen.queryByText( 'Hard to read' ) ).toBeNull();
-		expect( screen.getAllByText( 'Easy to read' ).length ).toBeGreaterThan(
-			0
-		);
+		expect( screen.getByText( 'Easy to read' ) ).toBeVisible();
 	} );
 
 	it( 'names each colour button with what it is for and its value', async () => {

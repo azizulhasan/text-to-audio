@@ -401,7 +401,7 @@ export default function PlayerReadAlong() {
 																'text-to-audio'
 															) }
 															help={ __(
-																'Lower is more faded. 70 keeps the text readable.',
+																'Lower is more faded. 75 or more keeps the text easy to read on a white page.',
 																'text-to-audio'
 															) }
 															value={ visibility }
