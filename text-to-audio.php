@@ -370,6 +370,9 @@ add_action('plugins_loaded', ['TTA\\TTA_Activator', 'maybe_set_default_mode'], 1
 add_action( 'admin_init', array( '\TTA_Admin\Admin_App', 'handle_switch_link' ) );
 add_action( 'admin_notices', array( '\TTA_Admin\Admin_App', 'classic_screen_notice' ) );
 
+// TTS-378: a new key, plan or licence makes the kept Cloud account answer out of date.
+add_action( 'update_option_tta_atlasvoice_service', array( '\TTA\Cloud\Account', 'forget_on_change' ), 10, 2 );
+
 // TTS-376: everything an admin can do on a screen is also a WP-CLI command.
 if ( defined( 'WP_CLI' ) && WP_CLI ) {
     add_action( 'plugins_loaded', array( '\TTA\CLI\Commands', 'register' ) );

@@ -43,6 +43,8 @@ class TTA_Api_Routes {
 		Pronunciation_Controller::register_routes();
 		// Player › Read-along: described routes beside the classic highlight route.
 		Read_Along_Controller::register_routes();
+		// TTS-378: the site's AtlasVoice Cloud account, read-only.
+		Cloud_Account_Controller::register_routes();
 
 
 		// register listening route.
