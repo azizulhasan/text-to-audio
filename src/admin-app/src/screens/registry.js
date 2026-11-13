@@ -18,6 +18,11 @@ const BUILT_IN = {
 			/* webpackChunkName: "screen-voice-languages" */ './VoiceLanguages'
 		)
 	),
+	'voice:providers': lazy( () =>
+		import(
+			/* webpackChunkName: "screen-voice-providers" */ './VoiceProviders'
+		)
+	),
 	'voice:voice': lazy( () =>
 		import( /* webpackChunkName: "screen-voice-voice" */ './VoiceVoice' )
 	),
