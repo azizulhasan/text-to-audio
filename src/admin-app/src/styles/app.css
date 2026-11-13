@@ -1029,7 +1029,7 @@ body.atlasvoice-app-page #atlasvoice-app {
 	padding: 12px 16px;
 	border: 1px solid var(--atlasvoice-line);
 	border-left-width: 4px;
-	border-radius: var(--atlasvoice-radius);
+	border-radius: var(--atlasvoice-radius-lg);
 	background: var(--atlasvoice-surface);
 }
 
@@ -1374,6 +1374,29 @@ body.atlasvoice-app-page #atlasvoice-app {
 	font-size: 13px;
 	line-height: 1.4;
 	opacity: 0.8;
+}
+
+/* ---------- Player shortcode ---------- */
+.atlasvoice-root .atlasvoice-copyrow {
+	display: flex;
+	align-items: center;
+	gap: 12px;
+	flex-wrap: wrap;
+}
+
+.atlasvoice-root .atlasvoice-copyrow-code {
+	flex: 1;
+	min-width: 0;
+	padding: 10px 12px;
+	border: 1px solid var(--atlasvoice-line);
+	border-radius: var(--atlasvoice-radius-lg);
+	background: var(--atlasvoice-canvas);
+	overflow-wrap: anywhere;
+	user-select: all;
+}
+
+.atlasvoice-root .atlasvoice-copyrow-note {
+	margin: 12px 0 0;
 }
 
 .atlasvoice-root .atlasvoice-voice-form {

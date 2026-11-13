@@ -44,6 +44,9 @@ const BUILT_IN = {
 			/* webpackChunkName: "screen-player-ai-notice" */ './PlayerAiNotice'
 		)
 	),
+	'player:embed': lazy( () =>
+		import( /* webpackChunkName: "screen-player-embed" */ './PlayerEmbed' )
+	),
 	'player:look': lazy( () =>
 		import( /* webpackChunkName: "screen-player-look" */ './PlayerLook' )
 	),
