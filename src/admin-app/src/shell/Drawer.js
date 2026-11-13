@@ -94,7 +94,7 @@ export default function Drawer( {
 				onClick={ onClose }
 				aria-hidden="true"
 			/>
-			<aside
+			<div
 				className="atlasvoice-drawer"
 				role="dialog"
 				aria-modal="true"
@@ -126,7 +126,7 @@ export default function Drawer( {
 				{ footer && (
 					<div className="atlasvoice-footer">{ footer }</div>
 				) }
-			</aside>
+			</div>
 		</div>,
 		document.body
 	);

@@ -16,7 +16,14 @@
     "@wordpress/icons": "^10.0.0"
   },
   "devDependencies": {
+    "@testing-library/jest-dom": "^6.9.1",
+    "@testing-library/react": "^14.3.1",
+    "@testing-library/user-event": "^14.6.10",
+    "@wordpress/components": "^28.13.0",
+    "@wordpress/element": "^10.1.0",
+    "@wordpress/i18n": "^7.1.0",
     "@wordpress/scripts": "^30.0.0",
+    "jest-axe": "^8.0.0",
     "tailwindcss": "^3.4.19",
     "typescript": "~5.5.4"
   }
