@@ -268,7 +268,24 @@ class Account {
 				'dashboard' => '',
 				'upgrade'   => '',
 			),
+			'connection' => array(
+				'email'      => '',
+				'key_prefix' => '',
+			),
 		);
+
+		// How this site is connected is the site's own stored data, not the
+		// service's answer, so it is read now and never from the kept answer.
+		// Only the first characters of the key are stored for display; the key
+		// itself is never read here.
+		unset( $account['connection'] );
+		if ( ! empty( $account['connected'] ) ) {
+			$state                 = TTA_AtlasVoice_Service::public_state();
+			$account['connection'] = array(
+				'email'      => sanitize_email( (string) $state['email'] ),
+				'key_prefix' => sanitize_text_field( (string) $state['keyPrefix'] ),
+			);
+		}
 
 		foreach ( $defaults as $name => $default ) {
 			if ( ! array_key_exists( $name, $account ) ) {

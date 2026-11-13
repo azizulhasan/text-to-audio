@@ -288,6 +288,42 @@ class AccountTest extends WP_UnitTestCase {
 		$this->assertLessThanOrEqual( time() + Account::FAILURE_SECONDS, $timeout );
 	}
 
+	// How the site is connected.
+
+	public function test_the_account_says_how_the_site_is_connected_without_the_key() {
+		$state          = get_option( Service::OPTION );
+		$state['email'] = 'owner@example.org';
+		update_option( Service::OPTION, $state, false );
+
+		$account = Account::get();
+
+		$this->assertSame( 'owner@example.org', $account['connection']['email'] );
+		$this->assertSame( 'av_live_secr', $account['connection']['key_prefix'] );
+		$this->assertStringNotContainsString( self::KEY, wp_json_encode( $account ) );
+	}
+
+	public function test_the_connection_is_read_from_the_site_not_from_the_kept_answer() {
+		Account::get();
+
+		$kept                             = get_transient( Account::CACHE );
+		$kept['connection']['key_prefix'] = 'planted';
+		set_transient( Account::CACHE, $kept, 60 );
+
+		$this->assertSame( 'av_live_secr', Account::get()['connection']['key_prefix'] );
+	}
+
+	public function test_a_site_that_is_not_connected_has_an_empty_connection() {
+		delete_option( Service::OPTION );
+
+		$this->assertSame(
+			array(
+				'email'      => '',
+				'key_prefix' => '',
+			),
+			Account::get()['connection']
+		);
+	}
+
 	// Staying up to date.
 
 	public function test_a_licence_change_clears_the_kept_answer() {

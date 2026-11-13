@@ -108,6 +108,9 @@
 .atlasvoice-root .atlasvoice-table {
 	display: table;
 }
+.atlasvoice-root .atlasvoice-grid {
+	display: grid;
+}
 
 /* ---------- Our page inside wp-admin ---------- */
 
@@ -972,6 +975,169 @@ body.atlasvoice-app-page #atlasvoice-app {
 	place-items: center;
 	font-size: 10px;
 	flex: none;
+}
+
+/* ---------- cards in a grid, facts, rows, the usage meter ---------- */
+.atlasvoice-root .atlasvoice-grid {
+	display: grid;
+	gap: 16px;
+	align-items: start;
+}
+
+.atlasvoice-root .atlasvoice-grid.is-2 {
+	grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.atlasvoice-root .atlasvoice-card-title {
+	margin: 0;
+	font-size: 14px;
+	font-weight: 600;
+}
+
+.atlasvoice-root .atlasvoice-facts {
+	margin: 16px 0 0;
+}
+
+.atlasvoice-root .atlasvoice-fact {
+	display: flex;
+	justify-content: space-between;
+	gap: 16px;
+	padding: 8px 0;
+	border-top: 1px solid var(--atlasvoice-line-weak);
+}
+
+.atlasvoice-root .atlasvoice-facts:first-child {
+	margin-top: 0;
+}
+
+.atlasvoice-root .atlasvoice-facts:first-child .atlasvoice-fact:first-child {
+	padding-top: 0;
+	border-top: 0;
+}
+
+.atlasvoice-root .atlasvoice-fact dt {
+	color: var(--atlasvoice-text-weak);
+}
+
+.atlasvoice-root .atlasvoice-fact dd {
+	margin: 0;
+	text-align: left;
+	overflow-wrap: anywhere;
+}
+
+.atlasvoice-root .atlasvoice-usage-figure {
+	margin: 0 0 8px;
+	font-size: 15px;
+	font-weight: 500;
+}
+
+.atlasvoice-root .atlasvoice-meter {
+	display: block;
+	width: 100%;
+	height: 8px;
+	border: 0;
+	border-radius: 4px;
+	overflow: hidden;
+	background: var(--atlasvoice-line);
+	-webkit-appearance: none;
+	   -moz-appearance: none;
+	        appearance: none;
+	accent-color: var(--atlasvoice-accent);
+}
+
+.atlasvoice-root .atlasvoice-meter::-webkit-progress-bar {
+	background: var(--atlasvoice-line);
+}
+
+.atlasvoice-root .atlasvoice-meter::-webkit-progress-value {
+	background: var(--atlasvoice-accent);
+}
+
+.atlasvoice-root .atlasvoice-meter::-moz-progress-bar {
+	background: var(--atlasvoice-accent);
+}
+
+/* Amber for the bar itself: the warning text colour is too dark to read as
+   "amber" on a bar. 3.6 to 1 against the track, so the fill is still clear. */
+.atlasvoice-root .atlasvoice-meter.is-warn::-webkit-progress-value {
+	background: #b26200;
+}
+
+.atlasvoice-root .atlasvoice-meter.is-warn::-moz-progress-bar {
+	background: #b26200;
+}
+
+.atlasvoice-root .atlasvoice-meter.is-err::-webkit-progress-value {
+	background: var(--atlasvoice-err);
+}
+
+.atlasvoice-root .atlasvoice-meter.is-err::-moz-progress-bar {
+	background: var(--atlasvoice-err);
+}
+
+.atlasvoice-root .atlasvoice-usage-line {
+	margin: 8px 0 0;
+}
+
+.atlasvoice-root .atlasvoice-usage-line.is-warn {
+	color: var(--atlasvoice-warn);
+}
+
+.atlasvoice-root .atlasvoice-usage-line.is-err {
+	color: var(--atlasvoice-err);
+}
+
+.atlasvoice-root .atlasvoice-actions {
+	display: flex;
+	align-items: center;
+	flex-wrap: wrap;
+	gap: 12px 16px;
+	margin-top: 16px;
+}
+
+.atlasvoice-root .atlasvoice-rows {
+	margin: 0;
+	padding: 0;
+	list-style: none;
+}
+
+.atlasvoice-root .atlasvoice-row {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 16px;
+	margin: 0;
+	padding: 12px 16px;
+}
+
+.atlasvoice-root .atlasvoice-row + .atlasvoice-row {
+	border-top: 1px solid var(--atlasvoice-line-weak);
+}
+
+.atlasvoice-root .atlasvoice-row-text {
+	display: flex;
+	flex-direction: column;
+	gap: 2px;
+	min-width: 0;
+}
+
+.atlasvoice-root .atlasvoice-row-text b {
+	font-weight: 500;
+}
+
+@media (max-width: 959px) {
+
+	.atlasvoice-root .atlasvoice-grid.is-2 {
+		grid-template-columns: minmax(0, 1fr);
+	}
+}
+
+@media (max-width: 600px) {
+
+	.atlasvoice-root .atlasvoice-row {
+		flex-direction: column;
+		align-items: flex-start;
+	}
 }
 
 /* ---------- 782 to 1279: the rail shrinks to icons ---------- */

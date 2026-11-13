@@ -13,6 +13,11 @@ import { lazy } from '@wordpress/element';
 import { applyFilters } from '@wordpress/hooks';
 
 const BUILT_IN = {
+	'account:usage': lazy( () =>
+		import(
+			/* webpackChunkName: "screen-account-usage" */ './AccountUsage'
+		)
+	),
 	'player:read': lazy( () =>
 		import(
 			/* webpackChunkName: "screen-player-read-along" */ './PlayerReadAlong'
