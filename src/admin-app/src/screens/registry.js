@@ -39,6 +39,11 @@ const BUILT_IN = {
 			/* webpackChunkName: "screen-account-usage" */ './AccountUsage'
 		)
 	),
+	'content:areas': lazy( () =>
+		import(
+			/* webpackChunkName: "screen-content-areas" */ './ContentAreas'
+		)
+	),
 	'content:text': lazy( () =>
 		import( /* webpackChunkName: "screen-content-text" */ './ContentText' )
 	),

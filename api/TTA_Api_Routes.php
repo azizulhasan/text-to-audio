@@ -73,6 +73,8 @@ class TTA_Api_Routes {
 		Where_Controller::register_routes();
 		// TTS-347: which text of a post is read aloud (What is read > Text to read).
 		Text_Controller::register_routes();
+		// TTS-347: which part of a page is read aloud (What is read > Page areas).
+		Areas_Controller::register_routes();
 
 
 		// register listening route.

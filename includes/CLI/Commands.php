@@ -44,6 +44,7 @@ class Commands {
 			'atlasvoice embed'         => Embed_Command::class,
 			'atlasvoice where'         => Where_Command::class,
 			'atlasvoice text'          => Text_Command::class,
+			'atlasvoice areas'         => Areas_Command::class,
 		);
 
 		/**
