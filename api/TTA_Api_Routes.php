@@ -71,6 +71,8 @@ class TTA_Api_Routes {
 		Embed_Controller::register_routes();
 		// TTS-347: which posts get a player (What is read > Where it appears).
 		Where_Controller::register_routes();
+		// TTS-347: which text of a post is read aloud (What is read > Text to read).
+		Text_Controller::register_routes();
 
 
 		// register listening route.

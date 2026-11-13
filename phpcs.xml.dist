@@ -30,6 +30,7 @@
 	<file>./api/AI_Notice_Controller.php</file>
 	<file>./api/Embed_Controller.php</file>
 	<file>./api/Where_Controller.php</file>
+	<file>./api/Text_Controller.php</file>
 	<file>./includes/Content</file>
 	<file>./includes/Voice</file>
 	<file>./includes/Home</file>
