@@ -63,6 +63,8 @@ class TTA_Api_Routes {
 		Placement_Controller::register_routes();
 		// TTS-347: the colours, size, border and spacing of the player (Player > Look).
 		Look_Controller::register_routes();
+		// TTS-347: the words, tooltips and icons of the player button (Player > Buttons & words).
+		Words_Controller::register_routes();
 
 
 		// register listening route.

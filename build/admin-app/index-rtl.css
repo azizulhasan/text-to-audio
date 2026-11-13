@@ -1433,6 +1433,34 @@ body.atlasvoice-app-page #atlasvoice-app {
 	margin-bottom: 16px;
 }
 
+/* ---------- Player words ---------- */
+.atlasvoice-root .atlasvoice-wordrow {
+	margin-right: 0;
+	margin-left: 0;
+	margin-bottom: 0;
+	padding: 0;
+	border: 0;
+	min-width: 0;
+}
+
+.atlasvoice-root .atlasvoice-wordrow legend {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	margin-bottom: 8px;
+	padding: 0;
+	font-weight: 600;
+}
+
+.atlasvoice-root .atlasvoice-wordrow + .atlasvoice-wordrow {
+	margin-top: 24px;
+}
+
+.atlasvoice-root .atlasvoice-wordrow-icon {
+	display: inline-flex;
+	color: var(--atlasvoice-text-weak);
+}
+
 .atlasvoice-root .atlasvoice-voice-form {
 	display: flex;
 	flex-direction: column;

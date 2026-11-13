@@ -39,6 +39,7 @@ class Commands {
 			'atlasvoice providers'     => Providers_Command::class,
 			'atlasvoice placement'     => Placement_Command::class,
 			'atlasvoice look'          => Look_Command::class,
+			'atlasvoice words'         => Words_Command::class,
 		);
 
 		/**

@@ -6,7 +6,8 @@ import { useApp } from '../app-context';
 
 /**
  * Whether a value on screen is the value that is saved. A list (the roles
- * that see the player) is compared by what it holds: ticking a box and
+ * that see the player) or a map (the words per state) is compared by what
+ * it holds: ticking a box and
  * unticking it again builds a new list, which is not a change.
  *
  * @param {*} a One value.
@@ -22,6 +23,22 @@ export function sameValue( a, b ) {
 		return (
 			a.length === b.length &&
 			a.every( ( item, index ) => sameValue( item, b[ index ] ) )
+		);
+	}
+
+	const isMap = ( value ) =>
+		value !== null && typeof value === 'object' && ! Array.isArray( value );
+
+	if ( isMap( a ) && isMap( b ) ) {
+		const keys = Object.keys( a );
+
+		return (
+			keys.length === Object.keys( b ).length &&
+			keys.every(
+				( key ) =>
+					Object.prototype.hasOwnProperty.call( b, key ) &&
+					sameValue( a[ key ], b[ key ] )
+			)
 		);
 	}
 

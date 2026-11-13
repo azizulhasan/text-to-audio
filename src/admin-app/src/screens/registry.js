@@ -47,6 +47,9 @@ const BUILT_IN = {
 			/* webpackChunkName: "screen-player-placement" */ './PlayerPlacement'
 		)
 	),
+	'player:words': lazy( () =>
+		import( /* webpackChunkName: "screen-player-words" */ './PlayerWords' )
+	),
 	'player:read': lazy( () =>
 		import(
 			/* webpackChunkName: "screen-player-read-along" */ './PlayerReadAlong'
