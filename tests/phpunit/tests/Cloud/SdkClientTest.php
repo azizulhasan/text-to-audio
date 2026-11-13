@@ -170,7 +170,8 @@ class SdkClientTest extends WP_UnitTestCase {
 X-Evil: 1'
 		) )->client_name();
 
-		$this->assertStringNotContainsString( '', $name );
+		$this->assertStringNotContainsString( '
+', $name );
 		$this->assertStringNotContainsString(
 			'
 ',
@@ -205,6 +206,21 @@ X-Evil: 1'
 		$this->client->usage();
 
 		$this->assertNotSame( $this->transport->sent[0]->headers['X-Request-Id'], $this->transport->sent[1]->headers['X-Request-Id'] );
+	}
+
+	public function test_the_id_the_service_logged_is_the_one_returned() {
+		$this->transport->answers[] = $this->json( 200, array(), array( 'X-Request-Id' => '0b9d3c1e-7a52-4f0c-9d1e-2f6a8b7c5d41' ) );
+		$this->transport->answers[] = $this->json( 200, array(), array( 'X-Request-Id' => "bad id
+X-Evil: 1" ) );
+
+		$replaced = $this->client->usage();
+		$hostile  = $this->client->usage();
+
+		$this->assertSame( '0b9d3c1e-7a52-4f0c-9d1e-2f6a8b7c5d41', $replaced->request_id );
+		// A value that is not an id is ignored; the id that was sent is kept.
+		$this->assertSame( $this->transport->sent[1]->headers['X-Request-Id'], $hostile->request_id );
+		// The log line carries the same id as the result.
+		$this->assertSame( $replaced->request_id, $this->logger->lines[0]['context']['request_id'] );
 	}
 
 	public function test_registering_never_sends_a_key() {

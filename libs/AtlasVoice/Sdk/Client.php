@@ -253,6 +253,12 @@ final class Client {
 			}
 		}
 
+		// The service echoes the id it logged. It is normally the one that was
+		// sent; if the service replaced it, its id is the one to quote to support.
+		if ( isset( $response->headers['x-request-id'] ) && preg_match( '/^[\w.-]{8,64}$/', $response->headers['x-request-id'] ) ) {
+			$request_id = $response->headers['x-request-id'];
+		}
+
 		return new Result( $response->status, $data, $error, $message, $response->headers, $response->transport_error, $request_id );
 	}
 
