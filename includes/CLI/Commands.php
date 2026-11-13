@@ -31,6 +31,7 @@ class Commands {
 			'atlasvoice read-along'    => Read_Along_Command::class,
 			'atlasvoice account'       => Account_Command::class,
 			'atlasvoice plans'         => Plans_Command::class,
+			'atlasvoice status'        => Status_Command::class,
 		);
 
 		/**

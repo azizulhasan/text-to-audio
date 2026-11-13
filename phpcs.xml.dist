@@ -18,6 +18,8 @@
 	<file>./api/Cloud_Account_Controller.php</file>
 	<file>./api/Plans_Controller.php</file>
 	<file>./includes/Account</file>
+	<file>./api/Home_Controller.php</file>
+	<file>./includes/Home</file>
 	<file>./includes/Player</file>
 	<file>./includes/Cloud</file>
 	<file>./libs/AtlasVoice</file>

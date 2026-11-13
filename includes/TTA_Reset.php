@@ -72,7 +72,11 @@ class TTA_Reset {
             'tta_review_notice_next_show_time',
             'tta_feedback_notice_next_show_time',
 
-            'tta_mode_default_migrated'
+            'tta_mode_default_migrated',
+
+            // TTS-374: which admin screens the site uses, and the one-time welcome.
+            'tta_admin_ui',
+            'tta_admin_ui_welcome',
         );
 
         foreach ( $options as $option ) {
@@ -132,6 +136,8 @@ class TTA_Reset {
             'tts_plugin_compatible_notice_dismissed',
             'tts_setup_notice_dismissed',
             'tts_plugin_analytics_notice_dismissed',
+            // TTS-347: what a user closed on the new Home screen.
+            'atlasvoice_dismissed',
         );
         foreach ( $legacy_tts_user_meta as $um_key ) {
             // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
