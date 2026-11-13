@@ -76,6 +76,7 @@ jobs:
           if [ "${{ matrix.wp }}" != "latest" ]; then
             composer require -d tests/phpunit --dev --no-interaction --no-progress -W "wp-phpunit/wp-phpunit:~${{ matrix.wp }}.0"
           fi
+      # build/admin-app is committed, so the loader tests run without a JS build here.
       - name: Run PHPUnit
         working-directory: tests/phpunit
         run: vendor/bin/phpunit
@@ -90,10 +91,16 @@ jobs:
           node-version: 22
           cache: npm
       - run: npm ci
+      - name: Install the admin app's tools
+        run: npm run app:install
       - name: JS tests
         run: npm test
+      - name: Admin app lint and tests
+        run: npm run app:lint && npm run app:test
       - name: Production build
         run: npm run production
+      - name: Admin app bundle budget
+        run: npm run app:size
       - name: Assemble the plugin as it is released
         run: npx gulp clean:production copy
         env:

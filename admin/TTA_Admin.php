@@ -253,7 +253,8 @@ class TTA_Admin
      */
     public function enqueue_styles()
     {
-        if (TTA_Helper::is_text_to_audio_page()) {
+        // TTS-372: the classic stylesheet has unscoped rules; the new app brings its own.
+        if (TTA_Helper::is_text_to_audio_page() && ! Admin_App::is_enabled()) {
             // TTS-351: file-time version, like the player bundles, so a rebuilt dashboard is never served stale.
             wp_enqueue_style('text-to-audio-dashboard', plugin_dir_url(__FILE__) . 'css/minify/text-to-audio-dashboard.min.css', [], $this->asset_version('css/minify/text-to-audio-dashboard.min.css'), 'all');
         }
@@ -433,6 +434,12 @@ class TTA_Admin
 
         // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- admin page-name read for asset enqueue, no state mutation
         if (is_admin() && isset($_REQUEST['page']) && ('text-to-audio' == $_REQUEST['page'])) {
+            // TTS-372: the new admin app replaces the classic dashboard bundle on this
+            // page (never both: two React apps would fight over the same screen).
+            if ( Admin_App::is_enabled() ) {
+                Admin_App::enqueue();
+                return;
+            }
             /* Load react js */
             wp_enqueue_style('tts-bootstrap', plugin_dir_url(__FILE__) . 'css/minify/bootstrap.min.css', [], $this->version, 'all');
             wp_enqueue_script('TextToSpeech', plugin_dir_url(__FILE__) . 'js/build/TextToSpeech.min.js', array('wp-hooks',), $this->version, true);
@@ -983,6 +990,11 @@ class TTA_Admin
             && ( ! get_option( 'tta_onboarding_completed' ) || ( TTA_Helper::is_atlasvoice_addon_functional() && ! get_option( 'tta_pro_onboarding_completed' ) ) );
         if ( $show_wizard ) {
             echo "<div class='wpwrap'><div id='tts_welcome_wizard'></div></div>";
+            return;
+        }
+        // TTS-372: the new admin app, on sites that have switched to it.
+        if ( Admin_App::is_enabled() ) {
+            Admin_App::render_root();
             return;
         }
         echo "<div class='wpwrap'><div id='tts_dashboard_ui'></div></div>";

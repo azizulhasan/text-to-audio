@@ -26,6 +26,8 @@ const languagesDir = path.join(__dirname, '..', 'languages');
 const sourceToBuiltMap = {
     // Dashboard components map to dashboard UI build file
     'src/dashboard/components/': ['admin/js/build/text-to-audio-dashboard-ui.js'],
+    // TTS-372: the new admin app, built by wp-scripts into build/admin-app.
+    'src/admin-app/src/': ['build/admin-app/index.js'],
     // TTS-296: the player button bundle. Note the target has no `.min` — core
     // strips it before hashing (SCRIPT_DEBUG handling), so the name WordPress
     // actually looks for is md5('admin/js/build/text-to-audio-button.js'). The

@@ -1,0 +1,99 @@
+/**
+ * AtlasVoice design tokens (TTS-372, DESIGN.md).
+ *
+ * Every token lives on .atlasvoice-root, never on :root, so nothing leaks into
+ * the rest of wp-admin. Where WordPress has a design token (--wpds-*, WordPress
+ * 7.0+) ours is an alias of it; the fallback after the comma carries the full
+ * look on WordPress 6.6 to 6.9, where those tokens do not exist.
+ */
+.atlasvoice-root {
+
+	/* WordPress 6.6+ components read this for buttons, toggles and focus rings. */
+	--wp-admin-theme-color: #5646e5;
+	--wp-admin-theme-color--rgb: 86, 70, 229;
+	--wp-admin-theme-color-darker-10: #4536c9;
+	--wp-admin-theme-color-darker-10--rgb: 69, 54, 201;
+	--wp-admin-theme-color-darker-20: #3a2db3;
+	--wp-admin-theme-color-darker-20--rgb: 58, 45, 179;
+
+	/* Brand: Voice Indigo. */
+	--atlasvoice-accent: var(--wp-admin-theme-color, #5646e5);
+	--atlasvoice-accent-hover: #4536c9;
+	--atlasvoice-accent-press: #3a2db3;
+	--atlasvoice-brand-ink: #3a2db3;
+	--atlasvoice-brand-weak: var(--wpds-color-background-surface-brand, #eeedfd);
+	--atlasvoice-brand-line: #d6d3fb;
+
+	/* Coral is a fill only (logo bars, "New" badge), never a button or text. */
+	--atlasvoice-signal: #ff7853;
+	--atlasvoice-on-signal: #1e1e1e;
+
+	/* The Pro badge, the same in every AtlasAiDev plugin. */
+	--atlasvoice-pro: #1d2327;
+	--atlasvoice-on-pro: #f3d27a;
+
+	/* Surfaces and lines. */
+	--atlasvoice-surface: var(--wpds-color-background-surface-neutral-strong, #fff);
+	--atlasvoice-canvas: var(--wpds-color-background-surface-neutral-weak, #f4f4f4);
+	--atlasvoice-line: var(--wpds-color-stroke-surface-neutral, #e0e0e0);
+	--atlasvoice-line-weak: var(--wpds-color-stroke-surface-neutral-weak, #f0f0f0);
+
+	/* Text. */
+	--atlasvoice-text: var(--wpds-color-foreground-content-neutral, #1e1e1e);
+	--atlasvoice-text-weak: var(--wpds-color-foreground-content-neutral-weak, #757575);
+
+	/* Status: each is a text colour that passes 4.5:1 on its own tinted ground. */
+	--atlasvoice-ok: var(--wpds-color-foreground-content-success, #007f30);
+	--atlasvoice-ok-bg: var(--wpds-color-background-surface-success-weak, #ebffed);
+	--atlasvoice-warn: var(--wpds-color-foreground-content-warning, #926300);
+	--atlasvoice-warn-bg: var(--wpds-color-background-surface-warning-weak, #fff7e1);
+	--atlasvoice-err: var(--wpds-color-foreground-content-error, #cc1818);
+	--atlasvoice-err-bg: var(--wpds-color-background-surface-error-weak, #fff6f5);
+	--atlasvoice-info: var(--wpds-color-foreground-content-info, #006bd7);
+	--atlasvoice-info-bg: var(--wpds-color-background-surface-info-weak, #f3f9ff);
+
+	/* Shape, type and depth. */
+	--atlasvoice-radius: var(--wpds-border-radius-md, 4px);
+	--atlasvoice-radius-lg: var(--wpds-border-radius-lg, 8px);
+	--atlasvoice-mono: var(--wpds-typography-font-family-mono, Menlo, Consolas, monaco, monospace);
+	--atlasvoice-shadow: 0 8px 24px rgba(0, 0, 0, 0.12), 0 1px 3px rgba(0, 0, 0, 0.08);
+
+	/* Frame sizes. */
+	--atlasvoice-header: 64px;
+	--atlasvoice-rail: 232px;
+	--atlasvoice-statusbar: 28px;
+
+	color: var(--atlasvoice-text);
+	font-size: 13px;
+	line-height: 1.5;
+}
+
+/* Our own small reset. Tailwind's preflight is off because it is global. */
+.atlasvoice-root *,
+.atlasvoice-root *::before,
+.atlasvoice-root *::after {
+	box-sizing: border-box;
+}
+
+.atlasvoice-root h1,
+.atlasvoice-root h2,
+.atlasvoice-root h3,
+.atlasvoice-root p {
+	margin: 0;
+}
+
+/* A visible focus ring on everything we style ourselves. */
+.atlasvoice-root :where(a, button, [tabindex]):focus-visible {
+	outline: 2px solid var(--atlasvoice-accent);
+	outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+
+	.atlasvoice-root *,
+	.atlasvoice-root *::before,
+	.atlasvoice-root *::after {
+		transition: none !important;
+		animation: none !important;
+	}
+}

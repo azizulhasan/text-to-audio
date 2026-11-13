@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" role="img" aria-label="AtlasVoice">
+	<title>AtlasVoice icon, small form for 16 to 20 px</title>
+	<rect width="256" height="256" rx="56" fill="#5646e5"/>
+	<path d="M62 202 128 58l66 144" fill="none" stroke="#ffffff" stroke-width="34" stroke-linecap="round" stroke-linejoin="round"/>
+	<path d="M128 132v48" fill="none" stroke="#ff7853" stroke-width="26" stroke-linecap="round"/>
+</svg>
