@@ -39,6 +39,8 @@ class TTA_Api_Routes {
 	public function tta_speech_register_routes() {
 		// TTS-374: which admin UI the site uses, and the one-time welcome.
 		Admin_Ui_Controller::register_routes();
+		// Voice › Pronunciation: described routes beside the classic text_alias route.
+		Pronunciation_Controller::register_routes();
 
 
 		// register listening route.
@@ -1114,31 +1116,11 @@ class TTA_Api_Routes {
 		// save data.
 		if ( 'post' == $request['method'] ) {
 			// TTS-319: keep the stored shape {actual_text, to_read} and only add
-			// apply_to_numbers when set. Trimming here (not only in the React
-			// form) fixes aliases saved through any client.
-			$fields = array();
-			foreach ( (array) json_decode( $request['aliases'] ) as $alias ) {
-				$alias       = (array) $alias;
-				$actual_text = isset( $alias['actual_text'] ) ? trim( sanitize_text_field( (string) $alias['actual_text'] ) ) : '';
-				$to_read     = isset( $alias['to_read'] ) ? trim( sanitize_text_field( (string) $alias['to_read'] ) ) : '';
-				if ( '' === $actual_text ) {
-					continue;
-				}
-				$row = array(
-					'actual_text' => $actual_text,
-					'to_read'     => $to_read,
-				);
-				if ( ! empty( $alias['apply_to_numbers'] ) ) {
-					$row['apply_to_numbers'] = true;
-				}
-				$fields[] = (object) $row;
-			}
-
-			update_option( 'tts_text_aliases', $fields, false );
+			// apply_to_numbers when set. The cleaning lives in Pronunciation\Rules,
+			// shared with the new screen, its route and WP-CLI (TTS-376).
+			\TTA\Pronunciation\Rules::store( json_decode( $request['aliases'] ) );
 
 			$response['data'] = get_option( 'tts_text_aliases' );
-
-			TTA_Cache::delete( 'all_settings' );
 
 			return rest_ensure_response( $response );
 		}

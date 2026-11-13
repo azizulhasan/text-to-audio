@@ -10,8 +10,10 @@
 	<file>./includes/Settings</file>
 	<file>./includes/Help</file>
 	<file>./includes/CLI</file>
+	<file>./includes/Pronunciation</file>
 	<file>./api/Admin_Ui_Controller.php</file>
 	<file>./api/Route_Access.php</file>
+	<file>./api/Pronunciation_Controller.php</file>
 	<file>./admin/Admin_App.php</file>
 	<file>./tests/phpunit</file>
 
