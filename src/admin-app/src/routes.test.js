@@ -1,5 +1,6 @@
 import {
 	CLASSIC_ROUTES,
+	classicHashFor,
 	SCREENS,
 	SHORT_ROUTES,
 	getScreen,
@@ -157,5 +158,24 @@ describe( 'toHash', () => {
 			'#/voice/pronunciation'
 		);
 		expect( toHash( 'overview' ) ).toBe( '#/overview' );
+	} );
+} );
+
+describe( 'classicHashFor', () => {
+	it.each( [
+		[ 'voice:voice', '#/listening' ],
+		[ 'voice:pronunciation', '#/aliases' ],
+		[ 'voice:providers', '#/integrations' ],
+		[ 'player:look', '#/customize' ],
+		[ 'player:read', '#/highlight' ],
+		[ 'content:where', '#/' ],
+		[ 'insights:posts', '#/analytics' ],
+		[ 'site:versions', '#/versions' ],
+		[ 'site:advanced', '#/' ],
+		[ 'help:docs', '#/faq' ],
+		[ 'overview', '#/' ],
+		[ '__proto__', '#/' ],
+	] )( 'sends %s to the classic %s', ( id, hash ) => {
+		expect( classicHashFor( id ) ).toBe( hash );
 	} );
 } );

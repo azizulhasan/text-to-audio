@@ -69,6 +69,18 @@ class Admin_App {
 	}
 
 	/**
+	 * Marks our screen on <body>, so the few rules the frame needs outside its
+	 * own root (wp-admin's padding and footer) can never reach another screen.
+	 *
+	 * @param string $classes Space-separated body classes.
+	 *
+	 * @return string
+	 */
+	public static function body_class( $classes ) {
+		return $classes . ' atlasvoice-app-page';
+	}
+
+	/**
 	 * Prints the element the app mounts on.
 	 *
 	 * WordPress moves admin notices to just after `.wp-header-end`. Without it
@@ -83,6 +95,8 @@ class Admin_App {
 	 * Call it only on the AtlasVoice admin page.
 	 */
 	public static function enqueue() {
+		add_filter( 'admin_body_class', array( __CLASS__, 'body_class' ) );
+
 		$asset = require self::build_path( 'index.asset.php' );
 
 		$script_deps = isset( $asset['dependencies'] ) ? (array) $asset['dependencies'] : array();
@@ -124,11 +138,20 @@ class Admin_App {
 	 */
 	public static function boot_data() {
 		$data = array(
-			'version'    => TEXT_TO_AUDIO_VERSION,
-			'restUrl'    => esc_url_raw( \TTA\TTA_Cache::get_rest_api_url() ),
-			'restNonce'  => wp_create_nonce( 'wp_rest' ),
-			'logoUrl'    => esc_url_raw( plugins_url( 'admin/images/brand/atlasvoice-icon.svg', TEXT_TO_AUDIO_ROOT_FILE ) ),
-			'classicUrl' => esc_url_raw( admin_url( 'admin.php?page=text-to-audio&atlasvoice_ui=classic' ) ),
+			'version'       => TEXT_TO_AUDIO_VERSION,
+			'restUrl'       => esc_url_raw( \TTA\TTA_Cache::get_rest_api_url() ),
+			'restNonce'     => wp_create_nonce( 'wp_rest' ),
+			'logoUrl'       => esc_url_raw( plugins_url( 'admin/images/brand/atlasvoice-icon.svg', TEXT_TO_AUDIO_ROOT_FILE ) ),
+			'classicUrl'    => esc_url_raw( admin_url( 'admin.php?page=text-to-audio&atlasvoice_ui=classic' ) ),
+			// Whether Pro's screens exist on this site. It decides what is shown,
+			// never whether a feature of the free plugin works.
+			'isPro'         => (bool) \TTA\TTA_Helper::is_atlasvoice_addon_functional(),
+			'proVersion'    => defined( 'TTA_PRO_VERSION' ) ? (string) TTA_PRO_VERSION : '',
+			'mode'          => \TTA\AtlasVoice\Mode::get(),
+			'setupFinished' => (bool) get_option( 'tta_onboarding_completed' ),
+			'helpTopics'    => \TTA\Help\Help_Topics::all(),
+			'docsUrl'       => \TTA\Help\Help_Topics::DOCS_BASE,
+			'supportUrl'    => 'https://atlasaidev.com/contact-us/',
 		);
 
 		/**

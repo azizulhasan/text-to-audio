@@ -272,3 +272,36 @@ export function resolveRoute( hash, isPro = false ) {
 export function toHash( id ) {
 	return '#/' + String( id ).replace( ':', '/' );
 }
+
+/**
+ * The classic address that holds the same settings as a new route, for the
+ * "Open it in the classic screens" link of a screen that is not rebuilt yet.
+ *
+ * @param {string} id "screen" or "screen:tab".
+ * @return {string} A hash such as "#/customize" ("#/" is the classic Settings tab).
+ */
+export function classicHashFor( id ) {
+	const exact = {
+		'voice:pronunciation': 'aliases',
+		'voice:providers': 'integrations',
+		'player:read': 'highlight',
+		'site:health': 'compatibility',
+		'site:versions': 'versions',
+		'library:clean': 'maintenance',
+		'help:docs': 'faq',
+		'help:more': 'plugins',
+	};
+	const byScreen = {
+		voice: 'listening',
+		player: 'customize',
+		insights: 'analytics',
+		seo: 'seo',
+	};
+	const key = String( id );
+	const screen = key.split( ':' )[ 0 ];
+	// Own keys only: a name such as "__proto__" must not find an inherited value.
+	const own = ( map, name ) =>
+		Object.prototype.hasOwnProperty.call( map, name ) ? map[ name ] : null;
+
+	return '#/' + ( own( exact, key ) ?? own( byScreen, screen ) ?? '' );
+}

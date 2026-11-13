@@ -99,10 +99,47 @@ class AdminAppTest extends WP_UnitTestCase {
 		$data = Admin_App::boot_data();
 		$json = wp_json_encode( $data );
 
-		$this->assertSame( array( 'version', 'restUrl', 'restNonce', 'logoUrl', 'classicUrl' ), array_keys( $data ) );
+		$this->assertSame(
+			array( 'version', 'restUrl', 'restNonce', 'logoUrl', 'classicUrl', 'isPro', 'proVersion', 'mode', 'setupFinished', 'helpTopics', 'docsUrl', 'supportUrl' ),
+			array_keys( $data )
+		);
 		$this->assertStringNotContainsString( 'sk_secret_eleven_123', $json );
 		$this->assertStringNotContainsString( 'sk-secret-openai-456', $json );
 		$this->assertStringNotContainsString( 'admin@example.org', $json );
+	}
+
+	public function test_boot_data_describes_a_free_site_in_staging() {
+		delete_option( 'tta_settings_data' );
+		delete_option( 'tta_onboarding_completed' );
+
+		$data = Admin_App::boot_data();
+
+		$this->assertFalse( $data['isPro'] );
+		$this->assertSame( '', $data['proVersion'] );
+		$this->assertSame( 'staging', $data['mode'] );
+		$this->assertFalse( $data['setupFinished'] );
+		$this->assertArrayHasKey( 'overview', $data['helpTopics'] );
+	}
+
+	public function test_boot_data_follows_the_saved_mode_and_setup() {
+		update_option( 'tta_settings_data', (object) array( 'tta__settings_atlasvoice_mode' => 'production' ) );
+		update_option( 'tta_onboarding_completed', true );
+		\TTA\TTA_Cache::flush();
+
+		$data = Admin_App::boot_data();
+
+		$this->assertSame( 'production', $data['mode'] );
+		$this->assertTrue( $data['setupFinished'] );
+	}
+
+	public function test_enqueue_marks_the_page_for_the_frame_styles() {
+		Admin_App::enqueue();
+
+		// Core has its own callbacks on this filter that need a screen, so ours is checked directly.
+		$this->assertNotFalse( has_filter( 'admin_body_class', array( Admin_App::class, 'body_class' ) ) );
+		$this->assertSame( 'folded atlasvoice-app-page', Admin_App::body_class( 'folded' ) );
+
+		remove_filter( 'admin_body_class', array( Admin_App::class, 'body_class' ) );
 	}
 
 	public function test_root_gives_notices_a_place_outside_the_app() {
