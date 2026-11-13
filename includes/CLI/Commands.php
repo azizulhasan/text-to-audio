@@ -45,6 +45,7 @@ class Commands {
 			'atlasvoice where'         => Where_Command::class,
 			'atlasvoice text'          => Text_Command::class,
 			'atlasvoice areas'         => Areas_Command::class,
+			'atlasvoice advanced'      => Advanced_Command::class,
 		);
 
 		/**

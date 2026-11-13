@@ -75,6 +75,8 @@ class TTA_Api_Routes {
 		Text_Controller::register_routes();
 		// TTS-347: which part of a page is read aloud (What is read > Page areas).
 		Areas_Controller::register_routes();
+		// TTS-347: the advanced switches and clearing the cache (Site health > Advanced).
+		Advanced_Controller::register_routes();
 
 
 		// register listening route.

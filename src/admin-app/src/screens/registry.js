@@ -83,7 +83,7 @@ const BUILT_IN = {
 	),
 	'site:advanced': lazy( () =>
 		import(
-			/* webpackChunkName: "screen-site-advanced" */ './SiteAdvanced'
+			/* webpackChunkName: "screen-site-advanced" */ './SiteAdvancedTab'
 		)
 	),
 	'help:moved': lazy( () =>
