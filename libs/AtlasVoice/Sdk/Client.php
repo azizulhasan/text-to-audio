@@ -119,6 +119,22 @@ final class Client {
 	}
 
 	/**
+	 * Reads everything a settings screen needs about the project in one call:
+	 * plan, engines, allowance, limits, licence state and links.
+	 *
+	 * The answer is the service's word on what the project may do; a platform
+	 * shows it and never decides the plan itself. It changes rarely, so a
+	 * platform keeps it for a few minutes and reads it again after a licence
+	 * change. The links in it are data from a response like any other: a
+	 * platform checks them before it prints them.
+	 *
+	 * @return Result data: project, plan, engines, usage, limits, license, links.
+	 */
+	public function account() {
+		return $this->request( 'GET', '/v1/account' );
+	}
+
+	/**
 	 * Attaches a Pro licence to the project. The licence key is sent once;
 	 * the service keeps only the licence id.
 	 *

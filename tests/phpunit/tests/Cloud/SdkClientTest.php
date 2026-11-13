@@ -509,4 +509,69 @@ X-Evil: 1" ) );
 		$this->assertSame( 'DELETE', $this->transport->sent[1]->method );
 		$this->assertNull( $this->transport->sent[1]->body );
 	}
+
+	// The account.
+
+	public function test_account_reads_the_whole_project_in_one_call_with_the_key() {
+		$account                    = array(
+			'project' => array(
+				'id'       => 37,
+				'platform' => 'wordpress',
+				'status'   => 'active',
+				'approval' => 'approved',
+			),
+			'plan'    => array(
+				'slug' => 'premium',
+				'name' => 'Premium',
+			),
+			'engines' => array( 'gtts', 'cloud' ),
+			'limits'  => array( 'requests_per_minute' => 60 ),
+			'license' => array(
+				'attached' => true,
+				'ended'    => null,
+			),
+		);
+		$this->transport->answers[] = $this->json( 200, $account );
+
+		$result = $this->client->account();
+
+		$sent = $this->transport->sent[0];
+		$this->assertSame( 'GET', $sent->method );
+		$this->assertSame( 'https://api.atlasvoice.cloud/v1/account', $sent->url );
+		$this->assertNull( $sent->body );
+		$this->assertSame( 'Bearer ' . self::KEY, $sent->headers['Authorization'] );
+		$this->assertTrue( $result->ok() );
+		$this->assertSame( $account, $result->data );
+	}
+
+	public function test_a_project_waiting_for_approval_gets_the_services_code_not_a_guess() {
+		$this->transport->answers[] = $this->json(
+			403,
+			array(
+				'error' => array(
+					'code'    => 'approval_required',
+					'message' => 'This project is waiting for approval.',
+				),
+			)
+		);
+
+		$result = $this->client->account();
+
+		$this->assertFalse( $result->ok() );
+		$this->assertTrue( $result->reached() );
+		$this->assertSame( Error_Codes::APPROVAL_REQUIRED, $result->code() );
+		$this->assertFalse( $result->is_temporary() );
+	}
+
+	public function test_an_older_service_without_the_account_route_is_a_plain_failure() {
+		// The route is newer than the plugin's first SDK release: a service
+		// that does not have it yet answers 404, and the caller falls back.
+		$this->transport->answers[] = $this->json( 404, array( 'error' => array( 'code' => 'not_found' ) ) );
+
+		$result = $this->client->account();
+
+		$this->assertFalse( $result->ok() );
+		$this->assertTrue( $result->reached() );
+		$this->assertSame( 404, $result->status );
+	}
 }
