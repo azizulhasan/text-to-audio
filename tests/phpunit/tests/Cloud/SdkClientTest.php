@@ -164,19 +164,10 @@ class SdkClientTest extends WP_UnitTestCase {
 	}
 
 	public function test_a_host_name_cannot_add_a_header_line() {
-		$name = ( new Config(
-			'https://a.test',
-			'wordpress/2.5.0
-X-Evil: 1'
-		) )->client_name();
+		$name = ( new Config( 'https://a.test', "wordpress/2.5.0\r\nX-Evil: 1" ) )->client_name();
 
-		$this->assertStringNotContainsString( '
-', $name );
-		$this->assertStringNotContainsString(
-			'
-',
-			$name
-		);
+		$this->assertStringNotContainsString( "\r", $name );
+		$this->assertStringNotContainsString( "\n", $name );
 	}
 
 	// Requests.
@@ -210,8 +201,7 @@ X-Evil: 1'
 
 	public function test_the_id_the_service_logged_is_the_one_returned() {
 		$this->transport->answers[] = $this->json( 200, array(), array( 'X-Request-Id' => '0b9d3c1e-7a52-4f0c-9d1e-2f6a8b7c5d41' ) );
-		$this->transport->answers[] = $this->json( 200, array(), array( 'X-Request-Id' => "bad id
-X-Evil: 1" ) );
+		$this->transport->answers[] = $this->json( 200, array(), array( 'X-Request-Id' => "bad id\nX-Evil: 1" ) );
 
 		$replaced = $this->client->usage();
 		$hostile  = $this->client->usage();

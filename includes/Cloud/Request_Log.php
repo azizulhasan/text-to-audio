@@ -37,8 +37,9 @@ class Request_Log implements Logger {
 		 *
 		 * @param array  $context method, route, status, code, reached, ms, request_id.
 		 * @param string $level   'info' or 'error'.
+		 * @param string $event   'request', or 'request_skipped' when calls are paused and nothing was sent.
 		 */
-		do_action( 'atlasvoice_cloud_request', $context, $level );
+		do_action( 'atlasvoice_cloud_request', $context, $level, $event );
 
 		if ( defined( 'TTA_DEBUG_MODE' ) && TTA_DEBUG_MODE ) {
 			// phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log -- only in the plugin's debug mode, with no secret in the line.

@@ -30,7 +30,7 @@ use AtlasVoice\Sdk\Contracts\Logger;
  */
 final class Client {
 
-	const VERSION = '0.1.0';
+	const VERSION = '0.2.0';
 
 	/**
 	 * The longest a single call may wait, whatever a caller asks for. One
@@ -69,18 +69,27 @@ final class Client {
 	private $logger;
 
 	/**
+	 * Pauses calls to a service that is down, or null.
+	 *
+	 * @var Circuit_Breaker|null
+	 */
+	private $breaker;
+
+	/**
 	 * Builds a client.
 	 *
-	 * @param Config         $config    Service address and host name.
-	 * @param Http_Transport $transport How to send a request.
-	 * @param Key_Store      $keys      Where the project key lives.
-	 * @param Logger|null    $logger    Where to report calls, if anywhere.
+	 * @param Config               $config    Service address and host name.
+	 * @param Http_Transport       $transport How to send a request.
+	 * @param Key_Store            $keys      Where the project key lives.
+	 * @param Logger|null          $logger    Where to report calls, if anywhere.
+	 * @param Circuit_Breaker|null $breaker   Pauses calls to a service that is down, if given.
 	 */
-	public function __construct( Config $config, Http_Transport $transport, Key_Store $keys, $logger = null ) {
+	public function __construct( Config $config, Http_Transport $transport, Key_Store $keys, $logger = null, $breaker = null ) {
 		$this->config    = $config;
 		$this->transport = $transport;
 		$this->keys      = $keys;
 		$this->logger    = $logger instanceof Logger ? $logger : null;
+		$this->breaker   = $breaker instanceof Circuit_Breaker ? $breaker : null;
 	}
 
 	/**
@@ -230,12 +239,26 @@ final class Client {
 		$timeout = max( 1, min( self::MAX_TIMEOUT, (int) $timeout ) );
 		$started = microtime( true );
 
+		// A service that is down, or that asked for a pause, is not called: the
+		// caller gets the same "could not be reached" answer at once.
+		$wait = $this->breaker ? $this->breaker->seconds_to_wait() : 0;
+		if ( $wait > 0 ) {
+			$result = $this->read( Response::failed( sprintf( 'The AtlasVoice service is not answering. Calls are paused for %d seconds.', $wait ) ), $raw, $request_id );
+			$this->report( $method, $path, $result, $started, true );
+
+			return $result;
+		}
+
 		$response = $this->transport->send( new Request( $method, $this->config->base_url . $path, $headers, $encoded, $timeout ) );
 		if ( ! $response instanceof Response ) {
 			$response = Response::failed( 'The transport returned no answer.' );
 		}
 
 		$result = $this->read( $response, $raw, $request_id );
+
+		if ( $this->breaker ) {
+			$this->breaker->record( $result );
+		}
 
 		$this->report( $method, $path, $result, $started );
 
@@ -286,15 +309,16 @@ final class Client {
 	 * @param string $path    Route.
 	 * @param Result $result  Outcome.
 	 * @param float  $started microtime( true ) when the call began.
+	 * @param bool   $skipped The call was not sent because calls are paused.
 	 */
-	private function report( $method, $path, Result $result, $started ) {
+	private function report( $method, $path, Result $result, $started, $skipped = false ) {
 		if ( ! $this->logger ) {
 			return;
 		}
 
 		$this->logger->log(
 			$result->ok() ? 'info' : 'error',
-			'request',
+			$skipped ? 'request_skipped' : 'request',
 			array(
 				'method'     => strtoupper( (string) $method ),
 				'route'      => strtok( $path, '?' ),

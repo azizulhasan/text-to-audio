@@ -232,4 +232,97 @@ class WordPressAdapterTest extends WP_UnitTestCase {
 
 		$this->assertStringStartsWith( 'wordpress/' . TEXT_TO_AUDIO_VERSION . ' sdk/', $this->sent['args']['headers']['X-AtlasVoice-Client'] );
 	}
+
+	// Back-off and the circuit breaker.
+
+	public function test_a_service_that_is_down_is_not_called_again_and_again() {
+		for ( $i = 0; $i < 7; $i++ ) {
+			$this->sent = null;
+			$result     = Cloud::client()->usage();
+		}
+
+		$this->assertNull( $this->sent, 'After five failures in a row no request leaves the site.' );
+		$this->assertFalse( $result->reached() );
+	}
+
+	public function test_the_pause_is_shared_by_every_request_of_the_site() {
+		for ( $i = 0; $i < 5; $i++ ) {
+			Cloud::client()->usage();
+		}
+
+		// The next page load builds a new client; the state is in a transient.
+		Cloud::reset();
+		$this->sent = null;
+		Cloud::client()->usage();
+
+		$this->assertNull( $this->sent );
+		$this->assertIsArray( get_transient( Cloud::STATE_PREFIX . md5( 'https://api.atlasvoice.cloud' ) ) );
+	}
+
+	public function test_a_paused_call_tells_a_monitor_it_was_skipped() {
+		$events = array();
+		add_action(
+			'atlasvoice_cloud_request',
+			static function ( $context, $level, $event ) use ( &$events ) {
+				$events[] = $event;
+			},
+			10,
+			3
+		);
+
+		for ( $i = 0; $i < 6; $i++ ) {
+			Cloud::client()->usage();
+		}
+
+		$this->assertSame( array( 'request', 'request', 'request', 'request', 'request', 'request_skipped' ), $events );
+	}
+
+	public function test_a_developer_can_turn_the_pause_off() {
+		Cloud::reset();
+		add_filter( 'atlasvoice_cloud_circuit_breaker', '__return_false' );
+
+		for ( $i = 0; $i < 7; $i++ ) {
+			$this->sent = null;
+			Cloud::client()->usage();
+		}
+
+		remove_filter( 'atlasvoice_cloud_circuit_breaker', '__return_false' );
+		Cloud::reset();
+
+		$this->assertNotNull( $this->sent );
+	}
+
+	// A second address of the service.
+
+	public function test_the_voice_host_gets_its_own_client_with_the_same_key_and_name() {
+		update_option( Service::OPTION, array( 'api_key' => 'av_live_abc' ), false );
+
+		$voice = Cloud::client_for( 'https://voice.atlasvoice.cloud' );
+		$voice->request( 'POST', '/api/atlasvoice', array( 'text' => 'Hi' ) );
+
+		$this->assertNotSame( Cloud::client(), $voice );
+		$this->assertSame( $voice, Cloud::client_for( 'https://voice.atlasvoice.cloud' ) );
+		$this->assertSame( 'https://voice.atlasvoice.cloud/api/atlasvoice', $this->sent['url'] );
+		$this->assertSame( 'Bearer av_live_abc', $this->sent['args']['headers']['Authorization'] );
+		$this->assertStringStartsWith( 'wordpress/', $this->sent['args']['headers']['X-AtlasVoice-Client'] );
+	}
+
+	public function test_one_host_being_down_does_not_pause_the_other() {
+		for ( $i = 0; $i < 6; $i++ ) {
+			Cloud::client_for( 'https://voice.atlasvoice.cloud' )->request( 'POST', '/api/atlasvoice', array() );
+		}
+
+		$this->sent = null;
+		Cloud::client()->usage();
+
+		$this->assertSame( 'https://api.atlasvoice.cloud/v1/usage', $this->sent['url'] );
+	}
+
+	public function test_the_voice_host_must_be_https_too() {
+		$this->setExpectedIncorrectUsage( 'TTA\Cloud\Cloud::client' );
+
+		Cloud::client_for( 'http://voice.example.org' )->usage();
+
+		$this->assertStringStartsWith( 'https://api.atlasvoice.cloud/', $this->sent['url'] );
+	}
 }
