@@ -47,6 +47,7 @@ class Commands {
 			'atlasvoice areas'         => Areas_Command::class,
 			'atlasvoice advanced'      => Advanced_Command::class,
 			'atlasvoice privacy'       => Privacy_Command::class,
+			'atlasvoice versions'      => Versions_Command::class,
 		);
 
 		/**

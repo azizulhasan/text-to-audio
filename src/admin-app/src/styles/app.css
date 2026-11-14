@@ -1422,6 +1422,10 @@ body.atlasvoice-app-page #atlasvoice-app {
 	margin-bottom: 16px;
 }
 
+.atlasvoice-root .atlasvoice-actions-below {
+	margin-top: 12px;
+}
+
 .atlasvoice-root .atlasvoice-voice-form {
 	display: flex;
 	flex-direction: column;

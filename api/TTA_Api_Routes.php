@@ -79,6 +79,8 @@ class TTA_Api_Routes {
 		Advanced_Controller::register_routes();
 		// TTS-347: what AtlasVoice keeps and shares (Site health > Privacy).
 		Privacy_Controller::register_routes();
+		// TTS-347: installed and older versions, automatic updates (Site health > Versions).
+		Versions_Controller::register_routes();
 
 
 		// register listening route.
