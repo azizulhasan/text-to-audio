@@ -77,6 +77,8 @@ class TTA_Api_Routes {
 		Areas_Controller::register_routes();
 		// TTS-347: the advanced switches and clearing the cache (Site health > Advanced).
 		Advanced_Controller::register_routes();
+		// TTS-347: what AtlasVoice keeps and shares (Site health > Privacy).
+		Privacy_Controller::register_routes();
 
 
 		// register listening route.

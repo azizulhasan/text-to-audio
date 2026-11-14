@@ -442,6 +442,18 @@ final class TTA_Lib_AtlasAiDev {
     }
 
     /**
+     * TTS-347: is this plugin's own usage sharing running on this site?
+     * False when AtlasVoice Pro is active, because Pro ships its own tracker
+     * and this one is not started (see init()). The Privacy screen asks this
+     * before it reads or changes the choice.
+     *
+     * @return bool
+     */
+    public function is_tracking_managed_here() {
+        return null !== $this->insights;
+    }
+
+    /**
      * TTS-314: may the AtlasVoice TTS connect form offer the tracking opt-in?
      * Same rules as the admin notice: Free-only installs (Pro ships its own
      * tracker), not on a local server, and only while the owner has not yet

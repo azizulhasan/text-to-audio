@@ -1525,6 +1525,11 @@ body.atlasvoice-app-page #atlasvoice-app {
 	color: var(--atlasvoice-text-weak);
 }
 
+.atlasvoice-root .atlasvoice-list-flush {
+	margin-top: 0;
+	margin-bottom: 16px;
+}
+
 .atlasvoice-root .atlasvoice-voice-form {
 	display: flex;
 	flex-direction: column;

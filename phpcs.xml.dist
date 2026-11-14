@@ -33,6 +33,7 @@
 	<file>./api/Text_Controller.php</file>
 	<file>./api/Areas_Controller.php</file>
 	<file>./api/Advanced_Controller.php</file>
+	<file>./api/Privacy_Controller.php</file>
 	<file>./includes/Site</file>
 	<file>./includes/Content</file>
 	<file>./includes/Voice</file>

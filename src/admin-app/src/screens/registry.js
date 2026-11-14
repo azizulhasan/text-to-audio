@@ -81,6 +81,9 @@ const BUILT_IN = {
 			/* webpackChunkName: "screen-voice-pronunciation" */ './VoicePronunciation'
 		)
 	),
+	'site:privacy': lazy( () =>
+		import( /* webpackChunkName: "screen-site-privacy" */ './SitePrivacy' )
+	),
 	'site:advanced': lazy( () =>
 		import(
 			/* webpackChunkName: "screen-site-advanced" */ './SiteAdvancedTab'
