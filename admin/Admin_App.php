@@ -305,6 +305,8 @@ class Admin_App {
 			$style_deps[] = 'wp-theme';
 		}
 
+		$script_deps = self::with_extension_scripts( $script_deps );
+
 		// The version is a hash of the built file, so a new build is never served from cache.
 		$version = isset( $asset['version'] ) ? $asset['version'] : TEXT_TO_AUDIO_VERSION;
 
@@ -322,6 +324,35 @@ class Admin_App {
 			wp_enqueue_style( self::HANDLE, self::build_url( 'index.css' ), $style_deps, $version );
 			wp_style_add_data( self::HANDLE, 'rtl', 'replace' );
 		}
+	}
+
+	/**
+	 * Adds the scripts of extensions to the scripts the app waits for.
+	 *
+	 * An extension (AtlasVoice Pro) adds its screens with a script that must
+	 * run before the app draws its first screen. It registers that script
+	 * and names its handle here; WordPress then loads it first. A handle
+	 * that is not registered is left out, so it can never stop the app.
+	 *
+	 * @param string[] $deps The handles the app already waits for.
+	 *
+	 * @return string[]
+	 */
+	public static function with_extension_scripts( array $deps ) {
+		/**
+		 * Filters the handles of extension scripts that run before the admin app.
+		 *
+		 * @param string[] $handles Registered script handles. Default none.
+		 */
+		$handles = (array) apply_filters( 'atlasvoice_admin_app_extension_scripts', array() );
+
+		foreach ( $handles as $handle ) {
+			if ( is_string( $handle ) && self::HANDLE !== $handle && wp_script_is( $handle, 'registered' ) && ! in_array( $handle, $deps, true ) ) {
+				$deps[] = $handle;
+			}
+		}
+
+		return $deps;
 	}
 
 	/**

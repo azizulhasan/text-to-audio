@@ -1438,6 +1438,47 @@ body.atlasvoice-app-page #atlasvoice-app {
 	max-width: 260px;
 }
 
+/* A block of code or structured data, shown as it is printed. */
+.atlasvoice-root .atlasvoice-code {
+	margin: 0;
+	padding: 12px;
+	max-height: 420px;
+	overflow: auto;
+	border: 1px solid var(--atlasvoice-line);
+	border-radius: 4px;
+	background: var(--atlasvoice-canvas);
+	font-family: var(--atlasvoice-mono);
+	font-size: 12px;
+	line-height: 1.6;
+	white-space: pre-wrap;
+	word-break: break-word;
+}
+
+.atlasvoice-root .atlasvoice-seo-hero {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 24px;
+	align-items: flex-start;
+}
+
+.atlasvoice-root .atlasvoice-seo-words {
+	flex: 1 1 320px;
+	display: grid;
+	gap: 12px;
+	justify-items: start;
+}
+
+.atlasvoice-root .atlasvoice-seo-lead {
+	margin: 0;
+}
+
+.atlasvoice-root .atlasvoice-seo-example {
+	flex: 0 1 320px;
+	margin: 0;
+	display: grid;
+	gap: 6px;
+}
+
 .atlasvoice-root .atlasvoice-library-bar {
 	display: flex;
 	flex-wrap: wrap;

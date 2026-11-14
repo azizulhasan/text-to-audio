@@ -83,6 +83,42 @@ class AdminAppTest extends WP_UnitTestCase {
 		$this->assertContains( 'wp-components', wp_styles()->registered[ Admin_App::HANDLE ]->deps );
 	}
 
+	public function test_an_extension_script_runs_before_the_app() {
+		wp_register_script( 'my-extension', 'https://example.com/extension.js', array(), '1', true );
+		add_filter(
+			'atlasvoice_admin_app_extension_scripts',
+			static function ( $handles ) {
+				$handles[] = 'my-extension';
+
+				return $handles;
+			}
+		);
+
+		Admin_App::enqueue();
+		remove_all_filters( 'atlasvoice_admin_app_extension_scripts' );
+
+		$this->assertContains( 'my-extension', wp_scripts()->registered[ Admin_App::HANDLE ]->deps );
+		wp_deregister_script( 'my-extension' );
+	}
+
+	public function test_an_extension_script_that_is_not_registered_cannot_stop_the_app() {
+		add_filter(
+			'atlasvoice_admin_app_extension_scripts',
+			static function () {
+				return array( 'not-registered', Admin_App::HANDLE, 42, 'wp-element', 'wp-element' );
+			}
+		);
+
+		$deps = Admin_App::with_extension_scripts( array( 'wp-element' ) );
+		remove_all_filters( 'atlasvoice_admin_app_extension_scripts' );
+
+		$this->assertSame( array( 'wp-element' ), $deps );
+	}
+
+	public function test_without_an_extension_the_app_waits_for_nothing_more() {
+		$this->assertSame( array( 'wp-element' ), Admin_App::with_extension_scripts( array( 'wp-element' ) ) );
+	}
+
 	public function test_boot_data_is_printed_before_the_script() {
 		Admin_App::enqueue();
 

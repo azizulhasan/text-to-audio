@@ -282,15 +282,17 @@ describe( 'screen registry', () => {
 		const ProScreen = () => null;
 		addFilter( 'atlasvoice.screens', 'test/pro', ( screens ) => ( {
 			...screens,
-			seo: ProScreen,
+			// A route the free plugin has no screen for (SEO was the example
+			// here until its free screen was built).
+			'library:clean': ProScreen,
 		} ) );
 
-		expect( getScreenComponent( 'seo' ) ).toBe( ProScreen );
+		expect( getScreenComponent( 'library:clean' ) ).toBe( ProScreen );
 		// The free screens are still there.
 		expect( getScreenComponent( 'help:moved' ) ).toBeTruthy();
 
 		removeFilter( 'atlasvoice.screens', 'test/pro' );
-		expect( getScreenComponent( 'seo' ) ).toBeNull();
+		expect( getScreenComponent( 'library:clean' ) ).toBeNull();
 	} );
 
 	it( 'falls back to the placeholder when a filter returns rubbish', () => {

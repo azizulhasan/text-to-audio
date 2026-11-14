@@ -49,6 +49,8 @@ const BUILT_IN = {
 			/* webpackChunkName: "screen-account-usage" */ './AccountUsage'
 		)
 	),
+	// What the free plugin shows; AtlasVoice Pro replaces it with its own screen.
+	seo: lazy( () => import( /* webpackChunkName: "screen-seo" */ './Seo' ) ),
 	'library:all': lazy( () =>
 		import( /* webpackChunkName: "screen-library-all" */ './LibraryAll' )
 	),
