@@ -137,7 +137,7 @@ class Wizard {
 		}
 
 		$post  = $posts[0];
-		$title = wp_strip_all_tags( get_the_title( $post ) );
+		$title = TTA_Helper::atlasvoice_plain_title( $post );
 		$body  = trim( preg_replace( '/\s+/', ' ', wp_strip_all_tags( strip_shortcodes( (string) $post->post_content ) ) ) );
 		$text  = trim( $title . '. ' . $body );
 

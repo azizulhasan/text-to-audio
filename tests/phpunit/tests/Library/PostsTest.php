@@ -507,4 +507,24 @@ class PostsTest extends WP_UnitTestCase {
 		$this->period( '', '' );
 		$this->assertSame( 3, Posts::get()['counts']['all'] );
 	}
+
+	// TTS-347: seen in the Audio library with a real post (2026-11-14).
+
+	public function test_a_title_is_plain_text_without_entities() {
+		$post_id = $this->post( "A beginner's guide to <em>oak</em> & \"ash\"" );
+
+		// WordPress itself writes the apostrophe as an entity for a web page.
+		$this->assertStringContainsString( '&#8217;', get_the_title( $post_id ) );
+
+		$titles = wp_list_pluck( Posts::get()['posts'], 'title', 'id' );
+
+		$this->assertStringNotContainsString( '&#', $titles[ $post_id ] );
+		$this->assertStringNotContainsString( '&amp;', $titles[ $post_id ] );
+		$this->assertStringNotContainsString( '<', $titles[ $post_id ] );
+		$this->assertStringContainsString( 'beginner’s guide to oak & ', $titles[ $post_id ] );
+	}
+
+	public function test_the_plain_title_of_a_post_that_does_not_exist_is_empty() {
+		$this->assertSame( '', \TTA\TTA_Helper::atlasvoice_plain_title( 999999 ) );
+	}
 }

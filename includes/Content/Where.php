@@ -81,7 +81,7 @@ class Where {
 				$post     = get_post( $id );
 				$titles[] = array(
 					'id'    => $id,
-					'title' => $post ? wp_strip_all_tags( get_the_title( $post ) ) : '',
+					'title' => $post ? TTA_Helper::atlasvoice_plain_title( $post ) : '',
 				);
 			}
 		}

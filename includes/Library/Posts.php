@@ -134,7 +134,7 @@ class Posts {
 		foreach ( $query->posts as $post ) {
 			$report['posts'][] = array(
 				'id'       => (int) $post->ID,
-				'title'    => wp_strip_all_tags( get_the_title( $post ) ),
+				'title'    => TTA_Helper::atlasvoice_plain_title( $post ),
 				'status'   => self::status_of( $post, $settings ),
 				'job'      => self::job_of( (int) $post->ID ),
 				'modified' => mysql2date( 'c', $post->post_modified_gmt, false ),

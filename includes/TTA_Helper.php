@@ -503,6 +503,20 @@ class TTA_Helper
 
 
     /**
+     * The title of a post as plain text, for data that is not a web page.
+     *
+     * @param int|\WP_Post $post The post.
+     *
+     * @return string
+     */
+    public static function atlasvoice_plain_title( $post ) {
+        // TTS-347: WordPress writes a title for a web page, with characters such
+        // as an apostrophe as an entity (&#8217;). A title sent as data (REST,
+        // WP-CLI, read aloud) is plain text, so the entities are turned back.
+        return trim( html_entity_decode( wp_strip_all_tags( (string) get_the_title( $post ) ), ENT_QUOTES | ENT_HTML5, 'UTF-8' ) );
+    }
+
+    /**
      * Extends wp_strip_all_tags to fix WP_Error object passing issue
      *
      * @param string | WP_Error $string
