@@ -17,7 +17,7 @@ defined( 'ABSPATH' ) || exit;
  * The audio library: the posts that get a player, and for each whether its
  * audio file is stored.
  *
- * It only reads, and it reads what the players already write: the post
+ * It reads what the players already write: the post
  * meta `tts_is_mp3_file_url_exists`, set when a post's audio file is saved
  * and removed when the voice changes. Nothing new is stored.
  *
@@ -161,6 +161,9 @@ class Posts {
 
 		// A job that runs now says more than the file of before.
 		if ( in_array( $status, array( 'queued', 'running', 'downloading' ), true ) ) {
+			// A job whose next check was lost from WP-Cron gets it planned again.
+			Jobs::follow( $post_id );
+
 			return 'making';
 		}
 		if ( get_post_meta( $post_id, self::MARK, true ) ) {

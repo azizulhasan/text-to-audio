@@ -1062,4 +1062,94 @@ class JobsTest extends WP_UnitTestCase {
 		$this->assertTrue( $kept, 'A file that was on the site before the test is kept.' );
 		$this->assertTrue( $gone, 'The file the test made is removed.' );
 	}
+
+	// TTS-354: a check that was lost from WP-Cron (seen with a real run, 2026-11-14).
+
+	/**
+	 * A job that is being made, last touched some seconds ago, with no check planned.
+	 */
+	private function job_without_a_check( $status, $seconds_ago ) {
+		$this->service_takes_the_job();
+		Jobs::start( $this->post );
+		$all                  = get_post_meta( $this->post, Jobs::META, true );
+		$all['en']['status']  = $status;
+		$all['en']['updated'] = time() - $seconds_ago;
+		update_post_meta( $this->post, Jobs::META, wp_slash( $all ) );
+		wp_clear_scheduled_hook( Jobs::HOOK, array( $this->post, 'en' ) );
+	}
+
+	/**
+	 * @dataProvider states_that_are_being_made
+	 */
+	public function test_a_job_that_lost_its_check_gets_one_planned_again( $status ) {
+		$this->job_without_a_check( $status, Jobs::LOST_AFTER + 5 );
+		$this->assertFalse( $this->next_poll() );
+
+		$this->assertTrue( Jobs::follow( $this->post ) );
+
+		$this->assertNotFalse( $this->next_poll() );
+		$this->assertLessThanOrEqual( time() + 10, $this->next_poll() );
+		// Asked again, nothing more is planned.
+		$this->assertFalse( Jobs::follow( $this->post ) );
+	}
+
+	public function states_that_are_being_made() {
+		return array(
+			'queued'      => array( 'queued' ),
+			'running'     => array( 'running' ),
+			'downloading' => array( 'downloading' ),
+		);
+	}
+
+	public function test_a_job_that_was_touched_a_moment_ago_is_left_alone() {
+		// Its check may be running right now.
+		$this->job_without_a_check( 'running', 10 );
+
+		$this->assertFalse( Jobs::follow( $this->post ) );
+		$this->assertFalse( $this->next_poll() );
+	}
+
+	/**
+	 * @dataProvider states_that_have_ended
+	 */
+	public function test_a_job_that_has_ended_is_never_checked_again( $status ) {
+		$this->job_without_a_check( $status, Jobs::LOST_AFTER + 5 );
+
+		$this->assertFalse( Jobs::follow( $this->post ) );
+		$this->assertFalse( $this->next_poll() );
+	}
+
+	public function states_that_have_ended() {
+		return array(
+			'done'     => array( 'done' ),
+			'failed'   => array( 'failed' ),
+			'canceled' => array( 'canceled' ),
+		);
+	}
+
+	public function test_a_post_without_a_job_has_nothing_to_follow() {
+		$this->assertFalse( Jobs::follow( $this->post ) );
+		$this->assertFalse( Jobs::follow( 999999 ) );
+	}
+
+	public function test_listing_a_post_whose_job_lost_its_check_plans_it_again() {
+		add_filter(
+			'tts_get_player_id',
+			static function () {
+				return Service::PLAYER_ID;
+			}
+		);
+		update_option( 'tta_settings_data', (object) array( 'tta__settings_allow_listening_for_post_types' => array( 'post' ) ) );
+		\TTA\TTA_Cache::flush();
+		$this->job_without_a_check( 'running', Jobs::LOST_AFTER + 5 );
+
+		$listed = wp_list_pluck( \TTA\Library\Posts::get()['posts'], 'status', 'id' );
+		$poll   = $this->next_poll();
+		remove_all_filters( 'tts_get_player_id' );
+		delete_option( 'tta_settings_data' );
+		\TTA\TTA_Cache::flush();
+
+		$this->assertSame( 'making', $listed[ $this->post ] );
+		$this->assertNotFalse( $poll );
+	}
 }

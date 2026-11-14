@@ -74,6 +74,11 @@ class Jobs {
 	 * Limits of the wait between two polls, in seconds.
 	 */
 	const MIN_WAIT = 2;
+
+	/**
+	 * A job nothing has touched for this long, with no check planned, lost its check.
+	 */
+	const LOST_AFTER = 120;
 	const MAX_WAIT = 300;
 
 	/**
@@ -225,6 +230,41 @@ class Jobs {
 	 */
 	public static function status( $post_id, $language = '' ) {
 		return self::record( (int) $post_id, self::language( $language ) );
+	}
+
+	/**
+	 * Plans the check of a job that is being made and has none planned.
+	 *
+	 * WP-Cron keeps every planned event in one stored list. When several
+	 * tasks change that list at the same moment (the checks of a few jobs,
+	 * the step of a run), one change can overwrite another, and a planned
+	 * check is gone. A job without a check would say "being made" for ever.
+	 * A screen that shows such a job calls this, so the job goes on.
+	 *
+	 * A job that was touched a moment ago is left alone: its check may be
+	 * running right now, and plans the next one itself.
+	 *
+	 * @param int    $post_id  The post.
+	 * @param string $language Language code; the saved language when empty.
+	 *
+	 * @return bool Whether a check was planned.
+	 */
+	public static function follow( $post_id, $language = '' ) {
+		$post_id  = (int) $post_id;
+		$language = self::language( $language );
+		$record   = self::record( $post_id, $language );
+
+		if ( ! $record || ! in_array( $record['status'], array( 'queued', 'running', 'downloading' ), true ) ) {
+			return false;
+		}
+
+		if ( time() - $record['updated'] < self::LOST_AFTER || wp_next_scheduled( self::HOOK, array( $post_id, $language ) ) ) {
+			return false;
+		}
+
+		self::schedule( $post_id, $language, self::MIN_WAIT );
+
+		return true;
 	}
 
 	/**
