@@ -411,7 +411,14 @@ class Jobs {
 		$record['file_url']  = TTA_AtlasVoice_Service::audio_dir_url() . 'jobs/' . $name;
 		$record['bytes']     = strlen( $bytes );
 		$record['updated']   = time();
-		self::save( $post_id, $language, $record );
+
+		// The record says "done" only after the file has become the post's audio.
+		// What runs on the action can take seconds (a copy to cloud storage); a
+		// screen that read "done" before the audio was there would show a post
+		// without audio and stop following it. Until then the job is still being
+		// made, and a check is planned in case the action never comes back.
+		self::save( $post_id, $language, array_merge( $record, array( 'status' => 'downloading' ) ) );
+		self::schedule( $post_id, $language, 60 );
 
 		/**
 		 * Fires when the audio of a post was made by a job and stored on the site.
@@ -422,6 +429,9 @@ class Jobs {
 		 * @param array  $record   The site's record of the job.
 		 */
 		do_action( 'atlasvoice_cloud_job_done', $post_id, $language, $record['file_url'], $record );
+
+		self::save( $post_id, $language, $record );
+		wp_clear_scheduled_hook( self::HOOK, array( (int) $post_id, (string) $language ) );
 
 		return $record;
 	}
@@ -633,7 +643,10 @@ class Jobs {
 
 		$all[ $language ] = $record;
 
-		update_post_meta( $post_id, self::META, $all );
+		// WordPress takes slashes off what it stores, so they are added first:
+		// without this the file path of a Windows server loses its backslashes
+		// and the stored file is never found again.
+		update_post_meta( $post_id, self::META, wp_slash( $all ) );
 	}
 
 	/**

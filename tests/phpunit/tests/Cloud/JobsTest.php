@@ -45,8 +45,16 @@ class JobsTest extends WP_UnitTestCase {
 	 */
 	private $post;
 
+	/**
+	 * The job files that were on the site before a test: they are not ours to delete.
+	 *
+	 * @var string[]
+	 */
+	private $files_before = array();
+
 	public function set_up() {
 		parent::set_up();
+		$this->files_before = (array) glob( Service::audio_dir() . 'jobs/post-*.mp3' );
 		WP_CLI::reset();
 		Cloud::reset();
 		delete_transient( Jobs::HOSTS_CACHE );
@@ -82,7 +90,10 @@ class JobsTest extends WP_UnitTestCase {
 		remove_filter( 'pre_http_request', array( $this, 'intercept' ), 10 );
 		remove_all_actions( 'atlasvoice_cloud_job_done' );
 		remove_all_filters( 'atlasvoice_cloud_file_hosts' );
-		foreach ( (array) glob( Service::audio_dir() . 'jobs/post-*.mp3' ) as $file ) {
+		// The tests write into the uploads folder of the site they run on, so only
+		// the files a test made are removed: a site's real audio is never touched
+		// (a run on 2026-11-14 deleted the file of a real job).
+		foreach ( array_diff( (array) glob( Service::audio_dir() . 'jobs/post-*.mp3' ), $this->files_before ) as $file ) {
 			wp_delete_file( $file );
 		}
 		parent::tear_down();
@@ -927,5 +938,128 @@ class JobsTest extends WP_UnitTestCase {
 		( new Job_Command() )->cancel( array( (string) $this->post ), array() );
 
 		$this->assertSame( array( 'success', 'The job is canceled.' ), end( WP_CLI::$log ) );
+	}
+
+	// TTS-354: found with a real job against the service (2026-11-14).
+
+	public function test_a_job_is_still_being_made_while_its_file_becomes_the_posts_audio() {
+		$seen = array();
+		add_action(
+			'atlasvoice_cloud_job_done',
+			function ( $post_id, $language, $url, $record ) use ( &$seen ) {
+				$seen = array(
+					'stored'  => Jobs::status( $post_id, $language )['status'],
+					'given'   => $record['status'],
+					'file'    => is_file( $record['file_path'] ),
+					'planned' => false !== $this->next_poll(),
+				);
+			},
+			10,
+			4
+		);
+		$this->service_takes_the_job();
+		Jobs::start( $this->post );
+		$this->service_finished_the_job();
+		$this->answers['GET /files/'][] = array( 200, self::MP3 );
+
+		Jobs::poll( $this->post, 'en' );
+
+		$this->assertSame(
+			array(
+				// A screen that reads the job now still shows "Making", never "No audio yet".
+				'stored'  => 'downloading',
+				'given'   => 'done',
+				'file'    => true,
+				// A check is planned in case what runs on the action never comes back.
+				'planned' => true,
+			),
+			$seen
+		);
+		$this->assertSame( 'done', Jobs::status( $this->post )['status'] );
+		$this->assertFalse( $this->next_poll() );
+	}
+
+	public function test_a_post_is_never_listed_without_audio_between_done_and_attached() {
+		$listed = array();
+		add_filter(
+			'tts_get_player_id',
+			static function () {
+				return Service::PLAYER_ID;
+			}
+		);
+		update_option( 'tta_settings_data', (object) array( 'tta__settings_allow_listening_for_post_types' => array( 'post' ) ) );
+		\TTA\TTA_Cache::flush();
+		// Runs late, after the file became the post's audio and before the record is "done".
+		add_action(
+			'atlasvoice_cloud_job_done',
+			function ( $post_id ) use ( &$listed ) {
+				$listed['before'] = wp_list_pluck( \TTA\Library\Posts::get()['posts'], 'status', 'id' )[ $post_id ];
+			},
+			5
+		);
+		$this->service_takes_the_job();
+		Jobs::start( $this->post );
+		$this->service_finished_the_job();
+		$this->answers['GET /files/'][] = array( 200, self::MP3 );
+
+		Jobs::poll( $this->post, 'en' );
+
+		$listed['after'] = wp_list_pluck( \TTA\Library\Posts::get()['posts'], 'status', 'id' )[ $this->post ];
+		remove_all_filters( 'tts_get_player_id' );
+		delete_option( 'tta_settings_data' );
+		\TTA\TTA_Cache::flush();
+
+		$this->assertSame( 'making', $listed['before'] );
+		$this->assertContains( $listed['after'], array( 'ready', 'missing' ) );
+		$this->assertNotSame( 'making', $listed['after'] );
+	}
+
+	public function test_the_file_path_of_a_windows_server_keeps_its_backslashes() {
+		$save = new ReflectionMethod( Jobs::class, 'save' );
+		$save->setAccessible( true );
+		$path = 'D:\\laragon\\www\\site/wp-content/uploads/TTA/gtts/jobs/post-1-en-abc.mp3';
+
+		$save->invoke(
+			null,
+			$this->post,
+			'en',
+			array(
+				'id'        => 'job-1',
+				'status'    => 'done',
+				'file_path' => $path,
+				'file_url'  => 'https://example.org/a "quoted" name.mp3',
+			)
+		);
+
+		$record = Jobs::status( $this->post );
+		$this->assertSame( $path, $record['file_path'] );
+		$this->assertSame( 'https://example.org/a "quoted" name.mp3', $record['file_url'] );
+	}
+
+	public function test_the_tests_never_delete_audio_that_was_on_the_site_before() {
+		// The file is on the site before a test begins.
+		$this->tear_down();
+		$real = Service::audio_dir() . 'jobs/post-999999-en-realfile0001.mp3';
+		wp_mkdir_p( dirname( $real ) );
+		file_put_contents( $real, 'audio of the site' ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_file_put_contents -- a stand-in for a real file, removed below.
+
+		// The test begins, makes a file of its own, and ends.
+		$this->set_up();
+		$this->service_takes_the_job();
+		Jobs::start( $this->post );
+		$this->service_finished_the_job();
+		$this->answers['GET /files/'][] = array( 200, self::MP3 );
+		Jobs::poll( $this->post, 'en' );
+		$made = Jobs::status( $this->post )['file_path'];
+		$this->assertFileExists( $made );
+		$this->tear_down();
+
+		$kept = is_file( $real );
+		$gone = ! is_file( $made );
+		wp_delete_file( $real );
+		$this->set_up();
+
+		$this->assertTrue( $kept, 'A file that was on the site before the test is kept.' );
+		$this->assertTrue( $gone, 'The file the test made is removed.' );
 	}
 }
