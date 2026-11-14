@@ -33,6 +33,7 @@
 import { splitSentences } from './sentence-splitter.js';
 // TTS-263: floating "Listen to selection" control (fires tts_listen_selection).
 import { initSelectionControl } from './selection-control.js';
+import { NOT_READ_SELECTOR, changesReadText } from './highlight-ignore.js';
 
 const HL_WORD = 'atlasvoice-word';
 const HL_SENTENCE = 'atlasvoice-sentence';
@@ -421,9 +422,9 @@ class WrapperHighlighter {
             if (this._stale) {
                 return;
             }
-            this._stale = mutations.some((m) => m.type === 'characterData'
-                || Array.prototype.some.call(m.addedNodes, hasText)
-                || Array.prototype.some.call(m.removedNodes, hasText));
+            // TTS-369: the player's ticking clock (inside the wrapper on many sites)
+            // is not content — it reset the index every second during MP3 playback.
+            this._stale = changesReadText(mutations, hasText);
         });
         this._observer.observe(this.root, { childList: true, subtree: true, characterData: true });
     }
@@ -449,7 +450,7 @@ class WrapperHighlighter {
         const excluded = this._excluded;
         const walker = document.createTreeWalker(this.root, NodeFilter.SHOW_TEXT, {
             acceptNode: (n) => {
-                if (n.parentElement && n.parentElement.closest('tts-play-button, .tts__listent_content, script, style')) {
+                if (n.parentElement && n.parentElement.closest(NOT_READ_SELECTOR)) {
                     return NodeFilter.FILTER_REJECT;
                 }
                 // TTS-340: skip text the voice never reads. Only ancestors INSIDE

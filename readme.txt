@@ -5,7 +5,7 @@ Tags: accessibility, speech, tts, text to speech, text to audio
 Requires at least: 5.6
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 2.3.25
+Stable tag: 2.3.26
 License: GPLv3 or later
 License URI: https://www.gnu.org/licenses/gpl-3.0.txt
 
@@ -454,6 +454,11 @@ Added : An audio box in the post editor to listen to, replace or delete a post's
 Added : A Versions screen to go back to an earlier version if an update causes trouble. Settings, audio and statistics are kept.
 Added : A voice step in the setup wizard, a "What's New" panel, and your AtlasVoice TTS usage in Listening and on the Dashboard, with a warning before the monthly allowance runs out.
 Changed : When AtlasVoice TTS cannot make audio (for example, the allowance is used up), the post is read by the browser voice with your usual player button and settings.
+= 2.3.26 ( 14 Nov 2026 ) =
+Fixed : On iPhone and iPad, the browser voice player now reads the whole article instead of stopping after the first sentence.
+Fixed : Resume now continues from where the reading stopped, instead of jumping to the end of the article.
+Fixed : With read-along highlighting and an MP3 player, the highlight now follows every spoken word again, instead of staying on the first word of each sentence.
+
 = 2.3.25 ( 9 Nov 2026 ) =
 Changed : Behind-the-scenes tidy-up: removed old, unused code notes. Nothing changes in how the plugin works.
 
@@ -639,6 +644,9 @@ Fixed : Removed external sample-audio requests from the dashboard; previews now 
 
 
 == Upgrade Notice ==
+
+= 2.3.26 =
+Fixes the player stopping after the first sentence on iPhone and iPad, Resume jumping to the end of the article, and word highlighting stopping on MP3 players. Recommended for all sites.
 
 = 2.3.25 =
 A small maintenance release that tidies up the code. Nothing changes in how the plugin works. Safe to update.

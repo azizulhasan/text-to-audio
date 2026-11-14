@@ -46,6 +46,7 @@ const productionSrc = [
 	'!sdk/**',
 	'!plan/**',
 	'!docs/**',
+	'!tests/**',
 	'!translation-script/**/**',
 	// Only text-to-audio.pot ships. The catalogs are published to the
 	// atlasaidev-translations repo and fetched at runtime by
