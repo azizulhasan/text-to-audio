@@ -1372,10 +1372,15 @@ body.atlasvoice-app-page #atlasvoice-app {
 	border: 0;
 }
 
-/* A group of fields with a name of its own inside a form. */
+/*
+ * A group of fields with a name of its own inside a form. No top margin is
+ * set here: inside a form, the form's own gap applies.
+ */
 .atlasvoice-root .atlasvoice-fieldset {
 	min-width: 0;
-	margin: 0;
+	margin-left: 0;
+	margin-bottom: 0;
+	margin-right: 0;
 	padding: 0;
 	border: 0;
 }
