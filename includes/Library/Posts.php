@@ -23,6 +23,11 @@ defined( 'ABSPATH' ) || exit;
  * A post whose audio is being made by a job (TTA\Cloud\Jobs, TTS-354) says
  * so: "making" with how many parts are done, or "failed" with the reason.
  *
+ * A post that was changed after its audio was made is "outdated". That is
+ * read from the fingerprint the plugin already keeps beside each file
+ * (`_atlasvoice_audio_hashes`, TTS-312); a file from before that fingerprint
+ * existed is "ready", because nothing says otherwise.
+ *
  * A voice that reads in the browser stores no files, so there is no
  * library for it; get() says so with `stores_audio`.
  *
@@ -35,6 +40,11 @@ class Posts {
 	 * The mark a player puts on a post whose audio file is stored.
 	 */
 	const MARK = 'tts_is_mp3_file_url_exists';
+
+	/**
+	 * Post meta: file key => the fingerprint of the text a file was made from.
+	 */
+	const FINGERPRINTS = '_atlasvoice_audio_hashes';
 
 	const STATUSES = array( 'all', 'ready', 'missing' );
 
@@ -54,7 +64,8 @@ class Posts {
 	 *     posts: array<int, array{id:int, title:string, status:string, job:array|null, modified:string, view_url:string, edit_url:string}>
 	 * }
 	 *
-	 * A post's status is ready, making, failed or missing.
+	 * A post's status is ready, outdated, making, failed or missing. An
+	 * outdated post is counted and filtered as ready: its file is stored.
 	 */
 	public static function get( array $args = array() ) {
 		$status = isset( $args['status'] ) ? $args['status'] : 'all';
@@ -113,11 +124,13 @@ class Posts {
 		$report['total'] = (int) $query->found_posts;
 		$report['pages'] = (int) $query->max_num_pages;
 
+		$settings = TTA_Helper::tts_get_settings();
+
 		foreach ( $query->posts as $post ) {
 			$report['posts'][] = array(
 				'id'       => (int) $post->ID,
 				'title'    => wp_strip_all_tags( get_the_title( $post ) ),
-				'status'   => self::status_of( (int) $post->ID ),
+				'status'   => self::status_of( $post, $settings ),
 				'job'      => self::job_of( (int) $post->ID ),
 				'modified' => mysql2date( 'c', $post->post_modified_gmt, false ),
 				'view_url' => (string) get_permalink( $post ),
@@ -131,23 +144,116 @@ class Posts {
 	/**
 	 * The audio status of one post: its file, or what its job says.
 	 *
-	 * @param int $post_id The post.
+	 * @param \WP_Post $post     The post.
+	 * @param mixed    $settings The plugin's settings, read once for the page.
 	 *
-	 * @return string ready, making, failed or missing.
+	 * @return string ready, outdated, making, failed or missing.
 	 */
-	private static function status_of( $post_id ) {
-		$job    = Jobs::status( $post_id );
-		$status = $job ? $job['status'] : '';
+	private static function status_of( \WP_Post $post, $settings ) {
+		$post_id = (int) $post->ID;
+		$job     = Jobs::status( $post_id );
+		$status  = $job ? $job['status'] : '';
 
 		// A job that runs now says more than the file of before.
 		if ( in_array( $status, array( 'queued', 'running', 'downloading' ), true ) ) {
 			return 'making';
 		}
 		if ( get_post_meta( $post_id, self::MARK, true ) ) {
+			// A new try that failed says more than "outdated": it says why.
+			if ( self::is_outdated( $post, $settings ) ) {
+				return 'failed' === $status ? 'failed' : 'outdated';
+			}
+
 			return 'ready';
 		}
 
 		return 'failed' === $status ? 'failed' : 'missing';
+	}
+
+	/**
+	 * Whether a post was changed after the audio of the voice in use was made.
+	 *
+	 * @param \WP_Post $post     The post.
+	 * @param mixed    $settings The plugin's settings.
+	 *
+	 * @return bool False when no fingerprint is kept for that file.
+	 */
+	private static function is_outdated( \WP_Post $post, $settings ) {
+		$records = get_post_meta( $post->ID, self::FINGERPRINTS, true );
+		if ( ! is_array( $records ) || ! $records ) {
+			return false;
+		}
+
+		// The file the player would use for this post, as the post editor's audio box works it out.
+		$resolved = (array) TTA_Helper::get_player_language_and_player_voice(
+			TTA_Helper::tts_site_language( $settings ),
+			TTA_Helper::tts_get_voice( $settings ),
+			$settings,
+			$post
+		);
+		$key      = strtolower(
+			(string) TTA_Helper::tts_get_file_url_key(
+				isset( $resolved['language'] ) ? (string) $resolved['language'] : '',
+				isset( $resolved['voice'] ) ? (string) $resolved['voice'] : ''
+			)
+		);
+
+		return isset( $records[ $key ]['hash'] )
+			&& is_string( $records[ $key ]['hash'] )
+			&& TTA_Helper::atlasvoice_content_hash( $post ) !== $records[ $key ]['hash'];
+	}
+
+	/**
+	 * The posts that get a player and have no stored audio, lowest number first.
+	 *
+	 * For work that goes through many posts in steps (making their audio): the
+	 * caller passes the last number it handled and gets the next ones, however
+	 * many posts the site has.
+	 *
+	 * @param int $after Only posts with a higher number than this.
+	 * @param int $limit How many, 1 to 50.
+	 *
+	 * @return int[] Post numbers. Empty when the voice in use stores no files.
+	 */
+	public static function missing_ids( $after = 0, $limit = self::PER_PAGE ) {
+		if ( ! TTA_Helper::player_makes_mp3( (int) TTA_Helper::get_player_id() ) ) {
+			return array();
+		}
+
+		$after = max( 0, (int) $after );
+		$where = static function ( $sql ) use ( $after ) {
+			global $wpdb;
+
+			return $sql . $wpdb->prepare( " AND {$wpdb->posts}.ID > %d", $after );
+		};
+
+		add_filter( 'posts_where', $where );
+		$query = new \WP_Query(
+			self::query_args( 'missing' ) + array(
+				'posts_per_page'         => max( 1, min( self::PER_PAGE_MAX, (int) $limit ) ),
+				'fields'                 => 'ids',
+				'orderby'                => 'ID',
+				'order'                  => 'ASC',
+				'no_found_rows'          => true,
+				'update_post_meta_cache' => false,
+			)
+		);
+		remove_filter( 'posts_where', $where );
+
+		return array_map( 'intval', $query->posts );
+	}
+
+	/**
+	 * How many posts that get a player have no stored audio.
+	 *
+	 * @return int Zero when the voice in use stores no files.
+	 */
+	public static function missing_count() {
+		if ( ! TTA_Helper::player_makes_mp3( (int) TTA_Helper::get_player_id() ) ) {
+			return 0;
+		}
+
+		return max( 0, self::count( 'all' ) - self::count( 'ready' ) );
 	}
 
 	/**

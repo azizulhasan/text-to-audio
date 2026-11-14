@@ -7,6 +7,7 @@ import {
 	within,
 } from '@testing-library/react';
 import { axe, toHaveNoViolations } from 'jest-axe';
+import { addFilter, removeFilter } from '@wordpress/hooks';
 
 import { renderWithApp } from '../test-utils';
 import LibraryAll from './LibraryAll';
@@ -280,6 +281,83 @@ describe( 'Audio library › making audio', () => {
 			( await row( 'Missing post' ) ).closest( 'table' )
 		);
 		expect( table.queryByRole( 'button' ) ).not.toBeInTheDocument();
+	} );
+
+	it( 'says that a post changed after its audio was made, and makes it again', async () => {
+		const site = fakeSite( {
+			...LIBRARY,
+			posts: [ post( 5, 'Changed post', 'outdated' ) ],
+		} );
+		renderWithApp( <LibraryAll /> );
+
+		const changed = await row( 'Changed post' );
+		expect( within( changed ).getByText( 'Outdated' ) ).toBeInTheDocument();
+		expect(
+			within( changed ).getByText(
+				'The post was changed after this audio was made.'
+			)
+		).toBeInTheDocument();
+
+		const button = within( changed ).getByRole( 'button', {
+			name: 'Make the audio of “Changed post” again',
+		} );
+		expect( button ).toHaveTextContent( 'Make again' );
+		fireEvent.click( button );
+
+		await waitFor( () =>
+			expect( site.jobs ).toEqual( [ [ 'POST', { post_id: 5 } ] ] )
+		);
+	} );
+
+	it( 'only says so where jobs cannot make the audio again', async () => {
+		fakeSite( {
+			...LIBRARY,
+			jobs: { available: false, reason: 'voice' },
+			posts: [ post( 5, 'Changed post', 'outdated' ) ],
+		} );
+		renderWithApp( <LibraryAll /> );
+
+		const changed = await row( 'Changed post' );
+		expect( within( changed ).getByText( 'Outdated' ) ).toBeInTheDocument();
+		expect(
+			within( changed ).queryByRole( 'button' )
+		).not.toBeInTheDocument();
+	} );
+
+	it( 'gives an extension a place above the list, with the library and a way to read it again', async () => {
+		const site = fakeSite();
+		const seen = [];
+		const Fill = ( props ) => {
+			seen.push( props );
+
+			return <button onClick={ props.refresh }>From an extension</button>;
+		};
+		const add = ( fills ) => [ ...fills, Fill ];
+		addFilter( 'atlasvoice.slot.library.actions', 'test/library', add );
+
+		const { unmount } = renderWithApp( <LibraryAll /> );
+		const button = await screen.findByRole( 'button', {
+			name: 'From an extension',
+		} );
+		const last = seen[ seen.length - 1 ];
+		expect( last.canMake ).toBe( true );
+		expect( last.library.counts.missing ).toBe( 3 );
+
+		fireEvent.click( button );
+		await waitFor( () => expect( site.gets ).toBe( 2 ) );
+
+		unmount();
+		removeFilter( 'atlasvoice.slot.library.actions', 'test/library' );
+	} );
+
+	it( 'shows nothing above the list without an extension', async () => {
+		fakeSite();
+		renderWithApp( <LibraryAll /> );
+		await row( 'Ready post' );
+
+		expect(
+			screen.queryByRole( 'button', { name: 'From an extension' } )
+		).not.toBeInTheDocument();
 	} );
 
 	it( 'puts every reason of a failure into words', () => {

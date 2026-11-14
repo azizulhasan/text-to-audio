@@ -9,6 +9,9 @@
  * the AtlasVoice service (tta/v1/cloud/jobs), the list then shows how far it
  * is, and it can be cancelled. Elsewhere the screen only reads.
  *
+ * An extension can add its own actions above the list through the slot
+ * "library.actions" (AtlasVoice Pro: the audio of many posts at once).
+ *
  * A voice that reads in the browser stores no files, so the screen then says
  * so and points to Voice.
  */
@@ -26,6 +29,7 @@ import { useCallback, useEffect, useRef, useState } from '@wordpress/element';
 
 import { request } from '../api';
 import { useApp } from '../app-context';
+import Slot from '../extend/Slot';
 import { Empty, Pane, ProNote, Scroll } from '../shell/parts';
 import { AudioAction, AudioStatus, REFRESH_EVERY } from './library-audio';
 
@@ -311,12 +315,17 @@ export default function LibraryAll() {
 					{ sprintf(
 						/* translators: %s: the name of a voice, e.g. "AtlasVoice TTS". */
 						__(
-							'“Ready” means the post’s audio file is stored for the voice in use (%s). “No audio yet” means it is not stored yet.',
+							'“Ready” means the post’s audio file is stored for the voice in use (%s). “Outdated” means the post was changed after its audio was made. “No audio yet” means no file is stored.',
 							'text-to-audio'
 						),
 						library.voice
 					) }
 				</p>
+
+				<Slot
+					name="library.actions"
+					fillProps={ { library, canMake, refresh } }
+				/>
 
 				<Card>
 					<CardBody>

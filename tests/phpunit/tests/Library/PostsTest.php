@@ -145,6 +145,136 @@ class PostsTest extends WP_UnitTestCase {
 		$this->assertSame( array( $never, $emptied ), $ids );
 	}
 
+	/**
+	 * Records the audio of a post the way a player does, so the plugin keeps
+	 * the fingerprint of the text beside the file.
+	 */
+	private function store_audio( $post_id, $key = 'en' ) {
+		\TTA\TTA_Helper::atlasvoice_store_audio_url( $post_id, $key, 'https://example.com/audio/' . $post_id . '.mp3' );
+	}
+
+	private function status_of( $post_id ) {
+		foreach ( Posts::get()['posts'] as $post ) {
+			if ( $post['id'] === $post_id ) {
+				return $post['status'];
+			}
+		}
+
+		return '';
+	}
+
+	private function file_key() {
+		$settings = \TTA\TTA_Helper::tts_get_settings();
+
+		return \TTA\TTA_Helper::tts_get_file_url_key( \TTA\TTA_Helper::tts_site_language( $settings ), \TTA\TTA_Helper::tts_get_voice( $settings ) );
+	}
+
+	public function test_a_post_that_changed_after_its_audio_was_made_is_outdated() {
+		$post_id = $this->post( 'The old mill' );
+		$this->store_audio( $post_id, $this->file_key() );
+
+		$this->assertSame( 'ready', $this->status_of( $post_id ) );
+
+		wp_update_post(
+			array(
+				'ID'           => $post_id,
+				'post_content' => 'The mill was rebuilt.',
+			)
+		);
+
+		$this->assertSame( 'outdated', $this->status_of( $post_id ) );
+	}
+
+	public function test_audio_that_is_made_again_is_ready_again() {
+		$post_id = $this->post( 'The old mill' );
+		$this->store_audio( $post_id, $this->file_key() );
+		wp_update_post(
+			array(
+				'ID'         => $post_id,
+				'post_title' => 'The new mill',
+			)
+		);
+		$this->assertSame( 'outdated', $this->status_of( $post_id ) );
+
+		\TTA\TTA_Helper::atlasvoice_mark_audio_current( $post_id, $this->file_key(), $post_id . '.mp3' );
+
+		$this->assertSame( 'ready', $this->status_of( $post_id ) );
+	}
+
+	public function test_a_file_from_before_fingerprints_is_ready_not_outdated() {
+		$post_id = $this->post( 'An older post', true );
+		wp_update_post(
+			array(
+				'ID'           => $post_id,
+				'post_content' => 'Changed.',
+			)
+		);
+
+		$this->assertSame( 'ready', $this->status_of( $post_id ) );
+	}
+
+	public function test_the_file_of_another_voice_does_not_make_a_post_outdated() {
+		$post_id = $this->post( 'Two voices', true );
+		$this->store_audio( $post_id, 'zz--voice--someone-else' );
+		wp_update_post(
+			array(
+				'ID'           => $post_id,
+				'post_content' => 'Changed.',
+			)
+		);
+
+		$this->assertSame( 'ready', $this->status_of( $post_id ) );
+	}
+
+	public function test_an_outdated_post_is_counted_and_filtered_as_ready() {
+		$post_id = $this->post( 'The old mill' );
+		$this->store_audio( $post_id, $this->file_key() );
+		wp_update_post(
+			array(
+				'ID'           => $post_id,
+				'post_content' => 'Changed.',
+			)
+		);
+
+		$library = Posts::get( array( 'status' => 'ready' ) );
+
+		$this->assertSame( 1, $library['counts']['ready'] );
+		$this->assertSame( 0, $library['counts']['missing'] );
+		$this->assertSame( array( $post_id ), wp_list_pluck( $library['posts'], 'id' ) );
+		$this->assertSame( 'outdated', $library['posts'][0]['status'] );
+	}
+
+	public function test_missing_ids_go_through_the_posts_without_audio_in_steps() {
+		$first  = $this->post( 'One' );
+		$ready  = $this->post( 'Two', true );
+		$second = $this->post( 'Three' );
+		$third  = $this->post( 'Four' );
+		$this->post( 'A draft', false, array( 'post_status' => 'draft' ) );
+		$this->post( 'A page', false, array( 'post_type' => 'page' ) );
+
+		$this->assertSame( array( $first, $second ), Posts::missing_ids( 0, 2 ) );
+		$this->assertSame( array( $third ), Posts::missing_ids( $second, 2 ) );
+		$this->assertSame( array(), Posts::missing_ids( $third, 2 ) );
+		$this->assertNotContains( $ready, Posts::missing_ids( 0, 50 ) );
+		$this->assertSame( 3, Posts::missing_count() );
+	}
+
+	public function test_missing_ids_never_change_another_query() {
+		$this->post( 'One' );
+		Posts::missing_ids( 999999, 5 );
+
+		$this->assertSame( 1, Posts::get()['counts']['all'] );
+		$this->assertFalse( has_filter( 'posts_where' ) );
+	}
+
+	public function test_a_browser_voice_has_no_missing_posts() {
+		$this->use_player( 1 );
+		$this->post( 'One' );
+
+		$this->assertSame( array(), Posts::missing_ids() );
+		$this->assertSame( 0, Posts::missing_count() );
+	}
+
 	public function test_an_unknown_status_is_an_error() {
 		$result = Posts::get( array( 'status' => 'broken' ) );
 

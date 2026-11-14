@@ -81,6 +81,22 @@ export function AudioStatus( { post } ) {
 		);
 	}
 
+	if ( post.status === 'outdated' ) {
+		return (
+			<>
+				<Chip tone="warn" dot>
+					{ __( 'Outdated', 'text-to-audio' ) }
+				</Chip>
+				<span className="atlasvoice-library-note">
+					{ __(
+						'The post was changed after this audio was made.',
+						'text-to-audio'
+					) }
+				</span>
+			</>
+		);
+	}
+
 	if ( post.status === 'making' ) {
 		return (
 			<>
@@ -152,6 +168,25 @@ export function AudioAction( { post, name, busy, onMake, onCancel } ) {
 				) }
 			>
 				{ __( 'Cancel', 'text-to-audio' ) }
+			</Button>
+		);
+	}
+
+	if ( post.status === 'outdated' ) {
+		return (
+			<Button
+				variant="secondary"
+				size="compact"
+				isBusy={ busy }
+				disabled={ busy }
+				onClick={ () => onMake( post ) }
+				aria-label={ sprintf(
+					/* translators: %s: a post title. */
+					__( 'Make the audio of “%s” again', 'text-to-audio' ),
+					name
+				) }
+			>
+				{ __( 'Make again', 'text-to-audio' ) }
 			</Button>
 		);
 	}

@@ -31,7 +31,7 @@ class Library_Controller {
 				// The label and description name this route for tools that read
 				// the REST index, such as an MCP server (AtlasMCP).
 				'label'               => __( 'List the posts and whether each has stored audio', 'text-to-audio' ),
-				'description'         => __( 'Returns a page of the posts that get a player, each with whether its audio file is stored ("ready") or not yet ("missing"), and how many posts are in each state. "stores_audio" is false when the voice in use reads in the browser and saves no files. It changes nothing.', 'text-to-audio' ),
+				'description'         => __( 'Returns a page of the posts that get a player, each with what its audio is doing: "ready" (the file is stored), "outdated" (stored, but the post was changed after it was made), "making" or "failed" (an audio job, with its parts or its reason) or "missing" (no audio yet), and how many posts have a stored file or none. "stores_audio" is false when the voice in use reads in the browser and saves no files. It changes nothing.', 'text-to-audio' ),
 				'callback'            => array( __CLASS__, 'read' ),
 				'permission_callback' => array( Route_Access::class, 'admin' ),
 				'args'                => array(
