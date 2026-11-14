@@ -15,7 +15,6 @@ import {
 	Button,
 	Card,
 	CardBody,
-	FormTokenField,
 	Notice,
 	Spinner,
 	TextareaControl,
@@ -28,6 +27,7 @@ import { useApp } from '../app-context';
 import useSettingsForm from '../hooks/use-settings-form';
 import { Pane, ProNote, Scroll, Section } from '../shell/parts';
 import SaveBar from '../shell/SaveBar';
+import TokenField from '../shell/TokenField';
 
 const ROUTE = 'tta/v1/areas';
 const PICKER_ROUTE = 'tta/v1/step-rail/sample-url?scope=global';
@@ -259,7 +259,7 @@ export default function ContentAreas() {
 					<Card>
 						<CardBody>
 							<div className="atlasvoice-form">
-								<FormTokenField
+								<TokenField
 									__nextHasNoMarginBottom
 									__next40pxDefaultSize
 									__experimentalShowHowTo={ false }
@@ -277,7 +277,7 @@ export default function ContentAreas() {
 										set( 'skip_areas', texts( tokens ) )
 									}
 								/>
-								<FormTokenField
+								<TokenField
 									__nextHasNoMarginBottom
 									__next40pxDefaultSize
 									__experimentalExpandOnFocus

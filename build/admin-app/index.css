@@ -1534,6 +1534,10 @@ body.atlasvoice-app-page #atlasvoice-app {
 	margin-top: 12px;
 }
 
+.atlasvoice-root .atlasvoice-token-help {
+	margin: 6px 0 0;
+}
+
 .atlasvoice-root .atlasvoice-voice-form {
 	display: flex;
 	flex-direction: column;

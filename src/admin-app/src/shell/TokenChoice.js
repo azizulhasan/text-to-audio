@@ -14,7 +14,7 @@
  * @param {Function} props.onChange Receives the new list of ids.
  * @return {*} The field.
  */
-import { FormTokenField } from '@wordpress/components';
+import TokenField from './TokenField';
 
 /**
  * What a choice is called in the field. Two choices with the same name
@@ -65,7 +65,7 @@ export default function TokenChoice( {
 	const { labelOf, idOf, labels } = choiceLabels( choices );
 
 	return (
-		<FormTokenField
+		<TokenField
 			__nextHasNoMarginBottom
 			__next40pxDefaultSize
 			__experimentalExpandOnFocus

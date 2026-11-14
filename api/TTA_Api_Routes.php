@@ -83,6 +83,8 @@ class TTA_Api_Routes {
 		Versions_Controller::register_routes();
 		// TTS-347: what could keep visitors from hearing the audio (Site health > Health).
 		Health_Controller::register_routes();
+		// TTS-347: whether plays are counted, and for which posts (Insights > Tracking).
+		Tracking_Controller::register_routes();
 
 
 		// register listening route.

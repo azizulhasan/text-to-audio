@@ -14,7 +14,6 @@ import {
 	Card,
 	CardBody,
 	CheckboxControl,
-	FormTokenField,
 	Notice,
 	Spinner,
 	ToggleControl,
@@ -23,6 +22,8 @@ import {
 import useSettingsForm from '../hooks/use-settings-form';
 import { Pane, Scroll, Section } from '../shell/parts';
 import SaveBar from '../shell/SaveBar';
+import TokenField from '../shell/TokenField';
+import { isPostNumber } from '../util/post-number';
 import TokenChoice from '../shell/TokenChoice';
 
 const ROUTE = 'tta/v1/where';
@@ -30,15 +31,8 @@ const ROUTE = 'tta/v1/where';
 /** The most single posts the site accepts (TTA\Content\Where::SKIP_POSTS_MAX). */
 export const SKIP_POSTS_MAX = 500;
 
-/**
- * Whether a text is a post number.
- *
- * @param {string} text What was typed.
- * @return {boolean} True for a whole number above zero.
- */
-export function isPostNumber( text ) {
-	return /^[1-9]\d{0,9}$/.test( String( text ).trim() );
-}
+// Kept as an export of this screen for what already imports it from here.
+export { isPostNumber };
 
 /**
  * The screen.
@@ -249,7 +243,7 @@ export default function ContentWhere() {
 										set( 'skip_tags', value )
 									}
 								/>
-								<FormTokenField
+								<TokenField
 									__nextHasNoMarginBottom
 									__next40pxDefaultSize
 									__experimentalShowHowTo={ false }
