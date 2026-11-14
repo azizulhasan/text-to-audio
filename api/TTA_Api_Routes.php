@@ -81,6 +81,8 @@ class TTA_Api_Routes {
 		Privacy_Controller::register_routes();
 		// TTS-347: installed and older versions, automatic updates (Site health > Versions).
 		Versions_Controller::register_routes();
+		// TTS-347: what could keep visitors from hearing the audio (Site health > Health).
+		Health_Controller::register_routes();
 
 
 		// register listening route.

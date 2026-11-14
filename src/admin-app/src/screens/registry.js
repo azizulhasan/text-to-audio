@@ -81,6 +81,9 @@ const BUILT_IN = {
 			/* webpackChunkName: "screen-voice-pronunciation" */ './VoicePronunciation'
 		)
 	),
+	'site:health': lazy( () =>
+		import( /* webpackChunkName: "screen-site-health" */ './SiteHealth' )
+	),
 	'site:versions': lazy( () =>
 		import(
 			/* webpackChunkName: "screen-site-versions" */ './SiteVersions'

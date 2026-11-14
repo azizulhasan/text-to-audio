@@ -35,6 +35,7 @@
 	<file>./api/Advanced_Controller.php</file>
 	<file>./api/Privacy_Controller.php</file>
 	<file>./api/Versions_Controller.php</file>
+	<file>./api/Health_Controller.php</file>
 	<file>./includes/Site</file>
 	<file>./includes/Content</file>
 	<file>./includes/Voice</file>
