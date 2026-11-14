@@ -11,8 +11,14 @@
  * nothing is sent anywhere.
  *
  * An extension (AtlasVoice Pro) adds a step with the `atlasvoice_setup_steps`
- * filter in PHP and fills the slot "setup.step.<id>" with its part.
+ * filter in PHP, names it with the `atlasvoice.setupStepNames` filter and
+ * fills the slot "setup.step.<id>" with its part. The part gets:
+ *   - `setup`: where the setup stands;
+ *   - `onSave( fn )`: `fn` runs when Continue is pressed; a rejected promise
+ *     keeps the step open and shows its message;
+ *   - `setBlocked( text )`: why Continue cannot be pressed yet, or ''.
  */
+import { applyFilters } from '@wordpress/hooks';
 import { __, sprintf } from '@wordpress/i18n';
 import {
 	Button,
@@ -36,19 +42,26 @@ import { SHAPES, shapeOf, stylePresets } from './PlayerLook';
 
 const ROUTE = 'tta/v1/setup';
 
+/** The steps this screen draws itself. */
+const BUILT_IN = [ 'hear', 'where', 'voice', 'look', 'live' ];
+
 /**
- * The names of the built-in steps.
+ * The names of the steps: the built-in ones, and those an extension named.
  *
  * @return {Object} Step id => name.
  */
 export function stepNames() {
-	return {
+	const names = {
 		hear: __( 'Hear it', 'text-to-audio' ),
 		where: __( 'Where', 'text-to-audio' ),
 		voice: __( 'Voice', 'text-to-audio' ),
 		look: __( 'Look', 'text-to-audio' ),
 		live: __( 'Check and go live', 'text-to-audio' ),
 	};
+	const all = applyFilters( 'atlasvoice.setupStepNames', { ...names } );
+
+	// A filter that returns something else than a map is ignored.
+	return all && typeof all === 'object' ? { ...all, ...names } : names;
 }
 
 /**
@@ -59,11 +72,9 @@ export function stepNames() {
  * @return {string[]} The ids to show, in order.
  */
 export function shownSteps( steps ) {
-	const names = stepNames();
-
 	return ( Array.isArray( steps ) ? steps : [] ).filter(
 		( id ) =>
-			Object.prototype.hasOwnProperty.call( names, id ) ||
+			BUILT_IN.includes( id ) ||
 			getSlotFills( 'setup.step.' + id ).length > 0
 	);
 }
@@ -259,6 +270,9 @@ export default function Setup() {
 	const [ goLive, setGoLive ] = useState( MODE_STAGING );
 	const [ opened, setOpened ] = useState( false );
 	const heading = useRef( null );
+	// What an extension's step asked to run on Continue, and why it blocks it.
+	const extensionSave = useRef( null );
+	const [ extensionBlocked, setExtensionBlocked ] = useState( '' );
 
 	const load = useCallback( async () => {
 		setFailure( '' );
@@ -314,6 +328,16 @@ export default function Setup() {
 			gone = true;
 		};
 	}, [ boot, part, source, step ] );
+
+	// What one step asked for never reaches the next one.
+	useEffect( () => {
+		extensionSave.current = null;
+		setExtensionBlocked( '' );
+	}, [ index ] );
+
+	const onExtensionSave = useCallback( ( run ) => {
+		extensionSave.current = typeof run === 'function' ? run : null;
+	}, [] );
 
 	// A new step starts at its heading, for the keyboard and the screen reader.
 	useEffect( () => {
@@ -376,10 +400,12 @@ export default function Setup() {
 
 	// Why Continue cannot be pressed yet, in words. Empty when it can.
 	const waiting = !! source && ! part;
-	const blocked =
-		step === 'where' && draft && ! draft.post_types.length
-			? __( 'Choose at least one content type', 'text-to-audio' )
-			: '';
+	let blocked = '';
+	if ( step === 'where' && draft && ! draft.post_types.length ) {
+		blocked = __( 'Choose at least one content type', 'text-to-audio' );
+	} else if ( ! BUILT_IN.includes( step ) ) {
+		blocked = extensionBlocked;
+	}
 
 	/**
 	 * Sends what a step changed to the step's own service.
@@ -420,6 +446,9 @@ export default function Setup() {
 					live: [ 'count_plays' ],
 				}[ step ];
 				await saveChanged( keys );
+			}
+			if ( extensionSave.current ) {
+				await extensionSave.current();
 			}
 
 			if ( index < steps.length - 1 ) {
@@ -540,7 +569,16 @@ export default function Setup() {
 
 	let title = names[ step ] || '';
 	let description = '';
-	let body = <Slot name={ 'setup.step.' + step } fillProps={ { setup } } />;
+	let body = (
+		<Slot
+			name={ 'setup.step.' + step }
+			fillProps={ {
+				setup,
+				onSave: onExtensionSave,
+				setBlocked: setExtensionBlocked,
+			} }
+		/>
+	);
 
 	if ( part && part.failed ) {
 		body = (

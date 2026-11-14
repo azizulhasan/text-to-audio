@@ -504,6 +504,135 @@ describe( 'Setup', () => {
 		] );
 	} );
 
+	it( 'runs a step an extension brought: its name, its reason to wait and its save', async () => {
+		const site = fakeSite( {
+			setup: { ...SITE.setup, steps: [ 'hear', 'extra', 'live' ] },
+		} );
+		fakeVoice();
+		const saved = jest.fn( () => Promise.resolve() );
+		const Extra = ( { setup, onSave, setBlocked } ) => (
+			<div>
+				<p>Extra part for { setup.voice }</p>
+				<button onClick={ () => setBlocked( 'Fill the extra box' ) }>
+					Block
+				</button>
+				<button
+					onClick={ () => {
+						setBlocked( '' );
+						onSave( saved );
+					} }
+				>
+					Ready
+				</button>
+			</div>
+		);
+		addFilter(
+			'atlasvoice.slot.setup.step.extra',
+			'test/extra',
+			( fills ) => [ ...fills, Extra ]
+		);
+		addFilter( 'atlasvoice.setupStepNames', 'test/extra', ( names ) => ( {
+			...names,
+			extra: 'Extra step',
+			hear: 'Renamed by an extension',
+		} ) );
+
+		const { unmount } = renderWithApp( <Setup />, { hash: '#/setup' } );
+		await stepTitle( 'Here is your newest post, read aloud' );
+		// A built-in step keeps its own name.
+		expect(
+			screen.getByRole( 'button', { name: /Hear it/ } )
+		).toBeInTheDocument();
+		fireEvent.click( next() );
+
+		await stepTitle( 'Extra step' );
+		expect(
+			screen.getByText( 'Extra part for Default' )
+		).toBeInTheDocument();
+
+		fireEvent.click( screen.getByRole( 'button', { name: 'Block' } ) );
+		expect( next() ).toBeDisabled();
+		expect( screen.getByText( 'Fill the extra box' ) ).toBeInTheDocument();
+
+		fireEvent.click( screen.getByRole( 'button', { name: 'Ready' } ) );
+		fireEvent.click( next() );
+
+		await stepTitle( 'Check it, then go live' );
+		expect( saved ).toHaveBeenCalledTimes( 1 );
+
+		// What that step asked for does not reach the next step.
+		await waitFor( () =>
+			expect(
+				screen.getByRole( 'button', { name: 'Finish setup' } )
+			).toBeEnabled()
+		);
+		fireEvent.click(
+			screen.getByRole( 'button', { name: 'Finish setup' } )
+		);
+		await stepTitle( 'You are set up, still in staging' );
+		expect( saved ).toHaveBeenCalledTimes( 1 );
+		expect( site.sent ).toEqual( [
+			[ 'setup/finish', { go_live: false } ],
+		] );
+
+		// The screen goes first: a slot redraws when its filter is removed.
+		unmount();
+		removeFilter( 'atlasvoice.slot.setup.step.extra', 'test/extra' );
+		removeFilter( 'atlasvoice.setupStepNames', 'test/extra' );
+	} );
+
+	it( 'stays on the step of an extension when its save fails', async () => {
+		fakeSite( {
+			setup: { ...SITE.setup, steps: [ 'hear', 'extra', 'live' ] },
+		} );
+		fakeVoice();
+		const Extra = ( { onSave } ) => (
+			<button
+				onClick={ () =>
+					onSave( () => Promise.reject( new Error( 'No email.' ) ) )
+				}
+			>
+				Ready
+			</button>
+		);
+		addFilter(
+			'atlasvoice.slot.setup.step.extra',
+			'test/fail',
+			( fills ) => [ ...fills, Extra ]
+		);
+
+		const { context, unmount } = renderWithApp( <Setup />, {
+			hash: '#/setup',
+		} );
+		await stepTitle( 'Here is your newest post, read aloud' );
+		fireEvent.click( next() );
+		fireEvent.click(
+			await screen.findByRole( 'button', { name: 'Ready' } )
+		);
+		fireEvent.click( next() );
+
+		await waitFor( () =>
+			expect( context.notify ).toHaveBeenCalledWith(
+				'This step was not saved: No email.',
+				'error'
+			)
+		);
+		expect(
+			screen.getByRole( 'button', { name: 'Ready' } )
+		).toBeInTheDocument();
+
+		unmount();
+		removeFilter( 'atlasvoice.slot.setup.step.extra', 'test/fail' );
+	} );
+
+	it( 'ignores step names that are not a map', () => {
+		addFilter( 'atlasvoice.setupStepNames', 'test/bad', () => 'broken' );
+
+		expect( stepNames().hear ).toBe( 'Hear it' );
+
+		removeFilter( 'atlasvoice.setupStepNames', 'test/bad' );
+	} );
+
 	it( 'has no accessibility violations on a form step and at the end', async () => {
 		fakeSite();
 		fakeVoice();
