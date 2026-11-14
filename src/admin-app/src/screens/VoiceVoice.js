@@ -442,7 +442,13 @@ export default function VoiceVoice() {
 		>
 			<Scroll width={ 860 }>
 				{ form.values ? (
-					<VoiceChoice form={ form } connected={ state.connected } />
+					<VoiceChoice
+						form={ form }
+						connected={ state.connected }
+						pending={
+							!! state.connected && !! state.pending_approval
+						}
+					/>
 				) : (
 					<div className="atlasvoice-section">
 						{ form.failure ? (

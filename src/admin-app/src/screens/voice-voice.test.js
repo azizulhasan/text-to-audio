@@ -944,3 +944,29 @@ describe( 'Voice › Voice', () => {
 		expect( await axe( after.container ) ).toHaveNoViolations();
 	}, 20000 ); // Two accessibility scans in one test: slow on a busy machine.
 } );
+
+describe( 'Voice: the natural voice tile while the site waits for approval', () => {
+	it( 'does not say Connected before the site is approved', async () => {
+		fakeSite( { ...CONNECTED, pending_approval: true } );
+		renderWithApp( <VoiceVoice /> );
+		await screen.findByText( 'Waiting for approval' );
+
+		const tile = screen
+			.getByRole( 'radio', { name: /Natural voice/ } )
+			.closest( '.atlasvoice-tile' );
+		expect( tile ).toHaveTextContent( 'Not approved yet' );
+		expect( tile ).not.toHaveTextContent( 'Connected' );
+	} );
+
+	it( 'says Connected once the site is approved', async () => {
+		fakeSite( CONNECTED );
+		renderWithApp( <VoiceVoice /> );
+		await screen.findByText( 'Natural voice connection' );
+
+		const tile = screen
+			.getByRole( 'radio', { name: /Natural voice/ } )
+			.closest( '.atlasvoice-tile' );
+		expect( tile ).toHaveTextContent( 'Connected' );
+		expect( tile ).not.toHaveTextContent( 'Not approved yet' );
+	} );
+} );

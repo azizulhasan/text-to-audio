@@ -104,9 +104,10 @@ function playSample( values ) {
  * @param {Object}  props
  * @param {Object}  props.form      What use-settings-form returns for tta/v1/voice.
  * @param {boolean} props.connected Whether the natural voice is connected right now.
+ * @param {boolean} props.pending   Whether the connection still waits for approval.
  * @return {*} The sections.
  */
-export default function VoiceChoice( { form, connected } ) {
+export default function VoiceChoice( { form, connected, pending } ) {
 	const { boot } = useApp();
 	const voices = useBrowserVoices();
 	const { values, set } = form;
@@ -193,7 +194,15 @@ export default function VoiceChoice( { form, connected } ) {
 								/>
 								<label htmlFor={ id }>
 									<b>{ words.title }</b>
-									{ player.id === natural && (
+									{ player.id === natural && pending && (
+										<Chip tone="warn">
+											{ __(
+												'Not approved yet',
+												'text-to-audio'
+											) }
+										</Chip>
+									) }
+									{ player.id === natural && ! pending && (
 										<Chip
 											tone={ connected ? 'ok' : 'info' }
 										>
