@@ -126,7 +126,7 @@ describe( 'Audio library › Settings', () => {
 		);
 	} );
 
-	it( 'says what is needed when the natural voice is not connected', async () => {
+	it( 'says what is needed when the site is not connected to the service', async () => {
 		fakeSite( { when: 'play', available: false, reason: 'not_connected' } );
 		const { container, context } = renderWithApp( <LibrarySettings />, {
 			hash: '#/library/settings',
@@ -134,7 +134,7 @@ describe( 'Audio library › Settings', () => {
 		await onPlay();
 
 		expect( container ).toHaveTextContent(
-			'needs the natural voice to be connected'
+			'needs this site to be connected to the AtlasVoice service'
 		);
 		fireEvent.click( screen.getByRole( 'button', { name: 'Open Voice' } ) );
 		expect( context.go ).toHaveBeenCalledWith( 'voice:voice' );
@@ -148,7 +148,7 @@ describe( 'Audio library › Settings', () => {
 		await onPlay();
 
 		expect( container ).toHaveTextContent(
-			'works with the natural voice (AtlasVoice TTS)'
+			'works with the voices of the AtlasVoice service'
 		);
 	} );
 

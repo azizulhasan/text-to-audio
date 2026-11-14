@@ -74,7 +74,7 @@ class Library_Controller {
 				array(
 					'methods'             => \WP_REST_Server::READABLE,
 					'label'               => __( 'Read when audio is made', 'text-to-audio' ),
-					'description'         => __( 'Returns when the audio of a post is made: "play" (the first play makes it, as always) or "publish" (it is made in the background when a post is published or changed), and whether background audio jobs can run on this site ("available"; "reason" is "voice" when the voice in use is not made by jobs, "not_connected" when the natural voice is not connected). It changes nothing.', 'text-to-audio' ),
+					'description'         => __( 'Returns when the audio of a post is made: "play" (the first play makes it, as always) or "publish" (it is made in the background when a post is published or changed), and whether background audio jobs can run on this site ("available"; "reason" is "voice" when the voice in use is not made by jobs, "not_connected" when the site is not connected to the AtlasVoice service). It changes nothing.', 'text-to-audio' ),
 					'callback'            => array( __CLASS__, 'read_settings' ),
 					'permission_callback' => array( Route_Access::class, 'admin' ),
 					'args'                => array(),

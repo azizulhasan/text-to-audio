@@ -101,11 +101,11 @@ export default function LibrarySettings() {
 						>
 							{ values.reason === 'not_connected'
 								? __(
-										'Audio in the background needs the natural voice to be connected. Until then, audio is made on the first play.',
+										'Audio in the background needs this site to be connected to the AtlasVoice service. Until then, audio is made on the first play.',
 										'text-to-audio'
 								  )
 								: __(
-										'Audio in the background works with the natural voice (AtlasVoice TTS). With the voice in use now, audio is made as that voice makes it.',
+										'Audio in the background works with the voices of the AtlasVoice service. With the voice in use now, audio is made as that voice makes it.',
 										'text-to-audio'
 								  ) }
 						</Notice>

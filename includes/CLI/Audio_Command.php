@@ -53,7 +53,7 @@ class Audio_Command {
 		$reasons = array(
 			''              => 'can run',
 			'voice'         => 'cannot run: the voice in use is not made by jobs',
-			'not_connected' => 'cannot run: the natural voice is not connected',
+			'not_connected' => 'cannot run: this site is not connected to the AtlasVoice service',
 		);
 
 		\WP_CLI::line( 'audio is made: ' . ( Audio::WHEN_PUBLISH === $setting['when'] ? 'when a post is published' : 'on the first play' ) );

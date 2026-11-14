@@ -103,7 +103,11 @@ class Jobs {
 			return self::error( 'nothing_to_speak', __( 'This post has no text to read.', 'text-to-audio' ), 422 );
 		}
 
-		$ref = Client::job_ref( 'post:' . $post_id . ':' . $language );
+		$options = self::options( $post_id, $language );
+
+		// The engine and the voice are part of what a job is: the same text in
+		// another voice is another job, never a replay of the first one.
+		$ref = Client::job_ref( 'post:' . $post_id . ':' . $language . ( '' !== $options['engine'] ? ':' . $options['engine'] . ':' . $options['voice'] : '' ) );
 		$key = Client::idempotency_key( $ref, $text );
 
 		// The same text was already made into a file that is still here: nothing to do.
@@ -115,9 +119,14 @@ class Jobs {
 		$result = Cloud::client()->create_job(
 			$text,
 			$language,
-			array(
-				'ref'             => $ref,
-				'idempotency_key' => $key,
+			array_filter(
+				array(
+					'ref'             => $ref,
+					'idempotency_key' => $key,
+					'engine'          => $options['engine'],
+					'voice'           => $options['voice'],
+				),
+				'strlen'
 			)
 		);
 
@@ -436,13 +445,18 @@ class Jobs {
 		}
 
 		$messages = array(
-			'quota_exceeded'    => __( 'This month’s characters are not enough for this post.', 'text-to-audio' ),
-			'daily_cap_reached' => __( 'Today’s limit is reached. Try again tomorrow.', 'text-to-audio' ),
-			'too_many_jobs'     => __( 'Too many audio jobs are running. This one can be started again in a moment.', 'text-to-audio' ),
-			'queue_full'        => __( 'The AtlasVoice service is busy. Please try again in a minute.', 'text-to-audio' ),
-			'text_too_long'     => __( 'This post is too long for one audio job.', 'text-to-audio' ),
-			'nothing_to_speak'  => __( 'This post has no text to read.', 'text-to-audio' ),
-			'approval_required' => __( 'This site waits for approval, so it cannot make audio yet.', 'text-to-audio' ),
+			'quota_exceeded'       => __( 'This month’s characters are not enough for this post.', 'text-to-audio' ),
+			'daily_cap_reached'    => __( 'Today’s limit is reached. Try again tomorrow.', 'text-to-audio' ),
+			'too_many_jobs'        => __( 'Too many audio jobs are running. This one can be started again in a moment.', 'text-to-audio' ),
+			'queue_full'           => __( 'The AtlasVoice service is busy. Please try again in a minute.', 'text-to-audio' ),
+			'text_too_long'        => __( 'This post is too long for one audio job.', 'text-to-audio' ),
+			'nothing_to_speak'     => __( 'This post has no text to read.', 'text-to-audio' ),
+			'approval_required'    => __( 'This site waits for approval, so it cannot make audio yet.', 'text-to-audio' ),
+			'engine_not_in_plan'   => __( 'The plan of this site does not include this voice engine.', 'text-to-audio' ),
+			'unknown_engine'       => __( 'The AtlasVoice service does not know this voice engine.', 'text-to-audio' ),
+			'unsupported_voice'    => __( 'The AtlasVoice service does not have the voice that is chosen. Choose another voice on the Voice screen.', 'text-to-audio' ),
+			'unsupported_language' => __( 'The voice that is chosen does not speak this language. Choose another voice or language on the Voice screen.', 'text-to-audio' ),
+			'service_unavailable'  => __( 'The AtlasVoice service is busy. Please try again in a few minutes.', 'text-to-audio' ),
 		);
 
 		$error = self::error(
@@ -462,6 +476,44 @@ class Jobs {
 		}
 
 		return $error;
+	}
+
+	/**
+	 * The engine and the voice of a job. Empty for both means the service's
+	 * own default, which is what the natural voice of the free plugin uses.
+	 *
+	 * @param int    $post_id  The post.
+	 * @param string $language Language code.
+	 *
+	 * @return array{engine: string, voice: string} Only values the service can take; anything else is left out.
+	 */
+	private static function options( $post_id, $language ) {
+		/**
+		 * Filters the voice engine and the voice of a post's audio job. An
+		 * extension whose player is made by jobs names them here.
+		 *
+		 * @param array  $options  { engine: string, voice: string }. Empty: the service's default.
+		 * @param int    $post_id  The post.
+		 * @param string $language Language code.
+		 */
+		$options = (array) apply_filters(
+			'atlasvoice_cloud_job_options',
+			array(
+				'engine' => '',
+				'voice'  => '',
+			),
+			(int) $post_id,
+			(string) $language
+		);
+
+		$engine = isset( $options['engine'] ) && is_string( $options['engine'] ) && preg_match( '/^[a-z0-9_-]{1,32}$/', $options['engine'] ) ? $options['engine'] : '';
+		// A voice belongs to an engine: without one it is never sent.
+		$voice = '' !== $engine && isset( $options['voice'] ) && is_string( $options['voice'] ) && preg_match( '/^[A-Za-z0-9_.:@+-]{1,96}$/', $options['voice'] ) ? $options['voice'] : '';
+
+		return array(
+			'engine' => $engine,
+			'voice'  => $voice,
+		);
 	}
 
 	/**

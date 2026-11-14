@@ -267,6 +267,119 @@ class JobsTest extends WP_UnitTestCase {
 		$this->assertNotNull( Jobs::status( $this->post, 'fr' ) );
 	}
 
+	public function test_a_job_names_no_engine_or_voice_unless_an_extension_does() {
+		$this->service_takes_the_job();
+
+		Jobs::start( $this->post );
+		$sent = $this->requests_to( '/v1/jobs' )[0]['body'];
+
+		// The SDK's own default, as before this option existed.
+		$this->assertSame( 'gtts', $sent['engine'] );
+		$this->assertNull( $sent['voice'] );
+		$this->assertSame( 'post:' . $this->post . ':en', $sent['ref'] );
+	}
+
+	public function test_an_extension_can_name_the_engine_and_the_voice() {
+		$this->service_takes_the_job();
+		add_filter(
+			'atlasvoice_cloud_job_options',
+			static function ( $options, $post_id, $language ) {
+				return array(
+					'engine' => 'cloud',
+					'voice'  => 'supertonic-' . $language . '-F1',
+				);
+			},
+			10,
+			3
+		);
+
+		Jobs::start( $this->post );
+		remove_all_filters( 'atlasvoice_cloud_job_options' );
+		$request = $this->requests_to( '/v1/jobs' )[0];
+		$sent    = $request['body'];
+
+		$this->assertSame( 'cloud', $sent['engine'] );
+		$this->assertSame( 'supertonic-en-F1', $sent['voice'] );
+		$this->assertSame( 'post:' . $this->post . ':en:cloud:supertonic-en-F1', $sent['ref'] );
+	}
+
+	public function test_another_voice_is_another_job_never_a_replay() {
+		$keys = array();
+		foreach ( array( 'supertonic-en-F1', 'supertonic-en-M2' ) as $voice ) {
+			$this->service_takes_the_job();
+			add_filter(
+				'atlasvoice_cloud_job_options',
+				static function () use ( $voice ) {
+					return array(
+						'engine' => 'cloud',
+						'voice'  => $voice,
+					);
+				}
+			);
+			Jobs::start( $this->post );
+			remove_all_filters( 'atlasvoice_cloud_job_options' );
+			$requests = $this->requests_to( '/v1/jobs' );
+			$keys[]   = end( $requests )['headers']['Idempotency-Key'];
+		}
+
+		$this->assertNotSame( $keys[0], $keys[1] );
+	}
+
+	/**
+	 * @dataProvider options_that_are_not_sent
+	 */
+	public function test_an_engine_or_voice_the_service_cannot_take_is_left_out( $options ) {
+		$this->service_takes_the_job();
+		add_filter(
+			'atlasvoice_cloud_job_options',
+			static function () use ( $options ) {
+				return $options;
+			}
+		);
+
+		Jobs::start( $this->post );
+		remove_all_filters( 'atlasvoice_cloud_job_options' );
+		$sent = $this->requests_to( '/v1/jobs' )[0]['body'];
+
+		$this->assertSame( 'gtts', $sent['engine'] );
+		$this->assertNull( $sent['voice'] );
+		$this->assertSame( 'post:' . $this->post . ':en', $sent['ref'] );
+	}
+
+	public function options_that_are_not_sent() {
+		return array(
+			'not a list'                 => array( 'cloud' ),
+			'an engine with a space'     => array(
+				array(
+					'engine' => 'my engine',
+					'voice'  => 'v1',
+				),
+			),
+			'an engine that is not text' => array( array( 'engine' => array( 'cloud' ) ) ),
+			'a voice without an engine'  => array( array( 'voice' => 'supertonic-en-F1' ) ),
+		);
+	}
+
+	public function test_a_voice_with_markup_is_left_out_but_the_engine_is_kept() {
+		$this->service_takes_the_job();
+		add_filter(
+			'atlasvoice_cloud_job_options',
+			static function () {
+				return array(
+					'engine' => 'cloud',
+					'voice'  => '<script>',
+				);
+			}
+		);
+
+		Jobs::start( $this->post );
+		remove_all_filters( 'atlasvoice_cloud_job_options' );
+		$sent = $this->requests_to( '/v1/jobs' )[0]['body'];
+
+		$this->assertSame( 'cloud', $sent['engine'] );
+		$this->assertNull( $sent['voice'] );
+	}
+
 	public function test_a_site_that_is_not_connected_sends_nothing() {
 		delete_option( Service::OPTION );
 
