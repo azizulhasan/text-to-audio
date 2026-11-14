@@ -12,7 +12,7 @@ import Search from './Search';
 /**
  * The top bar: where you are, then help and notices.
  *
- * The middle column holds the search box; on phones it is left out.
+ * The middle column holds the search box; on phones it has a row of its own.
  *
  * @param {Object}   props
  * @param {Function} props.onMenu Opens the slide-in rail on phones.
