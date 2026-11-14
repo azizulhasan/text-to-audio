@@ -7,6 +7,7 @@
 
 namespace TTA\Library;
 
+use TTA\Cloud\Jobs;
 use TTA\TTA_Helper;
 
 defined( 'ABSPATH' ) || exit;
@@ -18,6 +19,9 @@ defined( 'ABSPATH' ) || exit;
  * It only reads, and it reads what the players already write: the post
  * meta `tts_is_mp3_file_url_exists`, set when a post's audio file is saved
  * and removed when the voice changes. Nothing new is stored.
+ *
+ * A post whose audio is being made by a job (TTA\Cloud\Jobs, TTS-354) says
+ * so: "making" with how many parts are done, or "failed" with the reason.
  *
  * A voice that reads in the browser stores no files, so there is no
  * library for it; get() says so with `stores_audio`.
@@ -46,8 +50,11 @@ class Posts {
 	 *     stores_audio: bool, voice: string,
 	 *     counts: array{all:int, ready:int, missing:int},
 	 *     status: string, search: string, page: int, pages: int, total: int,
-	 *     posts: array<int, array{id:int, title:string, status:string, modified:string, view_url:string, edit_url:string}>
+	 *     jobs: array{available:bool, reason:string},
+	 *     posts: array<int, array{id:int, title:string, status:string, job:array|null, modified:string, view_url:string, edit_url:string}>
 	 * }
+	 *
+	 * A post's status is ready, making, failed or missing.
 	 */
 	public static function get( array $args = array() ) {
 		$status = isset( $args['status'] ) ? $args['status'] : 'all';
@@ -74,6 +81,8 @@ class Posts {
 				'ready'   => 0,
 				'missing' => 0,
 			),
+			// Whether "Make audio" can start a job on this site, and why not.
+			'jobs'         => Audio::availability(),
 			'status'       => $status,
 			'search'       => $search,
 			'page'         => $page,
@@ -108,7 +117,8 @@ class Posts {
 			$report['posts'][] = array(
 				'id'       => (int) $post->ID,
 				'title'    => wp_strip_all_tags( get_the_title( $post ) ),
-				'status'   => get_post_meta( $post->ID, self::MARK, true ) ? 'ready' : 'missing',
+				'status'   => self::status_of( (int) $post->ID ),
+				'job'      => self::job_of( (int) $post->ID ),
 				'modified' => mysql2date( 'c', $post->post_modified_gmt, false ),
 				'view_url' => (string) get_permalink( $post ),
 				'edit_url' => (string) get_edit_post_link( $post->ID, 'raw' ),
@@ -116,6 +126,50 @@ class Posts {
 		}
 
 		return $report;
+	}
+
+	/**
+	 * The audio status of one post: its file, or what its job says.
+	 *
+	 * @param int $post_id The post.
+	 *
+	 * @return string ready, making, failed or missing.
+	 */
+	private static function status_of( $post_id ) {
+		$job    = Jobs::status( $post_id );
+		$status = $job ? $job['status'] : '';
+
+		// A job that runs now says more than the file of before.
+		if ( in_array( $status, array( 'queued', 'running', 'downloading' ), true ) ) {
+			return 'making';
+		}
+		if ( get_post_meta( $post_id, self::MARK, true ) ) {
+			return 'ready';
+		}
+
+		return 'failed' === $status ? 'failed' : 'missing';
+	}
+
+	/**
+	 * What the screens need of a post's job. Never its key or its file path.
+	 *
+	 * @param int $post_id The post.
+	 *
+	 * @return array{status:string, parts_done:int, parts:int, error:string}|null Null without a job.
+	 */
+	private static function job_of( $post_id ) {
+		$job = Jobs::status( $post_id );
+
+		if ( ! $job ) {
+			return null;
+		}
+
+		return array(
+			'status'     => $job['status'],
+			'parts_done' => $job['parts_done'],
+			'parts'      => $job['parts'],
+			'error'      => $job['error'],
+		);
 	}
 
 	/**

@@ -8,13 +8,14 @@
 namespace TTA_Api;
 
 use TTA\AtlasVoice\RestRoutes;
+use TTA\Library\Audio;
 use TTA\Library\Posts;
 
 defined( 'ABSPATH' ) || exit;
 
 /**
- * The route tta/v1/library: which posts have a stored audio file. It only
- * reads.
+ * The routes tta/v1/library (which posts have a stored audio file; it only
+ * reads) and tta/v1/library/settings (when audio is made).
  */
 class Library_Controller {
 
@@ -60,6 +61,65 @@ class Library_Controller {
 				),
 			)
 		);
+	}
+
+	/**
+	 * Registers the routes of the setting. Called on rest_api_init.
+	 */
+	public static function register_settings_routes() {
+		register_rest_route(
+			RestRoutes::NAMESPACE_PREFIX,
+			'/library/settings',
+			array(
+				array(
+					'methods'             => \WP_REST_Server::READABLE,
+					'label'               => __( 'Read when audio is made', 'text-to-audio' ),
+					'description'         => __( 'Returns when the audio of a post is made: "play" (the first play makes it, as always) or "publish" (it is made in the background when a post is published or changed), and whether background audio jobs can run on this site ("available"; "reason" is "voice" when the voice in use is not made by jobs, "not_connected" when the natural voice is not connected). It changes nothing.', 'text-to-audio' ),
+					'callback'            => array( __CLASS__, 'read_settings' ),
+					'permission_callback' => array( Route_Access::class, 'admin' ),
+					'args'                => array(),
+				),
+				array(
+					'methods'             => \WP_REST_Server::CREATABLE,
+					'label'               => __( 'Choose when audio is made', 'text-to-audio' ),
+					'description'         => __( 'Saves when the audio of a post is made. With "publish", publishing or changing a post sends its text to the AtlasVoice service in the background and the characters count against the site\'s allowance; with "play" nothing is sent until a visitor plays the post.', 'text-to-audio' ),
+					'callback'            => array( __CLASS__, 'save_settings' ),
+					'permission_callback' => array( Route_Access::class, 'admin' ),
+					'args'                => array(
+						'when' => array(
+							'type'        => 'string',
+							'enum'        => array( Audio::WHEN_PLAY, Audio::WHEN_PUBLISH ),
+							'description' => __( 'play: on the first play. publish: when a post is published or changed.', 'text-to-audio' ),
+						),
+					),
+				),
+			)
+		);
+	}
+
+	/**
+	 * Returns when audio is made.
+	 *
+	 * @return \WP_REST_Response
+	 */
+	public static function read_settings() {
+		return rest_ensure_response( Audio::get() );
+	}
+
+	/**
+	 * Saves when audio is made.
+	 *
+	 * @param \WP_REST_Request $request Request with when.
+	 *
+	 * @return \WP_REST_Response|\WP_Error
+	 */
+	public static function save_settings( $request ) {
+		$fields = array();
+		if ( null !== $request->get_param( 'when' ) ) {
+			$fields['when'] = $request->get_param( 'when' );
+		}
+
+		return rest_ensure_response( Audio::save( $fields ) );
 	}
 
 	/**

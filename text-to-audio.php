@@ -376,6 +376,10 @@ add_action( 'update_option_tta_atlasvoice_service', array( '\TTA\Cloud\Account',
 // TTS-378: WP-Cron asks AtlasVoice Cloud how an audio job is going; never a page request.
 add_action( 'atlasvoice_cloud_job_poll', array( '\TTA\Cloud\Jobs', 'poll' ), 10, 2 );
 
+// TTS-354: a finished job's file becomes the post's audio, and a site that chose it
+// gets its audio made in the background when a post is published.
+\TTA\Library\Audio::register();
+
 // TTS-376: everything an admin can do on a screen is also a WP-CLI command.
 if ( defined( 'WP_CLI' ) && WP_CLI ) {
     add_action( 'plugins_loaded', array( '\TTA\CLI\Commands', 'register' ) );
