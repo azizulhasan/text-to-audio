@@ -89,6 +89,8 @@ class TTA_Api_Routes {
 		Report_Controller::register_routes();
 		// TTS-347: which posts have a stored audio file, read-only (Audio library > All posts).
 		Library_Controller::register_routes();
+		// TTS-347: the other AtlasAiDev plugins, read-only and without a fetch (Help > More plugins).
+		More_Plugins_Controller::register_routes();
 
 
 		// register listening route.

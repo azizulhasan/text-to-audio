@@ -1479,6 +1479,79 @@ body.atlasvoice-app-page #atlasvoice-app {
 	gap: 6px;
 }
 
+/* ---------- Help > Documentation ---------- */
+.atlasvoice-root .atlasvoice-docs {
+	display: grid;
+	grid-template-columns: minmax(200px, 280px) minmax(0, 1fr);
+	gap: 24px;
+	align-items: start;
+}
+
+.atlasvoice-root .atlasvoice-docs-side {
+	display: grid;
+	gap: 12px;
+}
+
+.atlasvoice-root .atlasvoice-docs-list {
+	margin: 0;
+	padding: 0;
+	list-style: none;
+}
+
+.atlasvoice-root .atlasvoice-docs-entry {
+	margin: 0;
+}
+
+.atlasvoice-root .atlasvoice-docs-item {
+	display: block;
+	width: 100%;
+	padding: 8px 12px;
+	border: 0;
+	border-radius: var(--atlasvoice-radius);
+	background: none;
+	color: inherit;
+	font: inherit;
+	text-align: left;
+	cursor: pointer;
+}
+
+.atlasvoice-root .atlasvoice-docs-item:hover {
+	background: var(--atlasvoice-line-weak);
+}
+
+.atlasvoice-root .atlasvoice-docs-item:focus-visible {
+	outline: 2px solid var(--atlasvoice-accent);
+	outline-offset: -2px;
+}
+
+.atlasvoice-root .atlasvoice-docs-item.is-current {
+	background: var(--atlasvoice-brand-weak);
+	color: var(--atlasvoice-brand-ink);
+	font-weight: 500;
+}
+
+.atlasvoice-root .atlasvoice-docs-main {
+	display: grid;
+	gap: 16px;
+	min-width: 0;
+}
+
+.atlasvoice-root .atlasvoice-docs-article {
+	display: grid;
+	gap: 8px;
+}
+
+.atlasvoice-root .atlasvoice-more-state {
+	flex: none;
+}
+
+@media (max-width: 782px) {
+
+	.atlasvoice-root .atlasvoice-docs {
+		grid-template-columns: minmax(0, 1fr);
+	}
+}
+
 .atlasvoice-root .atlasvoice-library-bar {
 	display: flex;
 	flex-wrap: wrap;

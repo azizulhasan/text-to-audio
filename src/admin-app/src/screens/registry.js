@@ -51,6 +51,12 @@ const BUILT_IN = {
 	),
 	// What the free plugin shows; AtlasVoice Pro replaces it with its own screen.
 	seo: lazy( () => import( /* webpackChunkName: "screen-seo" */ './Seo' ) ),
+	'help:docs': lazy( () =>
+		import( /* webpackChunkName: "screen-help-docs" */ './HelpDocs' )
+	),
+	'help:more': lazy( () =>
+		import( /* webpackChunkName: "screen-help-more" */ './HelpMore' )
+	),
 	'library:all': lazy( () =>
 		import( /* webpackChunkName: "screen-library-all" */ './LibraryAll' )
 	),
