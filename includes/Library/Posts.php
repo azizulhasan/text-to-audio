@@ -8,6 +8,7 @@
 namespace TTA\Library;
 
 use TTA\Cloud\Jobs;
+use TTA\Player\Placement;
 use TTA\TTA_Helper;
 
 defined( 'ABSPATH' ) || exit;
@@ -27,6 +28,10 @@ defined( 'ABSPATH' ) || exit;
  * read from the fingerprint the plugin already keeps beside each file
  * (`_atlasvoice_audio_hashes`, TTS-312); a file from before that fingerprint
  * existed is "ready", because nothing says otherwise.
+ *
+ * A site can limit the player to posts published in a period (Player ›
+ * Placement). Posts outside it get no player, so they are not in the
+ * library and no audio is made for them.
  *
  * A voice that reads in the browser stores no files, so there is no
  * library for it; get() says so with `stores_audio`.
@@ -316,6 +321,20 @@ class Posts {
 		);
 		if ( ! $args['post_type'] ) {
 			$args['post_type'] = array( 'atlasvoice-none' );
+		}
+
+		// Posts outside the period the site chose get no player, so no audio either.
+		$period = Placement::date_range();
+		$dates  = array();
+		if ( '' !== $period['from'] ) {
+			$dates['after'] = $period['from'];
+		}
+		if ( '' !== $period['to'] ) {
+			$dates['before'] = $period['to'];
+		}
+		if ( $dates ) {
+			// Inclusive: the first day from 00:00:00 and the last day until 23:59:59.
+			$args['date_query'] = array( $dates + array( 'inclusive' => true ) );
 		}
 
 		$filter = self::status_filter( $status );

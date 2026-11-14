@@ -2,8 +2,9 @@
  * Player › Placement.
  *
  * Where the player sits in a post, whether it follows the reader while
- * scrolling, who sees it, and who may download the audio. A form with a
- * Save footer: nothing is written until Save.
+ * scrolling, who sees it, who may download the audio, and the period the
+ * posts must be published in. A form with a Save footer: nothing is written
+ * until Save.
  *
  * It stores nothing new. The site saves each choice in the field the
  * classic Customization and Settings screens use (TTA\Player\Placement),
@@ -17,6 +18,7 @@ import {
 	Notice,
 	RadioControl,
 	Spinner,
+	TextControl,
 } from '@wordpress/components';
 
 import { useApp } from '../app-context';
@@ -181,6 +183,59 @@ function RoleChoice( { name, label, help, value, roles, onChange } ) {
 }
 
 /**
+ * Whether a period ends before it starts. An empty end is no limit.
+ *
+ * @param {string} from First day, YYYY-MM-DD or empty.
+ * @param {string} to   Last day, YYYY-MM-DD or empty.
+ * @return {boolean} True when both are set and the first is after the last.
+ */
+export function wrongOrder( from, to ) {
+	return !! from && !! to && from > to;
+}
+
+/**
+ * The period the posts must be published in to get the player.
+ *
+ * @param {Object}   props
+ * @param {string}   props.from     First day, YYYY-MM-DD or empty.
+ * @param {string}   props.to       Last day, YYYY-MM-DD or empty.
+ * @param {Function} props.onChange Receives ( 'date_from' | 'date_to', value ).
+ * @return {*} Two date fields.
+ */
+export function PublishedBetween( { from, to, onChange } ) {
+	return (
+		<>
+			<div className="atlasvoice-dates">
+				<TextControl
+					__nextHasNoMarginBottom
+					__next40pxDefaultSize
+					type="date"
+					label={ __( 'Published from', 'text-to-audio' ) }
+					value={ from }
+					onChange={ ( value ) => onChange( 'date_from', value ) }
+				/>
+				<TextControl
+					__nextHasNoMarginBottom
+					__next40pxDefaultSize
+					type="date"
+					label={ __( 'Published until', 'text-to-audio' ) }
+					value={ to }
+					onChange={ ( value ) => onChange( 'date_to', value ) }
+				/>
+			</div>
+			{ wrongOrder( from, to ) && (
+				<p className="atlasvoice-field-error" role="alert">
+					{ __(
+						'The first date must not be after the last date.',
+						'text-to-audio'
+					) }
+				</p>
+			) }
+		</>
+	);
+}
+
+/**
  * The screen.
  *
  * @return {*} Player › Placement.
@@ -238,10 +293,13 @@ export default function PlayerPlacement() {
 	const roles = Array.isArray( values.roles ) ? values.roles : [];
 	const showTo = Array.isArray( values.show_to ) ? values.show_to : [];
 	const download = Array.isArray( values.download ) ? values.download : [];
+	const dateFrom = values.date_from || '';
+	const dateTo = values.date_to || '';
 	// A list of roles with nothing ticked cannot be saved: nobody would be allowed.
 	const complete =
 		showTo.length > 0 &&
-		( ! values.download_available || download.length > 0 );
+		( ! values.download_available || download.length > 0 ) &&
+		! wrongOrder( dateFrom, dateTo );
 
 	let downloadPart = null;
 	if ( values.download_available ) {
@@ -334,6 +392,31 @@ export default function PlayerPlacement() {
 								/>
 								{ downloadPart }
 							</div>
+						</CardBody>
+					</Card>
+				</Section>
+
+				<Section
+					title={ __( 'Which posts, by date', 'text-to-audio' ) }
+					description={
+						values.stores_audio
+							? __(
+									'Only posts published in this period get the player, and audio is made only for them. Leave both empty for all posts.',
+									'text-to-audio'
+							  )
+							: __(
+									'Only posts published in this period get the player. Leave both empty for all posts.',
+									'text-to-audio'
+							  )
+					}
+				>
+					<Card>
+						<CardBody>
+							<PublishedBetween
+								from={ dateFrom }
+								to={ dateTo }
+								onChange={ set }
+							/>
 						</CardBody>
 					</Card>
 				</Section>

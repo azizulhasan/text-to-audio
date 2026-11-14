@@ -13,6 +13,7 @@ import { renderWithApp } from '../test-utils';
 import PlayerPlacement, {
 	dockOptions,
 	positionOptions,
+	wrongOrder,
 } from './PlayerPlacement';
 import { getScreenComponent } from './registry';
 
@@ -524,5 +525,113 @@ describe( 'Player › Placement', () => {
 		} );
 		await screen.findByRole( 'checkbox', { name: 'Administrator' } );
 		expect( await axe( pro.container ) ).toHaveNoViolations();
+	} );
+} );
+
+describe( 'Player › Placement: which posts, by date', () => {
+	const from = () => screen.getByLabelText( 'Published from' );
+	const until = () => screen.getByLabelText( 'Published until' );
+	const loaded = () =>
+		screen.findByRole( 'radio', { name: 'Before the content' } );
+	const DATED = { ...FREE, date_from: '2026-01-01', date_to: '' };
+
+	it( 'knows when a period ends before it starts', () => {
+		expect( wrongOrder( '2026-05-01', '2026-04-30' ) ).toBe( true );
+		expect( wrongOrder( '2026-05-01', '2026-05-01' ) ).toBe( false );
+		expect( wrongOrder( '', '2026-04-30' ) ).toBe( false );
+		expect( wrongOrder( '2026-05-01', '' ) ).toBe( false );
+		expect( wrongOrder( undefined, undefined ) ).toBe( false );
+	} );
+
+	it( 'shows the period the site has stored', async () => {
+		fakeSite( DATED );
+		renderWithApp( <PlayerPlacement /> );
+		await loaded();
+
+		expect( from() ).toHaveValue( '2026-01-01' );
+		expect( until() ).toHaveValue( '' );
+		expect( saveButton() ).toBeDisabled();
+	} );
+
+	it( 'saves only the end that changed', async () => {
+		const site = fakeSite( DATED );
+		renderWithApp( <PlayerPlacement /> );
+		await loaded();
+
+		fireEvent.change( until(), { target: { value: '2026-06-30' } } );
+		expect( site.posts ).toHaveLength( 0 );
+		fireEvent.click( saveButton() );
+
+		await waitFor( () =>
+			expect( site.posts ).toEqual( [ { date_to: '2026-06-30' } ] )
+		);
+	} );
+
+	it( 'removes a limit when its date is emptied', async () => {
+		const site = fakeSite( DATED );
+		renderWithApp( <PlayerPlacement /> );
+		await loaded();
+
+		fireEvent.change( from(), { target: { value: '' } } );
+		fireEvent.click( saveButton() );
+
+		await waitFor( () =>
+			expect( site.posts ).toEqual( [ { date_from: '' } ] )
+		);
+	} );
+
+	it( 'cannot be saved while the period ends before it starts, and says why', async () => {
+		const site = fakeSite( { ...DATED, date_from: '2026-05-01' } );
+		renderWithApp( <PlayerPlacement /> );
+		await loaded();
+		expect( screen.queryByRole( 'alert' ) ).not.toBeInTheDocument();
+
+		fireEvent.change( until(), { target: { value: '2026-04-30' } } );
+
+		expect( screen.getByRole( 'alert' ) ).toHaveTextContent(
+			'The first date must not be after the last date.'
+		);
+		expect( saveButton() ).toBeDisabled();
+		expect( site.posts ).toHaveLength( 0 );
+
+		fireEvent.change( until(), { target: { value: '2026-05-01' } } );
+		expect( screen.queryByRole( 'alert' ) ).not.toBeInTheDocument();
+		expect( saveButton() ).toBeEnabled();
+	} );
+
+	it( 'says that audio is made only for those posts where the voice stores files', async () => {
+		fakeSite( PRO );
+		const first = renderWithApp( <PlayerPlacement />, {
+			boot: { isPro: true },
+		} );
+		await loaded();
+		expect( first.container ).toHaveTextContent(
+			'audio is made only for them'
+		);
+		cleanup();
+
+		fakeSite( FREE );
+		const second = renderWithApp( <PlayerPlacement /> );
+		await loaded();
+		expect( second.container ).toHaveTextContent(
+			'Only posts published in this period get the player. Leave both empty for all posts.'
+		);
+		expect( second.container ).not.toHaveTextContent(
+			'audio is made only for them'
+		);
+	} );
+
+	it( 'works in the free plugin and has no accessibility violations', async () => {
+		fakeSite( {
+			...DATED,
+			date_from: '2026-05-01',
+			date_to: '2026-04-30',
+		} );
+		const { container } = renderWithApp( <PlayerPlacement /> );
+		await loaded();
+
+		expect( from() ).toBeEnabled();
+		expect( until() ).toBeEnabled();
+		expect( await axe( container ) ).toHaveNoViolations();
 	} );
 } );

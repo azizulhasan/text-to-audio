@@ -1266,6 +1266,41 @@ body.atlasvoice-app-page #atlasvoice-app {
 	border: 0;
 }
 
+/* A group of fields with a name of its own inside a form. */
+.atlasvoice-root .atlasvoice-fieldset {
+	min-width: 0;
+	margin: 0;
+	padding: 0;
+	border: 0;
+}
+
+.atlasvoice-root .atlasvoice-fieldset > legend {
+	margin: 0 0 8px;
+	padding: 0;
+	font-weight: 600;
+}
+
+.atlasvoice-root .atlasvoice-fieldset > .atlasvoice-weak {
+	margin: 8px 0 0;
+}
+
+/* Two date fields side by side; one under the other where there is no room. */
+.atlasvoice-root .atlasvoice-dates {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 16px;
+}
+
+.atlasvoice-root .atlasvoice-dates > * {
+	flex: 1 1 200px;
+	min-width: 0;
+}
+
+.atlasvoice-root .atlasvoice-field-error {
+	margin: 8px 0 0;
+	color: #cc1818;
+}
+
 .atlasvoice-root .atlasvoice-checks-help {
 	margin: 0;
 }

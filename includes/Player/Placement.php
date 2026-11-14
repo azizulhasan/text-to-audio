@@ -25,7 +25,10 @@ defined( 'ABSPATH' ) || exit;
  * - dock: buttonSettings → float_position, and "do not follow" is
  *   `tta_settings_data` → tta__settings_stop_floating_button set to true;
  * - show_to: buttonSettings → display_player_to (a list of roles, or "all");
- * - download: buttonSettings → who_can_download_mp3_file (the same).
+ * - download: buttonSettings → who_can_download_mp3_file (the same);
+ * - date_from, date_to: buttonSettings → generate_mp3_date_from and
+ *   generate_mp3_date_to (YYYY-MM-DD, or empty for no limit). Only posts
+ *   published in that period get the player, and so get audio.
  *
  * The admin screen (REST), `wp atlasvoice placement` and an MCP server all
  * act here (TTS-376).
@@ -62,10 +65,19 @@ class Placement {
 	const DOCK_ALIASES = array( 'bottom_center' => 'bottom_fixed' );
 
 	/**
+	 * The two ends of the date range, and the field each is stored in.
+	 */
+	const DATE_FIELDS = array(
+		'date_from' => 'generate_mp3_date_from',
+		'date_to'   => 'generate_mp3_date_to',
+	);
+
+	/**
 	 * The placement and what can be chosen.
 	 *
 	 * @return array {
 	 *     position: string, dock: string, show_to: string[], download: string[],
+	 *     date_from: string, date_to: string,
 	 *     download_available: bool, stores_audio: bool,
 	 *     roles: array<int, array{id:string, name:string}>
 	 * }
@@ -86,12 +98,15 @@ class Placement {
 		}
 
 		$stores_audio = TTA_Helper::player_makes_mp3( TTA_Helper::get_player_id() );
+		$dates        = self::date_range();
 
 		return array(
 			'position'           => $automatic ? $position : self::MANUAL,
 			'dock'               => empty( $settings['tta__settings_stop_floating_button'] ) ? self::dock_corner( $button ) : self::NO_DOCK,
 			'show_to'            => self::stored_roles( $button, 'display_player_to' ),
 			'download'           => self::stored_roles( $button, 'who_can_download_mp3_file' ),
+			'date_from'          => $dates['from'],
+			'date_to'            => $dates['to'],
 			/**
 			 * Filters whether the player on this site has a download button.
 			 *
@@ -110,7 +125,7 @@ class Placement {
 	/**
 	 * Saves the parts that were sent; the rest stays as it is.
 	 *
-	 * @param array $fields Any of: position, dock, show_to, download.
+	 * @param array $fields Any of: position, dock, show_to, download, date_from, date_to.
 	 *
 	 * @return array|\WP_Error The placement after the save, or why nothing was saved.
 	 */
@@ -152,6 +167,12 @@ class Placement {
 
 		if ( isset( $clean['download'] ) ) {
 			$button['who_can_download_mp3_file'] = $clean['download'];
+		}
+
+		foreach ( self::DATE_FIELDS as $name => $key ) {
+			if ( isset( $clean[ $name ] ) ) {
+				$button[ $key ] = $clean[ $name ];
+			}
 		}
 
 		// Both values are prepared before either is stored, so a refusal leaves both untouched.
@@ -221,12 +242,69 @@ class Placement {
 					$clean[ $name ] = $roles;
 					break;
 
+				case 'date_from':
+				case 'date_to':
+					$value = is_string( $value ) ? trim( $value ) : $value;
+					if ( '' !== $value && ! self::is_date( $value ) ) {
+						return self::invalid( $name, __( 'The date must be written as YYYY-MM-DD, or left empty for no limit.', 'text-to-audio' ) );
+					}
+					$clean[ $name ] = $value;
+					break;
+
 				default:
 					return self::invalid( (string) $name, __( 'This setting does not exist.', 'text-to-audio' ) );
 			}//end switch
 		}//end foreach
 
+		// The range is checked as it will be stored: an end that was not sent keeps its stored value.
+		if ( isset( $clean['date_from'] ) || isset( $clean['date_to'] ) ) {
+			$stored = self::date_range();
+			$from   = isset( $clean['date_from'] ) ? $clean['date_from'] : $stored['from'];
+			$to     = isset( $clean['date_to'] ) ? $clean['date_to'] : $stored['to'];
+			if ( '' !== $from && '' !== $to && $from > $to ) {
+				return self::invalid( isset( $clean['date_to'] ) ? 'date_to' : 'date_from', __( 'The first date must not be after the last date.', 'text-to-audio' ) );
+			}
+		}
+
 		return $clean;
+	}
+
+	/**
+	 * The period the posts must be published in to get the player.
+	 *
+	 * Read the way the player reads it (TTA_Helper::display_player_based_on_date_range()):
+	 * an end that is not a YYYY-MM-DD date is no limit.
+	 *
+	 * @return array{from:string, to:string} Each a date, or empty for no limit.
+	 */
+	public static function date_range() {
+		$button = self::button_settings();
+		$range  = array();
+
+		foreach ( self::DATE_FIELDS as $name => $key ) {
+			$value = isset( $button[ $key ] ) && is_string( $button[ $key ] ) ? $button[ $key ] : '';
+			$end   = substr( $name, 5 );
+
+			// The same test as the player's, so both always agree on what is a limit.
+			$range[ $end ] = 1 === preg_match( '/^\d{4}-\d{2}-\d{2}$/', $value ) ? $value : '';
+		}
+
+		return $range;
+	}
+
+	/**
+	 * Whether a value is a day of the calendar written as YYYY-MM-DD.
+	 *
+	 * @param mixed $value What was sent or stored.
+	 *
+	 * @return bool
+	 */
+	private static function is_date( $value ) {
+		if ( ! is_string( $value ) || 1 !== preg_match( '/^(\d{4})-(\d{2})-(\d{2})$/', $value, $parts ) ) {
+			return false;
+		}
+
+		return checkdate( (int) $parts[2], (int) $parts[3], (int) $parts[1] );
 	}
 
 	/**

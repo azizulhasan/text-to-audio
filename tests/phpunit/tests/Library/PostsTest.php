@@ -434,4 +434,77 @@ class PostsTest extends WP_UnitTestCase {
 			$this->assertStringContainsString( 'all, ready or missing', $stop->getMessage() );
 		}
 	}
+
+	// The period the posts must be published in (Player › Placement).
+
+	/**
+	 * Three posts: before the period, inside it and late on its last day.
+	 */
+	private function posts_over_time() {
+		return array(
+			'before' => $this->post( 'Before', false, array( 'post_date' => '2025-06-01 10:00:00' ) ),
+			'inside' => $this->post( 'Inside', true, array( 'post_date' => '2026-03-01 12:00:00' ) ),
+			'last'   => $this->post( 'Last day', false, array( 'post_date' => '2026-10-31 23:30:00' ) ),
+		);
+	}
+
+	private function period( $from, $to ) {
+		$saved = \TTA\Player\Placement::save(
+			array(
+				'date_from' => $from,
+				'date_to'   => $to,
+			)
+		);
+		$this->assertNotWPError( $saved );
+	}
+
+	public function test_without_a_period_every_post_is_in_the_library() {
+		$this->posts_over_time();
+
+		$this->assertSame( 3, Posts::get()['counts']['all'] );
+		$this->assertSame( 2, Posts::missing_count() );
+	}
+
+	public function test_posts_outside_the_period_are_not_in_the_library() {
+		$posts = $this->posts_over_time();
+		$this->period( '2026-01-01', '2026-10-31' );
+
+		$library = Posts::get();
+		$listed  = wp_list_pluck( $library['posts'], 'id' );
+		sort( $listed );
+
+		$this->assertSame( array( $posts['inside'], $posts['last'] ), $listed );
+		$this->assertSame(
+			array(
+				'all'     => 2,
+				'ready'   => 1,
+				'missing' => 1,
+			),
+			$library['counts']
+		);
+	}
+
+	public function test_no_audio_is_planned_for_posts_outside_the_period() {
+		$posts = $this->posts_over_time();
+		$this->period( '2026-01-01', '2026-10-31' );
+
+		// The last day counts until its end; the post of 2025 is left alone.
+		$this->assertSame( array( $posts['last'] ), Posts::missing_ids() );
+		$this->assertSame( 1, Posts::missing_count() );
+	}
+
+	public function test_a_period_can_have_one_end_only() {
+		$posts = $this->posts_over_time();
+
+		$this->period( '2026-03-01', '' );
+		$this->assertSame( array( $posts['last'] ), Posts::missing_ids() );
+		$this->assertSame( 2, Posts::get()['counts']['all'] );
+
+		$this->period( '', '2026-03-01' );
+		$this->assertSame( array( $posts['before'] ), Posts::missing_ids() );
+		$this->assertSame( 2, Posts::get()['counts']['all'] );
+
+		$this->period( '', '' );
+		$this->assertSame( 3, Posts::get()['counts']['all'] );
+	}
 }

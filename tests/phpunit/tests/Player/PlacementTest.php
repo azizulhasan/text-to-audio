@@ -594,4 +594,179 @@ class PlacementTest extends WP_UnitTestCase {
 		$this->assertSame( 'error', WP_CLI::$log[0][0] );
 		$this->assertStringContainsString( 'wizard', WP_CLI::$log[0][1] );
 	}
+
+	// The period the posts must be published in.
+
+	public function test_a_new_site_has_no_period() {
+		$placement = Placement::get();
+
+		$this->assertSame( '', $placement['date_from'] );
+		$this->assertSame( '', $placement['date_to'] );
+		$this->assertSame(
+			array(
+				'from' => '',
+				'to'   => '',
+			),
+			Placement::date_range()
+		);
+	}
+
+	public function test_it_reads_the_period_the_classic_screen_saved() {
+		$this->classic_customize( array( 'generate_mp3_date_to' => '2026-06-30' ) );
+
+		$placement = Placement::get();
+
+		$this->assertSame( '2026-01-01', $placement['date_from'] );
+		$this->assertSame( '2026-06-30', $placement['date_to'] );
+	}
+
+	public function test_a_stored_value_that_is_no_date_is_no_limit() {
+		$this->classic_customize(
+			array(
+				'generate_mp3_date_from' => 'soon',
+				'generate_mp3_date_to'   => array( '2026-06-30' ),
+			)
+		);
+
+		$this->assertSame(
+			array(
+				'from' => '',
+				'to'   => '',
+			),
+			Placement::date_range()
+		);
+	}
+
+	public function test_a_period_is_stored_in_the_fields_the_player_reads() {
+		$this->classic_customize();
+		$this->classic_settings();
+
+		$saved = Placement::save(
+			array(
+				'date_from' => '2026-02-01',
+				'date_to'   => '2026-02-28',
+			)
+		);
+
+		$this->assertSame( '2026-02-01', $saved['date_from'] );
+		$this->assertSame( '2026-02-28', $this->button()['generate_mp3_date_to'] );
+		$this->assertSame( '2026-02-01', $this->button()['generate_mp3_date_from'] );
+		// The rest of what the classic screen stored is still there.
+		$this->assertSame( array( 'all' ), $this->button()['who_can_download_mp3_file'] );
+		$this->assertSame( '.x > p { color: red; }', $this->stored( Placement::CUSTOMIZE_OPTION )['custom_css'] );
+
+		$inside  = (object) array( 'post_date' => '2026-02-28 23:10:00' );
+		$outside = (object) array( 'post_date' => '2026-03-01 00:00:01' );
+		$this->assertTrue( \TTA\TTA_Helper::display_player_based_on_date_range( $inside ) );
+		$this->assertFalse( \TTA\TTA_Helper::display_player_based_on_date_range( $outside ) );
+	}
+
+	public function test_an_empty_date_removes_that_limit_and_keeps_the_other() {
+		$this->classic_customize( array( 'generate_mp3_date_to' => '2026-06-30' ) );
+
+		$saved = Placement::save( array( 'date_from' => '' ) );
+
+		$this->assertSame( '', $saved['date_from'] );
+		$this->assertSame( '2026-06-30', $saved['date_to'] );
+		$this->assertSame( '', $this->button()['generate_mp3_date_from'] );
+		$this->assertTrue( \TTA\TTA_Helper::display_player_based_on_date_range( (object) array( 'post_date' => '2020-01-01 08:00:00' ) ) );
+	}
+
+	/**
+	 * @dataProvider wrong_dates
+	 */
+	public function test_a_value_that_is_no_day_of_the_calendar_saves_nothing( $value ) {
+		$this->classic_customize();
+		$before = $this->stored( Placement::CUSTOMIZE_OPTION );
+
+		$result = Placement::save( array( 'date_to' => $value ) );
+
+		$this->assertWPError( $result );
+		$this->assertSame( 'atlasvoice_invalid_placement', $result->get_error_code() );
+		$this->assertSame( 'date_to', $result->get_error_data()['field'] );
+		$this->assertSame( $before, $this->stored( Placement::CUSTOMIZE_OPTION ) );
+	}
+
+	public function wrong_dates() {
+		return array(
+			'another way of writing' => array( '01/02/2026' ),
+			'a day that never comes' => array( '2026-02-30' ),
+			'a date with a time'     => array( '2026-02-01 10:00:00' ),
+			'a number'               => array( 20260201 ),
+			'a list'                 => array( array( '2026-02-01' ) ),
+			'markup'                 => array( '<b>2026</b>' ),
+		);
+	}
+
+	public function test_a_period_that_ends_before_it_starts_is_refused() {
+		$result = Placement::save(
+			array(
+				'date_from' => '2026-05-01',
+				'date_to'   => '2026-04-30',
+			)
+		);
+
+		$this->assertWPError( $result );
+		$this->assertSame( 'date_to', $result->get_error_data()['field'] );
+		$this->assertFalse( get_option( Placement::CUSTOMIZE_OPTION ) );
+	}
+
+	public function test_one_end_is_checked_against_the_stored_other_end() {
+		// Stored: from 2026-01-01.
+		$this->classic_customize();
+
+		$result = Placement::save( array( 'date_to' => '2025-12-31' ) );
+
+		$this->assertWPError( $result );
+		$this->assertArrayNotHasKey( 'generate_mp3_date_to', $this->button() );
+
+		// The same day at both ends is one day, and allowed.
+		$this->assertSame( '2026-01-01', Placement::save( array( 'date_to' => '2026-01-01' ) )['date_to'] );
+	}
+
+	public function test_the_route_saves_and_describes_the_period() {
+		$this->classic_customize();
+		$this->classic_settings();
+
+		$response = $this->rest( 'POST', array( 'date_to' => '2026-12-31' ) );
+
+		$this->assertSame( 200, $response->get_status() );
+		$this->assertSame( '2026-12-31', $response->get_data()['date_to'] );
+		$this->assertSame( '2026-01-01', $response->get_data()['date_from'] );
+
+		$cleared = $this->rest( 'POST', array( 'date_from' => '' ) );
+		$this->assertSame( 200, $cleared->get_status() );
+		$this->assertSame( '', $cleared->get_data()['date_from'] );
+
+		$refused = $this->rest( 'POST', array( 'date_from' => 'yesterday' ) );
+		$this->assertSame( 400, $refused->get_status() );
+		$this->assertSame( 'atlasvoice_invalid_placement', $refused->get_data()['code'] );
+
+		$args = rest_get_server()->get_routes()['/tta/v1/placement'][1]['args'];
+		foreach ( array( 'date_from', 'date_to' ) as $name ) {
+			$this->assertSame( 'string', $args[ $name ]['type'] );
+			$this->assertStringContainsString( 'YYYY-MM-DD', $args[ $name ]['description'] );
+		}
+	}
+
+	public function test_the_command_prints_and_changes_the_period() {
+		( new Placement_Command() )->get( array(), array() );
+		$this->assertContains( 'posts published: any date', wp_list_pluck( WP_CLI::$log, 1 ) );
+
+		WP_CLI::reset();
+		( new Placement_Command() )->set( array(), array( 'date-from' => '2026-01-01' ) );
+		( new Placement_Command() )->get( array(), array() );
+		$this->assertContains( 'posts published: from 2026-01-01', wp_list_pluck( WP_CLI::$log, 1 ) );
+
+		WP_CLI::reset();
+		( new Placement_Command() )->set( array(), array( 'date-to' => '2026-03-31' ) );
+		( new Placement_Command() )->get( array(), array() );
+		$this->assertContains( 'posts published: 2026-01-01 to 2026-03-31', wp_list_pluck( WP_CLI::$log, 1 ) );
+
+		// A flag given without a value means no limit.
+		WP_CLI::reset();
+		( new Placement_Command() )->set( array(), array( 'date-from' => true ) );
+		( new Placement_Command() )->get( array(), array() );
+		$this->assertContains( 'posts published: until 2026-03-31', wp_list_pluck( WP_CLI::$log, 1 ) );
+	}
 }

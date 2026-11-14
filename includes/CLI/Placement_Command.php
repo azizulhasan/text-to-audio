@@ -37,6 +37,7 @@ class Placement_Command {
 	 *     dock: bottom_fixed
 	 *     show to: all
 	 *     download: all
+	 *     posts published: any date
 	 *
 	 * @param array $args       Positional arguments (none).
 	 * @param array $assoc_args Flags: format.
@@ -54,6 +55,16 @@ class Placement_Command {
 		\WP_CLI::line( 'dock: ' . $placement['dock'] );
 		\WP_CLI::line( 'show to: ' . implode( ', ', $placement['show_to'] ) );
 		\WP_CLI::line( 'download: ' . implode( ', ', $placement['download'] ) );
+
+		$period = 'any date';
+		if ( '' !== $placement['date_from'] && '' !== $placement['date_to'] ) {
+			$period = $placement['date_from'] . ' to ' . $placement['date_to'];
+		} elseif ( '' !== $placement['date_from'] ) {
+			$period = 'from ' . $placement['date_from'];
+		} elseif ( '' !== $placement['date_to'] ) {
+			$period = 'until ' . $placement['date_to'];
+		}
+		\WP_CLI::line( 'posts published: ' . $period );
 	}
 
 	/**
@@ -77,6 +88,14 @@ class Placement_Command {
 	 * [--download=<roles>]
 	 * : Who may download the audio: all, or user roles separated by commas.
 	 *
+	 * [--date-from=<date>]
+	 * : Only posts published on or after this day (YYYY-MM-DD) get the player
+	 * and audio. Give it empty (--date-from=) for no limit.
+	 *
+	 * [--date-to=<date>]
+	 * : Only posts published on or before this day (YYYY-MM-DD) get the player
+	 * and audio. Give it empty (--date-to=) for no limit.
+	 *
 	 * ## EXAMPLES
 	 *
 	 *     $ wp atlasvoice placement set --position=after_content --dock=none
@@ -85,21 +104,27 @@ class Placement_Command {
 	 *     $ wp atlasvoice placement set --show-to=subscriber,editor
 	 *     Success: Placement saved.
 	 *
+	 *     $ wp atlasvoice placement set --date-from=2026-01-01
+	 *     Success: Placement saved.
+	 *
 	 * @param array $args       Positional arguments (none).
-	 * @param array $assoc_args Flags: position, dock, show-to, download.
+	 * @param array $assoc_args Flags: position, dock, show-to, download, date-from, date-to.
 	 */
 	public function set( $args, $assoc_args ) {
 		$names  = array(
-			'position' => 'position',
-			'dock'     => 'dock',
-			'show-to'  => 'show_to',
-			'download' => 'download',
+			'position'  => 'position',
+			'dock'      => 'dock',
+			'show-to'   => 'show_to',
+			'download'  => 'download',
+			'date-from' => 'date_from',
+			'date-to'   => 'date_to',
 		);
 		$fields = array();
 
 		foreach ( $names as $flag => $name ) {
 			if ( isset( $assoc_args[ $flag ] ) ) {
-				$fields[ $name ] = $assoc_args[ $flag ];
+				// WP-CLI gives a flag without a value as true: for a date that means no limit.
+				$fields[ $name ] = true === $assoc_args[ $flag ] && 0 === strpos( $name, 'date_' ) ? '' : $assoc_args[ $flag ];
 			}
 		}
 

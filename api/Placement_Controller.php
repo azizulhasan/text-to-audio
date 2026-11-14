@@ -39,14 +39,14 @@ class Placement_Controller {
 					// The label and description name this route for tools that read
 					// the REST index, such as an MCP server (AtlasMCP).
 					'label'               => __( 'Get where the player sits and who gets it', 'text-to-audio' ),
-					'description'         => __( 'Returns where the player sits in a post, where it docks while the reader scrolls, which user roles see it, which roles may download the audio, and the roles of this site.', 'text-to-audio' ),
+					'description'         => __( 'Returns where the player sits in a post, where it docks while the reader scrolls, which user roles see it, which roles may download the audio, the period the posts must be published in to get the player, and the roles of this site.', 'text-to-audio' ),
 					'callback'            => array( __CLASS__, 'read' ),
 					'permission_callback' => array( Route_Access::class, 'admin' ),
 				),
 				array(
 					'methods'             => \WP_REST_Server::CREATABLE,
 					'label'               => __( 'Change where the player sits and who gets it', 'text-to-audio' ),
-					'description'         => __( 'Changes the position of the player, where it docks, who sees it or who may download the audio. Send only what should change. Visitors see the change on their next page load.', 'text-to-audio' ),
+					'description'         => __( 'Changes the position of the player, where it docks, who sees it, who may download the audio, or the period the posts must be published in. Send only what should change. Visitors see the change on their next page load.', 'text-to-audio' ),
 					'callback'            => array( __CLASS__, 'save' ),
 					'permission_callback' => array( Route_Access::class, 'admin' ),
 					'args'                => array(
@@ -65,6 +65,14 @@ class Placement_Controller {
 						),
 						'download' => $roles + array(
 							'description' => __( 'Who may download the audio file: ["all"] for everyone, or a list of user roles of this site. It applies to players that have a download button.', 'text-to-audio' ),
+						),
+						'date_from' => array(
+							'type'        => 'string',
+							'description' => __( 'Only posts published on or after this day (YYYY-MM-DD) get the player and audio. Send an empty text for no limit.', 'text-to-audio' ),
+						),
+						'date_to'   => array(
+							'type'        => 'string',
+							'description' => __( 'Only posts published on or before this day (YYYY-MM-DD) get the player and audio. Send an empty text for no limit.', 'text-to-audio' ),
 						),
 					),
 				),
@@ -91,7 +99,7 @@ class Placement_Controller {
 	public static function save( $request ) {
 		$fields = array();
 
-		foreach ( array( 'position', 'dock', 'show_to', 'download' ) as $name ) {
+		foreach ( array( 'position', 'dock', 'show_to', 'download', 'date_from', 'date_to' ) as $name ) {
 			if ( null !== $request->get_param( $name ) ) {
 				$fields[ $name ] = $request->get_param( $name );
 			}
