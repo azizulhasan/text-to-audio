@@ -189,4 +189,45 @@ class MorePluginsTest extends WP_UnitTestCase {
 
 		$this->assertSame( More_Plugins::get(), json_decode( WP_CLI::$log[0][1], true ) );
 	}
+
+	// TTS-347: the product once called AtlasAgent / AtlasAI Connector is AtlasMCP.
+
+	private function mcp_row() {
+		$rows = wp_list_filter( More_Plugins::get()['plugins'], array( 'slug' => 'ai-workflow-automation-ai-agent-hub' ) );
+
+		return reset( $rows );
+	}
+
+	public function test_the_mcp_plugin_is_listed_under_its_new_name() {
+		$row = $this->mcp_row();
+
+		$this->assertSame( 'MCP Server for WordPress – AtlasMCP', $row['name'] );
+		$this->assertStringContainsString( 'MCP server', $row['description'] );
+		$this->assertStringNotContainsString( 'workflow', strtolower( $row['description'] ) );
+	}
+
+	public function test_a_list_saved_before_the_rename_shows_the_new_name() {
+		set_transient(
+			\TTA_Admin\TTA_Admin::ATLAS_PLUGINS_TRANSIENT,
+			array(
+				array(
+					'name'        => 'AI Workflow Automation – AtlasAgent',
+					'slug'        => 'ai-workflow-automation-ai-agent-hub',
+					'basename'    => 'ai-workflow-automation-ai-agent-hub/ai-workflow-automation-ai-agent-hub.php',
+					'description' => 'An older description.',
+				),
+			)
+		);
+
+		$this->assertSame( 'MCP Server for WordPress – AtlasMCP', $this->mcp_row()['name'] );
+	}
+
+	public function test_no_old_name_or_old_link_of_the_mcp_plugin_is_left() {
+		$carried = wp_json_encode( \TTA_Admin\TTA_Admin::get_atlas_plugins() );
+
+		foreach ( array( 'AtlasAgent', 'AtlasAI Connector', 'AI Workflow Automation', 'ai-agent-hub-pro\/"' ) as $old ) {
+			$this->assertStringNotContainsString( $old, $carried, $old );
+		}
+		$this->assertStringContainsString( 'wpatlasmcp.com', $carried );
+	}
 }

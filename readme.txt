@@ -273,7 +273,7 @@ GitHub, Inc. (catalog, promotions + translations) — Terms: https://docs.github
 
 
 ### CHECK OUT OUR OTHER PLUGINS:
-> More free plugins from AtlasAiDev: [MCP Server For WordPress | AtlasAI Connector](https://wordpress.org/plugins/ai-workflow-automation-ai-agent-hub/), [Smart Local AI](https://wordpress.org/plugins/smart-local-ai/), and [3D Viewer – Augmented Reality & Virtual Try-On | AtlasAR](https://wordpress.org/plugins/ar-vr-3d-model-try-on/).
+> More free plugins from AtlasAiDev: [MCP Server for WordPress | AtlasMCP](https://wordpress.org/plugins/ai-workflow-automation-ai-agent-hub/), [Smart Local AI](https://wordpress.org/plugins/smart-local-ai/), and [3D Viewer – Augmented Reality & Virtual Try-On | AtlasAR](https://wordpress.org/plugins/ar-vr-3d-model-try-on/).
 
 
 

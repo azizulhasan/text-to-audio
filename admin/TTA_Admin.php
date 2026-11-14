@@ -1075,7 +1075,9 @@ class TTA_Admin
      */
     private static function apply_name_overrides($plugins) {
         $overrides = array(
-            'ai-workflow-automation-ai-agent-hub' => 'AI Workflow Automation – AtlasAI',
+            // TTS-347: the product was renamed AtlasMCP (2026-09-24). A list saved
+            // or fetched before the rename still carries the old name.
+            'ai-workflow-automation-ai-agent-hub' => 'MCP Server for WordPress – AtlasMCP',
             'smart-local-ai'                       => 'Smart Local AI – AtlasML',
         );
         if (!is_array($plugins)) {
@@ -1153,28 +1155,29 @@ class TTA_Admin
                 ),
             ),
             array(
-                'name'          => 'AI Workflow Automation – AtlasAgent',
+                'name'          => 'MCP Server for WordPress – AtlasMCP',
                 'slug'          => 'ai-workflow-automation-ai-agent-hub',
                 'basename'      => 'ai-workflow-automation-ai-agent-hub/ai-workflow-automation-ai-agent-hub.php',
                 'icon'          => 'https://ps.w.org/ai-workflow-automation-ai-agent-hub/assets/icon-256x256.gif',
-                'learnMoreUrl'  => 'https://wordpress.org/plugins/ai-workflow-automation-ai-agent-hub/',
+                'learnMoreUrl'  => 'https://wpatlasmcp.com/',
                 'proBasenames'  => array(
                     'ai-workflow-automation-ai-agent-hub-pro/ai-workflow-automation-ai-agent-hub-pro.php',
                 ),
-                'proUrl'        => 'https://atlasaidev.com/ai-agent-hub-pro/',
+                'proUrl'        => 'https://wpatlasmcp.com/pricing/',
                 'configureSlug' => 'ai-workflow-automation-ai-agent-hub',
                 'isNew'         => false,
                 'complementary' => array('text-to-audio', 'smart-local-ai'),
                 'priority'      => 1,
-                'description'   => 'Transform WordPress into an AI-powered control center with 70+ abilities, MCP server support, and workflow builder.',
+                'description'   => 'Turns your WordPress site into an MCP server, so Claude, ChatGPT or Gemini can do what your WordPress role allows, in WordPress and in any plugin. Direct, with no middleman and no limit on tool calls, and every change can be undone.',
                 'features'      => array(
-                    '70+ abilities across 9 modules',
-                    'Built-in MCP Server (JSON-RPC 2.0)',
-                    'JWT authentication',
-                    'Drag-and-drop workflow builder',
-                    'Multi-provider AI support (OpenAI, Gemini, Claude)',
-                    'WooCommerce AI Store Manager',
-                    'Post editor AI integration',
+                    'Connect Claude, ChatGPT, Gemini, Cursor or Claude Code',
+                    'Direct to your site: no account and no relay server',
+                    'Tool calls are never counted or limited',
+                    'Every AI change can be undone from the Activity log',
+                    'A connection can never do more than its WordPress user',
+                    'Posts, pages, media, menus, settings, users and any plugin',
+                    'WooCommerce products, orders, refunds, coupons and reports',
+                    'Elementor, Beaver Builder, Bricks and Divi pages by element',
                 ),
             ),
             array(
