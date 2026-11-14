@@ -1546,6 +1546,59 @@ body.atlasvoice-app-page #atlasvoice-app {
 	max-width: 260px;
 }
 
+.atlasvoice-root .atlasvoice-library-bar {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: 12px;
+}
+
+.atlasvoice-root .atlasvoice-library-filters {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 6px;
+}
+
+.atlasvoice-root .atlasvoice-library-search {
+	flex: 1 1 220px;
+	max-width: 320px;
+}
+
+.atlasvoice-root .atlasvoice-table th.atlasvoice-library-post {
+	height: 52px;
+	padding-top: 8px;
+	padding-bottom: 8px;
+	font-size: 13px;
+	color: inherit;
+	white-space: normal;
+	border-bottom-color: var(--atlasvoice-line-weak);
+}
+
+.atlasvoice-root .atlasvoice-table tr:last-child th.atlasvoice-library-post {
+	border-bottom: 0;
+}
+
+.atlasvoice-root .atlasvoice-library-id {
+	display: block;
+	font-weight: 400;
+	font-size: 12px;
+	color: var(--atlasvoice-text-weak);
+}
+
+.atlasvoice-root .atlasvoice-library-links {
+	display: inline-flex;
+	gap: 12px;
+}
+
+.atlasvoice-root .atlasvoice-library-pager {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	justify-content: flex-end;
+	gap: 8px;
+	color: var(--atlasvoice-text-weak);
+}
+
 .atlasvoice-root .atlasvoice-stats {
 	display: grid;
 	grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));

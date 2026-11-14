@@ -271,9 +271,9 @@ describe( 'screen registry', () => {
 	it( 'knows the rebuilt screens and nothing else', () => {
 		expect( getScreenComponent( 'site:advanced' ) ).toBeTruthy();
 		expect( getScreenComponent( 'help:moved' ) ).toBeTruthy();
-		// A screen that is not rebuilt yet (Voice › Voice was the example
-		// here until it was built).
-		expect( getScreenComponent( 'library:all' ) ).toBeNull();
+		// A screen that is not rebuilt yet (Voice › Voice, then Audio
+		// library › All posts, were the example here until they were built).
+		expect( getScreenComponent( 'library:settings' ) ).toBeNull();
 		expect( getScreenComponent( '__proto__' ) ).toBeNull();
 		expect( getScreenComponent( 'constructor' ) ).toBeNull();
 	} );

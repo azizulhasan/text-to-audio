@@ -38,6 +38,8 @@
 	<file>./api/Health_Controller.php</file>
 	<file>./api/Tracking_Controller.php</file>
 	<file>./api/Report_Controller.php</file>
+	<file>./api/Library_Controller.php</file>
+	<file>./includes/Library</file>
 	<file>./includes/Insights</file>
 	<file>./includes/Site</file>
 	<file>./includes/Content</file>

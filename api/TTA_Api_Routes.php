@@ -87,6 +87,8 @@ class TTA_Api_Routes {
 		Tracking_Controller::register_routes();
 		// TTS-347: the listening numbers, as sums (Insights > Overview, Posts, Listeners).
 		Report_Controller::register_routes();
+		// TTS-347: which posts have a stored audio file, read-only (Audio library > All posts).
+		Library_Controller::register_routes();
 
 
 		// register listening route.
