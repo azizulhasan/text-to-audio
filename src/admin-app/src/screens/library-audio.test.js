@@ -392,3 +392,40 @@ describe( 'Audio library › making audio', () => {
 		expect( await axe( container ) ).toHaveNoViolations();
 	} );
 } );
+
+describe( 'why a job failed, for the reasons the site itself stores', () => {
+	const general = failureWords( 'something_new' );
+
+	it.each( [
+		[ 'job_not_found', 'no longer has this audio job' ],
+		[ 'file_missing', 'no longer keeps its file' ],
+		[ 'file_expired', 'not fetched in time' ],
+		[ 'file_unverified', 'could not be checked' ],
+		[ 'file_corrupt', 'arrived damaged' ],
+		[ 'engine_failed', 'voice engine could not make' ],
+	] )( 'says %s in words of its own', ( code, part ) => {
+		expect( failureWords( code ) ).toContain( part );
+		expect( failureWords( code ) ).not.toBe( general );
+	} );
+
+	it( 'has words for every reason the jobs service of the site can store', () => {
+		// The codes of TTA\Cloud\Jobs::failed() and what the service reports.
+		for ( const code of [
+			'timed_out',
+			'download_failed',
+			'not_writable',
+			'job_not_found',
+			'file_missing',
+			'file_expired',
+			'file_unverified',
+			'file_corrupt',
+		] ) {
+			expect( failureWords( code ) ).not.toBe( general );
+		}
+	} );
+
+	it( 'never takes a word of the object itself for a reason', () => {
+		expect( failureWords( 'constructor' ) ).toBe( general );
+		expect( failureWords( 'toString' ) ).toBe( general );
+	} );
+} );

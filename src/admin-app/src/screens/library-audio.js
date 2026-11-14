@@ -56,6 +56,30 @@ export function failureWords( code ) {
 			'The file could not be saved: the uploads folder is not writable.',
 			'text-to-audio'
 		),
+		job_not_found: __(
+			'The service no longer has this audio job. Try again to make it anew.',
+			'text-to-audio'
+		),
+		file_missing: __(
+			'The audio was made, but the service no longer keeps its file. Try again.',
+			'text-to-audio'
+		),
+		file_expired: __(
+			'The audio was made, but its file was not fetched in time and is gone. Try again.',
+			'text-to-audio'
+		),
+		file_unverified: __(
+			'The finished file could not be checked, so it was not saved. Try again.',
+			'text-to-audio'
+		),
+		file_corrupt: __(
+			'The finished file arrived damaged, so it was not saved. Try again.',
+			'text-to-audio'
+		),
+		engine_failed: __(
+			'The voice engine could not make this audio. Try again in a few minutes.',
+			'text-to-audio'
+		),
 	};
 
 	return Object.prototype.hasOwnProperty.call( known, code )
