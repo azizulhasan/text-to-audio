@@ -85,6 +85,8 @@ class TTA_Api_Routes {
 		Health_Controller::register_routes();
 		// TTS-347: whether plays are counted, and for which posts (Insights > Tracking).
 		Tracking_Controller::register_routes();
+		// TTS-347: the listening numbers, as sums (Insights > Overview, Posts, Listeners).
+		Report_Controller::register_routes();
 
 
 		// register listening route.

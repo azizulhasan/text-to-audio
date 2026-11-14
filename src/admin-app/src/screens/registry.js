@@ -12,7 +12,17 @@
 import { lazy } from '@wordpress/element';
 import { applyFilters } from '@wordpress/hooks';
 
+// One report, three views: the component shows the tab that is open.
+const InsightsReport = lazy( () =>
+	import(
+		/* webpackChunkName: "screen-insights-report" */ './InsightsReport'
+	)
+);
+
 const BUILT_IN = {
+	'insights:overview': InsightsReport,
+	'insights:posts': InsightsReport,
+	'insights:listeners': InsightsReport,
 	'voice:languages': lazy( () =>
 		import(
 			/* webpackChunkName: "screen-voice-languages" */ './VoiceLanguages'

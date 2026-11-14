@@ -50,6 +50,7 @@ class Commands {
 			'atlasvoice versions'      => Versions_Command::class,
 			'atlasvoice health'        => Health_Command::class,
 			'atlasvoice tracking'      => Tracking_Command::class,
+			'atlasvoice insights'      => Insights_Command::class,
 		);
 
 		/**
