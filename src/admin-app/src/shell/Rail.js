@@ -17,10 +17,12 @@ import { AppIcon, ProBadge } from './parts';
  * @return {*} The rail.
  */
 export default function Rail( { open, onClose } ) {
-	const { boot, isPro, route, go } = useApp();
+	const { boot, isPro, route, go, setupFinished } = useApp();
+	// What the app knows now; what the site said at the start when it does not.
+	const finished = setupFinished ?? !! boot.setupFinished;
 
 	const visible = SCREENS.filter(
-		( screen ) => screen.id !== 'setup' || ! boot.setupFinished
+		( screen ) => screen.id !== 'setup' || ! finished
 	);
 	const sections = [
 		{ id: 'top', items: visible.filter( ( screen ) => ! screen.group ) },

@@ -40,6 +40,8 @@
 	<file>./api/Report_Controller.php</file>
 	<file>./api/Library_Controller.php</file>
 	<file>./api/More_Plugins_Controller.php</file>
+	<file>./api/Setup_Controller.php</file>
+	<file>./includes/Setup</file>
 	<file>./includes/Library</file>
 	<file>./includes/Insights</file>
 	<file>./includes/Site</file>

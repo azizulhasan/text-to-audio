@@ -53,6 +53,7 @@ class Commands {
 			'atlasvoice insights'      => Insights_Command::class,
 			'atlasvoice library'       => Library_Command::class,
 			'atlasvoice more-plugins'  => More_Plugins_Command::class,
+			'atlasvoice setup'         => Setup_Command::class,
 		);
 
 		/**

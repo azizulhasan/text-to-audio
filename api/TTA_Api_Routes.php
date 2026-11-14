@@ -91,6 +91,8 @@ class TTA_Api_Routes {
 		Library_Controller::register_routes();
 		// TTS-347: the other AtlasAiDev plugins, read-only and without a fetch (Help > More plugins).
 		More_Plugins_Controller::register_routes();
+		// TTS-347: where the first-run setup stands, and the one action that ends it (Setup).
+		Setup_Controller::register_routes();
 
 
 		// register listening route.

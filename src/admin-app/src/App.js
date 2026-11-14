@@ -38,6 +38,10 @@ export default function App( { boot } ) {
 	const [ mode, setMode ] = useState(
 		boot.mode === MODE_LIVE ? MODE_LIVE : MODE_STAGING
 	);
+	// Starts as the site says and changes when the setup is finished here.
+	const [ setupFinished, setSetupFinished ] = useState(
+		!! boot.setupFinished
+	);
 	const [ railOpen, setRailOpen ] = useState( false );
 	const [ dialog, setDialog ] = useState( null );
 	const [ snacks, setSnacks ] = useState( [] );
@@ -156,8 +160,20 @@ export default function App( { boot } ) {
 			setDirty,
 			mode,
 			setMode,
+			setupFinished,
+			setSetupFinished,
 		} ),
-		[ boot, isPro, route, go, notify, confirm, setDirty, mode ]
+		[
+			boot,
+			isPro,
+			route,
+			go,
+			notify,
+			confirm,
+			setDirty,
+			mode,
+			setupFinished,
+		]
 	);
 
 	const tabs = getTabs( getScreen( route.screen ), isPro );
