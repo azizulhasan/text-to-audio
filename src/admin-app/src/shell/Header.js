@@ -7,11 +7,12 @@ import { safeLink } from '../help/topics';
 import { getScreen } from '../routes';
 import NoticesBell from './NoticesBell';
 import { AppIcon } from './parts';
+import Search from './Search';
 
 /**
  * The top bar: where you are, then help and notices.
  *
- * The middle column is kept for the search box (subtask 4 of TTS-347).
+ * The middle column holds the search box; on phones it is left out.
  *
  * @param {Object}   props
  * @param {Function} props.onMenu Opens the slide-in rail on phones.
@@ -32,7 +33,9 @@ export default function Header( { onMenu } ) {
 				/>
 				<h1>{ getScreen( route.screen ).label }</h1>
 			</div>
-			<div className="atlasvoice-header-search" />
+			<div className="atlasvoice-header-search">
+				<Search />
+			</div>
 			<div className="atlasvoice-header-end">
 				<HelpButton />
 				<NoticesBell />

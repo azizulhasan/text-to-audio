@@ -1587,6 +1587,109 @@ body.atlasvoice-app-page #atlasvoice-app {
 	gap: 6px;
 }
 
+/* ---------- Search ---------- */
+.atlasvoice-root .atlasvoice-search {
+	position: relative;
+}
+
+.atlasvoice-root .atlasvoice-search-input {
+	width: 100%;
+	height: 36px;
+	margin: 0;
+	padding: 0 12px 0 36px;
+	border: 1px solid var(--atlasvoice-line);
+	border-radius: var(--atlasvoice-radius);
+	background: var(--atlasvoice-canvas);
+	color: var(--atlasvoice-text);
+	font: inherit;
+	box-shadow: none;
+}
+
+.atlasvoice-root .atlasvoice-search-input:focus {
+	border-color: var(--atlasvoice-accent);
+	background: var(--atlasvoice-surface);
+	box-shadow: 0 0 0 1px var(--atlasvoice-accent);
+	outline: 2px solid transparent;
+}
+
+.atlasvoice-root .atlasvoice-search-key {
+	position: absolute;
+	top: 8px;
+	left: 8px;
+	min-width: 20px;
+	height: 20px;
+	padding: 0 4px;
+	border: 1px solid var(--atlasvoice-line);
+	border-radius: 3px;
+	background: var(--atlasvoice-surface);
+	color: var(--atlasvoice-text-weak);
+	font: 11px/18px var(--atlasvoice-mono);
+	text-align: center;
+	pointer-events: none;
+}
+
+.atlasvoice-root .atlasvoice-search-results {
+	position: absolute;
+	top: calc(100% + 4px);
+	right: 0;
+	left: 0;
+	z-index: 30;
+	max-height: min(420px, 70vh);
+	overflow-y: auto;
+	border: 1px solid var(--atlasvoice-line);
+	border-radius: var(--atlasvoice-radius-lg);
+	background: var(--atlasvoice-surface);
+	box-shadow: var(--atlasvoice-shadow);
+}
+
+.atlasvoice-root .atlasvoice-search-group {
+	padding: 10px 12px 4px;
+	color: var(--atlasvoice-text-weak);
+	font-size: 11px;
+	font-weight: 500;
+	text-transform: uppercase;
+	letter-spacing: 0.04em;
+}
+
+.atlasvoice-root .atlasvoice-search-hit {
+	display: flex;
+	align-items: baseline;
+	justify-content: space-between;
+	gap: 12px;
+	padding: 8px 12px;
+	cursor: pointer;
+}
+
+.atlasvoice-root .atlasvoice-search-hit small {
+	flex: none;
+	max-width: 50%;
+	overflow: hidden;
+	color: var(--atlasvoice-text-weak);
+	font-size: 12px;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
+.atlasvoice-root .atlasvoice-search-hit.is-active {
+	background: var(--atlasvoice-brand-weak);
+	color: var(--atlasvoice-brand-ink);
+}
+
+.atlasvoice-root .atlasvoice-search-none {
+	margin: 0;
+	padding: 20px 12px;
+	color: var(--atlasvoice-text-weak);
+}
+
+.atlasvoice-root .atlasvoice-search-foot {
+	display: flex;
+	gap: 16px;
+	padding: 8px 12px;
+	border-top: 1px solid var(--atlasvoice-line-weak);
+	color: var(--atlasvoice-text-weak);
+	font-size: 11px;
+}
+
 /* ---------- Setup ---------- */
 .atlasvoice-root .atlasvoice-setup {
 	display: grid;
