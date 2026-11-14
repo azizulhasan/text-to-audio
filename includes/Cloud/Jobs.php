@@ -118,7 +118,9 @@ class Jobs {
 
 		$result = Cloud::client()->create_job(
 			$text,
-			$language,
+			// The site's language names the job and its file; an engine may need
+			// a fuller code for the same language (en-GB for a British voice).
+			'' !== $options['lang'] ? $options['lang'] : $language,
 			array_filter(
 				array(
 					'ref'             => $ref,
@@ -457,6 +459,7 @@ class Jobs {
 			'unsupported_voice'    => __( 'The AtlasVoice service does not have the voice that is chosen. Choose another voice on the Voice screen.', 'text-to-audio' ),
 			'unsupported_language' => __( 'The voice that is chosen does not speak this language. Choose another voice or language on the Voice screen.', 'text-to-audio' ),
 			'service_unavailable'  => __( 'The AtlasVoice service is busy. Please try again in a few minutes.', 'text-to-audio' ),
+			'idempotency_conflict' => __( 'The audio of this post is already being made. Wait a moment, then look again.', 'text-to-audio' ),
 		);
 
 		$error = self::error(
@@ -485,14 +488,16 @@ class Jobs {
 	 * @param int    $post_id  The post.
 	 * @param string $language Language code.
 	 *
-	 * @return array{engine: string, voice: string} Only values the service can take; anything else is left out.
+	 * @return array{engine: string, voice: string, lang: string} Only values the service can take; anything else is left out.
 	 */
 	private static function options( $post_id, $language ) {
 		/**
 		 * Filters the voice engine and the voice of a post's audio job. An
 		 * extension whose player is made by jobs names them here.
 		 *
-		 * @param array  $options  { engine: string, voice: string }. Empty: the service's default.
+		 * @param array  $options  { engine: string, voice: string, lang: string }. Empty: the service's default;
+		 *                         lang is the language code sent to the service when it must be fuller
+		 *                         than the site's (the job and its file keep the site's language).
 		 * @param int    $post_id  The post.
 		 * @param string $language Language code.
 		 */
@@ -501,6 +506,7 @@ class Jobs {
 			array(
 				'engine' => '',
 				'voice'  => '',
+				'lang'   => '',
 			),
 			(int) $post_id,
 			(string) $language
@@ -510,9 +516,13 @@ class Jobs {
 		// A voice belongs to an engine: without one it is never sent.
 		$voice = '' !== $engine && isset( $options['voice'] ) && is_string( $options['voice'] ) && preg_match( '/^[A-Za-z0-9_.:@+-]{1,96}$/', $options['voice'] ) ? $options['voice'] : '';
 
+		// Like the voice, a language of its own belongs to an engine.
+		$lang = '' !== $engine && isset( $options['lang'] ) && is_string( $options['lang'] ) && preg_match( '/^[A-Za-z]{2,3}([-_][A-Za-z0-9]{2,8}){0,3}$/', $options['lang'] ) ? $options['lang'] : '';
+
 		return array(
 			'engine' => $engine,
 			'voice'  => $voice,
+			'lang'   => $lang,
 		);
 	}
 

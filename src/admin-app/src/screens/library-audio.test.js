@@ -290,6 +290,9 @@ describe( 'Audio library › making audio', () => {
 			'timed_out',
 			'download_failed',
 			'not_writable',
+			'unsupported_language',
+			'unsupported_voice',
+			'invalid_request',
 		].forEach( ( code ) =>
 			expect( failureWords( code ) ).not.toBe(
 				failureWords( 'something_new' )

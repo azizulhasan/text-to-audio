@@ -40,6 +40,18 @@ export function failureWords( code ) {
 			'The finished file could not be fetched. Try again.',
 			'text-to-audio'
 		),
+		unsupported_language: __(
+			'The voice could not speak this post’s language. Choose another voice or language on the Voice screen.',
+			'text-to-audio'
+		),
+		unsupported_voice: __(
+			'The service does not have the voice that is chosen. Choose another voice on the Voice screen.',
+			'text-to-audio'
+		),
+		invalid_request: __(
+			'The service could not read this post’s text. Check the post, then try again.',
+			'text-to-audio'
+		),
 		not_writable: __(
 			'The file could not be saved: the uploads folder is not writable.',
 			'text-to-audio'

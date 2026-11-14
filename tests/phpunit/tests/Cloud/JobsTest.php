@@ -380,6 +380,75 @@ class JobsTest extends WP_UnitTestCase {
 		$this->assertNull( $sent['voice'] );
 	}
 
+	public function test_an_engine_can_ask_for_a_fuller_language_code_and_the_job_keeps_the_sites() {
+		$this->service_takes_the_job();
+		add_filter(
+			'atlasvoice_cloud_job_options',
+			static function () {
+				return array(
+					'engine' => 'cloud',
+					'voice'  => 'bf_emma',
+					'lang'   => 'en-GB',
+				);
+			}
+		);
+
+		$record = Jobs::start( $this->post );
+		remove_all_filters( 'atlasvoice_cloud_job_options' );
+		$sent = $this->requests_to( '/v1/jobs' )[0]['body'];
+
+		$this->assertSame( 'en-GB', $sent['lang'] );
+		// The reference and the record stay under the site's language.
+		$this->assertSame( 'post:' . $this->post . ':en:cloud:bf_emma', $sent['ref'] );
+		$this->assertSame( $record['id'], Jobs::status( $this->post, 'en' )['id'] );
+		$this->assertNull( Jobs::status( $this->post, 'en-GB' ) );
+	}
+
+	/**
+	 * @dataProvider languages_that_are_not_sent
+	 */
+	public function test_a_language_that_is_not_a_code_or_has_no_engine_is_not_sent( array $options ) {
+		$this->service_takes_the_job();
+		add_filter(
+			'atlasvoice_cloud_job_options',
+			static function () use ( $options ) {
+				return $options;
+			}
+		);
+
+		Jobs::start( $this->post );
+		remove_all_filters( 'atlasvoice_cloud_job_options' );
+
+		$this->assertSame( 'en', $this->requests_to( '/v1/jobs' )[0]['body']['lang'] );
+	}
+
+	public function languages_that_are_not_sent() {
+		return array(
+			'markup'            => array(
+				array(
+					'engine' => 'cloud',
+					'lang'   => '<b>en</b>',
+				),
+			),
+			'not text'          => array(
+				array(
+					'engine' => 'cloud',
+					'lang'   => array( 'en-GB' ),
+				),
+			),
+			'without an engine' => array( array( 'lang' => 'en-GB' ) ),
+		);
+	}
+
+	public function test_a_job_that_is_already_being_made_is_said_in_words() {
+		$this->answers['POST /v1/jobs'][] = array( 409, array( 'error' => array( 'code' => 'idempotency_conflict' ) ) );
+
+		$result = Jobs::start( $this->post );
+
+		$this->assertSame( 'idempotency_conflict', $result->get_error_code() );
+		$this->assertStringContainsString( 'already being made', $result->get_error_message() );
+	}
+
 	public function test_a_site_that_is_not_connected_sends_nothing() {
 		delete_option( Service::OPTION );
 
