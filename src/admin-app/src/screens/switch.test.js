@@ -272,8 +272,9 @@ describe( 'screen registry', () => {
 		expect( getScreenComponent( 'site:advanced' ) ).toBeTruthy();
 		expect( getScreenComponent( 'help:moved' ) ).toBeTruthy();
 		// A screen that is not rebuilt yet (Voice › Voice, then Audio
-		// library › All posts, were the example here until they were built).
-		expect( getScreenComponent( 'library:settings' ) ).toBeNull();
+		// library › All posts and › Settings, were the example here until
+		// they were built; this route stands for one that is not).
+		expect( getScreenComponent( 'library:not-built' ) ).toBeNull();
 		expect( getScreenComponent( '__proto__' ) ).toBeNull();
 		expect( getScreenComponent( 'constructor' ) ).toBeNull();
 	} );

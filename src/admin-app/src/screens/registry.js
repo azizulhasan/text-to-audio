@@ -60,6 +60,11 @@ const BUILT_IN = {
 	'help:more': lazy( () =>
 		import( /* webpackChunkName: "screen-help-more" */ './HelpMore' )
 	),
+	'library:settings': lazy( () =>
+		import(
+			/* webpackChunkName: "screen-library-settings" */ './LibrarySettings'
+		)
+	),
 	'library:all': lazy( () =>
 		import( /* webpackChunkName: "screen-library-all" */ './LibraryAll' )
 	),

@@ -2,8 +2,12 @@
  * Audio library › All posts.
  *
  * Which posts have a stored audio file with the voice in use
- * (GET tta/v1/library, TTA\Library\Posts). The screen only reads: it stores
- * and changes nothing.
+ * (GET tta/v1/library, TTA\Library\Posts).
+ *
+ * Where the site's audio is made by jobs (TTS-354), a post without audio
+ * can be made from here, one post at a time: "Make audio" starts its job on
+ * the AtlasVoice service (tta/v1/cloud/jobs), the list then shows how far it
+ * is, and it can be cancelled. Elsewhere the screen only reads.
  *
  * A voice that reads in the browser stores no files, so the screen then says
  * so and points to Voice.
@@ -22,9 +26,11 @@ import { useCallback, useEffect, useRef, useState } from '@wordpress/element';
 
 import { request } from '../api';
 import { useApp } from '../app-context';
-import { Chip, Empty, Pane, ProNote, Scroll } from '../shell/parts';
+import { Empty, Pane, ProNote, Scroll } from '../shell/parts';
+import { AudioAction, AudioStatus, REFRESH_EVERY } from './library-audio';
 
 const ROUTE = 'tta/v1/library';
+const JOBS_ROUTE = 'tta/v1/cloud/jobs';
 
 /** How long to wait after the last key before searching, in milliseconds. */
 export const SEARCH_DELAY = 300;
@@ -70,7 +76,7 @@ export function shortDate( date ) {
  * @return {*} Audio library › All posts.
  */
 export default function LibraryAll() {
-	const { boot, go, isPro } = useApp();
+	const { boot, go, isPro, notify } = useApp();
 	const [ status, setStatus ] = useState( 'all' );
 	const [ typed, setTyped ] = useState( '' );
 	const [ search, setSearch ] = useState( '' );
@@ -78,6 +84,8 @@ export default function LibraryAll() {
 	const [ library, setLibrary ] = useState( null );
 	const [ failure, setFailure ] = useState( '' );
 	const [ loading, setLoading ] = useState( true );
+	// The post whose audio is being started or cancelled right now.
+	const [ acting, setActing ] = useState( 0 );
 	// Only the answer to the newest question is shown.
 	const asked = useRef( 0 );
 
@@ -105,6 +113,64 @@ export default function LibraryAll() {
 	useEffect( () => {
 		load();
 	}, [ load ] );
+
+	// Reads the list again without a spinner; a failure keeps what is shown.
+	const refresh = useCallback( async () => {
+		const mine = ++asked.current;
+		try {
+			const answer = await request( boot, ROUTE, {
+				query: { status, search, page },
+			} );
+			if ( mine === asked.current ) {
+				setLibrary( answer );
+			}
+		} catch ( error ) {
+			// The next round asks again.
+		}
+	}, [ boot, status, search, page ] );
+
+	// While audio is in the making, the list follows it.
+	const making =
+		!! library &&
+		Array.isArray( library.posts ) &&
+		library.posts.some( ( post ) => post.status === 'making' );
+
+	useEffect( () => {
+		if ( ! making ) {
+			return undefined;
+		}
+		const timer = setInterval( refresh, REFRESH_EVERY );
+
+		return () => clearInterval( timer );
+	}, [ making, refresh ] );
+
+	/**
+	 * Starts or cancels the audio job of a post, then reads the list again.
+	 *
+	 * @param {Object} post   The post.
+	 * @param {string} method POST starts, DELETE cancels.
+	 */
+	const act = async ( post, method ) => {
+		setActing( post.id );
+		try {
+			await request( boot, JOBS_ROUTE, {
+				method,
+				data: { post_id: post.id },
+			} );
+			notify(
+				method === 'POST'
+					? __(
+							'The audio is being made. You can leave this screen.',
+							'text-to-audio'
+					  )
+					: __( 'Cancelled.', 'text-to-audio' )
+			);
+		} catch ( error ) {
+			notify( error.message, 'error' );
+		}
+		await refresh();
+		setActing( 0 );
+	};
 
 	// Search a moment after the typing stops, not on every key.
 	useEffect( () => {
@@ -211,6 +277,8 @@ export default function LibraryAll() {
 		[ 'missing', __( 'No audio yet', 'text-to-audio' ), counts.missing ],
 	];
 	const filtered = status !== 'all' || search !== '';
+	// Whether a job can make this site's audio (the natural voice, connected).
+	const canMake = !! library.jobs && !! library.jobs.available;
 
 	return (
 		<Pane canvas>
@@ -338,27 +406,39 @@ export default function LibraryAll() {
 												</span>
 											</th>
 											<td>
-												{ post.status === 'ready' ? (
-													<Chip tone="ok" dot>
-														{ __(
-															'Ready',
-															'text-to-audio'
-														) }
-													</Chip>
-												) : (
-													<Chip tone="warn" dot>
-														{ __(
-															'No audio yet',
-															'text-to-audio'
-														) }
-													</Chip>
-												) }
+												<AudioStatus post={ post } />
 											</td>
 											<td>
 												{ shortDate( post.modified ) }
 											</td>
 											<td className="atlasvoice-td-end">
 												<span className="atlasvoice-library-links">
+													{ canMake && (
+														<AudioAction
+															post={ post }
+															name={ postName(
+																post
+															) }
+															busy={
+																acting ===
+																post.id
+															}
+															onMake={ ( item ) =>
+																act(
+																	item,
+																	'POST'
+																)
+															}
+															onCancel={ (
+																item
+															) =>
+																act(
+																	item,
+																	'DELETE'
+																)
+															}
+														/>
+													) }
 													{ post.view_url && (
 														<ExternalLink
 															href={

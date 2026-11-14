@@ -1815,9 +1815,17 @@ body.atlasvoice-app-page #atlasvoice-app {
 	color: var(--atlasvoice-text-weak);
 }
 
+.atlasvoice-root .atlasvoice-library-note {
+	display: block;
+	margin-top: 2px;
+	color: var(--atlasvoice-text-weak);
+	font-size: 12px;
+}
+
 .atlasvoice-root .atlasvoice-library-links {
 	display: inline-flex;
 	gap: 12px;
+	align-items: center;
 }
 
 .atlasvoice-root .atlasvoice-library-pager {
