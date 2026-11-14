@@ -395,9 +395,10 @@ We are looking for people to help translate this plugin. If you can help, we wou
 Help us and the WordPress community translate the plugin. [Contact us](http://atlasaidev.com/contact-us/) and we'll guide you through the process.
 
 
-= 2.3.26 ( 10 Nov 2026 ) =
+= 2.3.26 ( 14 Nov 2026 ) =
 Fixed : On iPhone and iPad, the browser voice player now reads the whole article instead of stopping after the first sentence.
 Fixed : Resume now continues from where the reading stopped, instead of jumping to the end of the article.
+Fixed : With read-along highlighting and an MP3 player, the highlight now follows every spoken word again, instead of staying on the first word of each sentence.
 
 = 2.3.25 ( 9 Nov 2026 ) =
 Changed : Behind-the-scenes tidy-up: removed old, unused code notes. Nothing changes in how the plugin works.
@@ -586,7 +587,7 @@ Fixed : Removed external sample-audio requests from the dashboard; previews now 
 == Upgrade Notice ==
 
 = 2.3.26 =
-Fixes the player stopping after the first sentence on iPhone and iPad, and Resume jumping to the end of the article. Recommended for all sites.
+Fixes the player stopping after the first sentence on iPhone and iPad, Resume jumping to the end of the article, and word highlighting stopping on MP3 players. Recommended for all sites.
 
 = 2.3.25 =
 A small maintenance release that tidies up the code. Nothing changes in how the plugin works. Safe to update.
