@@ -1,5 +1,6 @@
 import '@testing-library/jest-dom';
 import { act, cleanup, fireEvent, screen } from '@testing-library/react';
+import { addFilter, removeFilter } from '@wordpress/hooks';
 import { axe, toHaveNoViolations } from 'jest-axe';
 
 import { renderWithApp } from '../test-utils';
@@ -968,5 +969,211 @@ describe( 'Voice: the natural voice tile while the site waits for approval', () 
 			.closest( '.atlasvoice-tile' );
 		expect( tile ).toHaveTextContent( 'Connected' );
 		expect( tile ).not.toHaveTextContent( 'Not approved yet' );
+	} );
+} );
+
+describe( 'Voice: an extension shows the voices of its engines (wp.org guideline 5)', () => {
+	const PRO_CHOICE = {
+		...CHOICE,
+		player_id: 6,
+		language: 'en',
+		voice: 'uLJQ::jephthah',
+		players: [
+			...CHOICE.players,
+			{ id: 2, name: 'Default Pro', pro: true, stores_audio: false },
+			{ id: 6, name: 'ElevenLabs TTS', pro: true, stores_audio: true },
+			{ id: 7, name: 'AtlasVoice Cloud', pro: true, stores_audio: true },
+		],
+	};
+	const HOOK = 'atlasvoice.slot.voice.engine';
+	let seen;
+	let run;
+
+	// What AtlasVoice Pro does: a part for the engine's voices, with its own save.
+	const Fill = ( props ) => {
+		seen = props;
+
+		return (
+			<button onClick={ () => props.onSave( run ) }>
+				{ 'Voices of ' + props.player.name }
+			</button>
+		);
+	};
+
+	beforeEach( () => {
+		seen = null;
+		run = jest.fn( async () => {} );
+		addFilter( HOOK, 'test/fill', ( fills ) => [ ...fills, Fill ] );
+	} );
+
+	afterEach( () => {
+		// The screen is taken down first: a place that is still drawn follows its filter.
+		cleanup();
+		removeFilter( HOOK, 'test/fill' );
+	} );
+
+	it( 'gives the place to the extension instead of sending the user to the classic screen', async () => {
+		fakeSite( CONNECTED, { choice: PRO_CHOICE } );
+		renderWithApp( <VoiceVoice />, { boot: { isPro: true } } );
+
+		expect(
+			await screen.findByRole( 'button', {
+				name: 'Voices of ElevenLabs TTS',
+			} )
+		).toBeInTheDocument();
+		expect( seen.player ).toEqual( PRO_CHOICE.players[ 3 ] );
+		expect( seen.form.values.voice ).toBe( 'uLJQ::jephthah' );
+		expect( typeof seen.form.set ).toBe( 'function' );
+		expect(
+			screen.queryByText( /chosen on the classic screen/ )
+		).not.toBeInTheDocument();
+	} );
+
+	it( 'lets every engine of the extension be chosen', async () => {
+		fakeSite( CONNECTED, { choice: PRO_CHOICE } );
+		renderWithApp( <VoiceVoice />, { boot: { isPro: true } } );
+		await screen.findByRole( 'radio', { name: /ElevenLabs TTS/ } );
+
+		expect( screen.getAllByRole( 'radio' ) ).toHaveLength( 5 );
+		fireEvent.click(
+			screen.getByRole( 'radio', { name: /AtlasVoice Cloud/ } )
+		);
+		expect(
+			await screen.findByRole( 'button', {
+				name: 'Voices of AtlasVoice Cloud',
+			} )
+		).toBeInTheDocument();
+		expect( seen.form.values.player_id ).toBe( 7 );
+	} );
+
+	it( 'an engine that stores no audio uses the browser’s voices, not the extension’s part', async () => {
+		fakeSite( CONNECTED, { choice: { ...PRO_CHOICE, player_id: 2 } } );
+		renderWithApp( <VoiceVoice />, { boot: { isPro: true } } );
+
+		expect(
+			await screen.findByRole( 'radio', { name: /Default Pro/ } )
+		).toBeChecked();
+		expect(
+			screen.queryByRole( 'button', { name: /^Voices of/ } )
+		).not.toBeInTheDocument();
+		expect(
+			screen.getByText( /voices of the browser you are using now/ )
+		).toBeInTheDocument();
+	} );
+
+	it( 'one Save saves the extension’s part too', async () => {
+		const site = fakeSite( CONNECTED, { choice: PRO_CHOICE } );
+		const { context } = renderWithApp( <VoiceVoice />, {
+			boot: { isPro: true },
+		} );
+		const saveAll = () => screen.getByRole( 'button', { name: 'Save' } );
+
+		await screen.findByRole( 'button', { name: /^Voices of/ } );
+		expect( saveAll() ).toBeDisabled();
+
+		// The extension has something to save: the screen is unsaved.
+		fireEvent.click( screen.getByRole( 'button', { name: /^Voices of/ } ) );
+		expect( saveAll() ).toBeEnabled();
+		await act( async () => {
+			fireEvent.click( saveAll() );
+		} );
+
+		expect( run ).toHaveBeenCalledTimes( 1 );
+		// The free form had no change of its own: nothing is sent for it.
+		expect(
+			site.calls.filter(
+				( call ) =>
+					call.method === 'POST' &&
+					call.url.includes( 'tta/v1/voice' )
+			)
+		).toHaveLength( 0 );
+		expect( context.notify ).toHaveBeenCalledWith(
+			'Voice settings saved.'
+		);
+	} );
+
+	it( 'a save the extension refuses is said, and the engine is not saved', async () => {
+		const site = fakeSite( CONNECTED, { choice: PRO_CHOICE } );
+		run = jest.fn( async () => {
+			throw new Error( 'Choose one of: a, b.' );
+		} );
+		const { context } = renderWithApp( <VoiceVoice />, {
+			boot: { isPro: true },
+		} );
+		await screen.findByRole( 'button', { name: /^Voices of/ } );
+
+		fireEvent.click(
+			screen.getByRole( 'radio', { name: /AtlasVoice Cloud/ } )
+		);
+		fireEvent.click(
+			await screen.findByRole( 'button', { name: /^Voices of/ } )
+		);
+		await act( async () => {
+			fireEvent.click( screen.getByRole( 'button', { name: 'Save' } ) );
+		} );
+
+		expect( context.notify ).toHaveBeenCalledWith(
+			'Not saved: Choose one of: a, b.',
+			'error'
+		);
+		expect(
+			site.calls.filter(
+				( call ) =>
+					call.method === 'POST' &&
+					call.url.includes( 'tta/v1/voice' )
+			)
+		).toHaveLength( 0 );
+	} );
+
+	it( 'without the extension nothing of it is on the screen', async () => {
+		removeFilter( HOOK, 'test/fill' );
+		fakeSite( CONNECTED, { choice: PRO_CHOICE } );
+		renderWithApp( <VoiceVoice />, { boot: { isPro: true } } );
+
+		await screen.findByRole( 'radio', { name: /ElevenLabs TTS/ } );
+		// Only the Pro engine in use, and the link to the classic screen.
+		expect( screen.getAllByRole( 'radio' ) ).toHaveLength( 3 );
+		expect(
+			screen.getByRole( 'link', {
+				name: 'Change the voice on the classic screen',
+			} )
+		).toBeInTheDocument();
+	} );
+} );
+
+describe( 'Voice: trying another engine and coming back', () => {
+	it( 'puts the saved language and voice back with the saved engine', async () => {
+		const site = fakeSite( CONNECTED, {
+			choice: {
+				...CHOICE,
+				player_id: 3,
+				language: 'fr',
+				voice: '',
+				connected: true,
+			},
+		} );
+		renderWithApp( <VoiceVoice /> );
+		const saveButton = () => screen.getByRole( 'button', { name: 'Save' } );
+
+		expect(
+			await screen.findByRole( 'radio', { name: /Natural voice/ } )
+		).toBeChecked();
+		expect( saveButton() ).toBeDisabled();
+
+		// A look at the browser voice changes the language of the form…
+		fireEvent.click(
+			screen.getByRole( 'radio', { name: /Browser voice/ } )
+		);
+		expect( saveButton() ).toBeEnabled();
+
+		// …and going back to the saved engine leaves nothing to save.
+		fireEvent.click(
+			screen.getByRole( 'radio', { name: /Natural voice/ } )
+		);
+		expect( saveButton() ).toBeDisabled();
+		expect( screen.getByLabelText( 'Language' ) ).toHaveValue( 'fr' );
+		expect(
+			site.calls.filter( ( call ) => call.method === 'POST' )
+		).toHaveLength( 0 );
 	} );
 } );

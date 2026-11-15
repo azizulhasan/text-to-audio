@@ -55,7 +55,7 @@ export function sameValue( a, b ) {
  *
  * @param {string} route        REST route, e.g. "tta/v1/read-along".
  * @param {string} savedMessage Shown in the snackbar after a save.
- * @return {Object} { values, set, dirty, saving, save, loading, failure, reload }
+ * @return {Object} { values, saved, set, dirty, saving, save, loading, failure, reload }
  */
 export default function useSettingsForm( route, savedMessage ) {
 	const { boot, notify } = useApp();
@@ -125,6 +125,8 @@ export default function useSettingsForm( route, savedMessage ) {
 
 	return {
 		values,
+		// What the site has stored, for a screen that offers to go back to it.
+		saved,
 		set,
 		dirty: Object.keys( changed ).length > 0,
 		saving,

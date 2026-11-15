@@ -20,6 +20,7 @@ import {
 import { useRef } from '@wordpress/element';
 
 import { useApp } from '../app-context';
+import Slot, { getSlotFills } from '../extend/Slot';
 import { classicHashFor } from '../routes';
 import { Chip, Facts, Section } from '../shell/parts';
 import {
@@ -35,11 +36,12 @@ import {
 /**
  * The words of an engine tile.
  *
- * @param {Object} player  { id, name, pro, stores_audio }.
- * @param {number} natural Id of the natural voice engine.
+ * @param {Object}  player     { id, name, pro, stores_audio }.
+ * @param {number}  natural    Id of the natural voice engine.
+ * @param {boolean} voicesHere Whether an extension shows its engines' voices on this screen.
  * @return {Object} { title, text }.
  */
-function engineWords( player, natural ) {
+function engineWords( player, natural, voicesHere ) {
 	if ( player.id === BROWSER_PLAYER ) {
 		return {
 			title: __( 'Browser voice', 'text-to-audio' ),
@@ -62,10 +64,12 @@ function engineWords( player, natural ) {
 
 	return {
 		title: player.name,
-		text: __(
-			'A voice engine of AtlasVoice Pro. Its voices are chosen on the classic screen.',
-			'text-to-audio'
-		),
+		text: voicesHere
+			? __( 'A voice engine of AtlasVoice Pro.', 'text-to-audio' )
+			: __(
+					'A voice engine of AtlasVoice Pro. Its voices are chosen on the classic screen.',
+					'text-to-audio'
+			  ),
 	};
 }
 
@@ -101,13 +105,20 @@ function playSample( values ) {
 /**
  * The choice.
  *
- * @param {Object}  props
- * @param {Object}  props.form      What use-settings-form returns for tta/v1/voice.
- * @param {boolean} props.connected Whether the natural voice is connected right now.
- * @param {boolean} props.pending   Whether the connection still waits for approval.
+ * @param {Object}   props
+ * @param {Object}   props.form            What use-settings-form returns for tta/v1/voice.
+ * @param {boolean}  props.connected       Whether the natural voice is connected right now.
+ * @param {boolean}  props.pending         Whether the connection still waits for approval.
+ * @param {Function} props.onExtensionSave Registers what an extension's part saves
+ *                                         when Save is pressed, or null for nothing.
  * @return {*} The sections.
  */
-export default function VoiceChoice( { form, connected, pending } ) {
+export default function VoiceChoice( {
+	form,
+	connected,
+	pending,
+	onExtensionSave,
+} ) {
 	const { boot } = useApp();
 	const voices = useBrowserVoices();
 	const { values, set } = form;
@@ -119,16 +130,43 @@ export default function VoiceChoice( { form, connected, pending } ) {
 	// while another engine is tried out, so the owner can go back to it
 	// without leaving the screen.
 	const startedWith = useRef( playerId );
+	// An older AtlasVoice Pro fills nothing: its voices stay on the classic screen.
+	const hasEngineFill = getSlotFills( 'voice.engine' ).length > 0;
+	// With an extension that shows an engine's voices here, every engine it
+	// brings can be chosen here too.
 	const tiles = values.players.filter(
 		( player ) =>
 			! player.pro ||
+			hasEngineFill ||
 			player.id === playerId ||
 			player.id === startedWith.current
 	);
 
+	// An engine that stores no audio reads with the visitor's browser: its
+	// voices are the browser's, whichever plugin brings the engine.
+	const readsInBrowser = ( player ) =>
+		!! player &&
+		( player.id === BROWSER_PLAYER ||
+			( hasEngineFill && player.pro && ! player.stores_audio ) );
+
 	const chooseEngine = ( id ) => {
 		set( 'player_id', id );
-		const also = fieldsForEngine( id, values, voices );
+		// Back to the engine that is saved: its saved language, voice and speed
+		// come back too. Trying another engine changes them, and without this a
+		// look at another engine would cost the voice that was chosen.
+		if ( form.saved && id === form.saved.player_id ) {
+			set( 'language', form.saved.language );
+			set( 'voice', form.saved.voice );
+			set( 'rate', form.saved.rate );
+
+			return;
+		}
+		const chosen = values.players.find( ( player ) => player.id === id );
+		const also = fieldsForEngine(
+			readsInBrowser( chosen ) ? BROWSER_PLAYER : id,
+			values,
+			voices
+		);
 		for ( const name of Object.keys( also ) ) {
 			set( name, also[ name ] );
 		}
@@ -170,7 +208,11 @@ export default function VoiceChoice( { form, connected, pending } ) {
 						{ __( 'What makes the sound', 'text-to-audio' ) }
 					</legend>
 					{ tiles.map( ( player ) => {
-						const words = engineWords( player, natural );
+						const words = engineWords(
+							player,
+							natural,
+							hasEngineFill
+						);
 						const needsConnection =
 							player.id === natural && ! connected;
 						const id = 'atlasvoice-engine-' + player.id;
@@ -241,7 +283,7 @@ export default function VoiceChoice( { form, connected, pending } ) {
 				</fieldset>
 			</Section>
 
-			{ playerId === BROWSER_PLAYER && (
+			{ readsInBrowser( inUse ) && (
 				<Section
 					title={ __( 'Language and voice', 'text-to-audio' ) }
 					description={ __(
@@ -454,7 +496,23 @@ export default function VoiceChoice( { form, connected, pending } ) {
 				</Section>
 			) }
 
-			{ inUse && inUse.pro && (
+			{ /*
+			 * The voices and settings of an engine that is not the free plugin's
+			 * are the extension's (AtlasVoice Pro) to show. Free ships the place,
+			 * never the form (wp.org guideline 5).
+			 */ }
+			{ inUse && inUse.pro && hasEngineFill && inUse.stores_audio && (
+				<Slot
+					name="voice.engine"
+					fillProps={ {
+						form,
+						player: inUse,
+						onSave: onExtensionSave,
+					} }
+				/>
+			) }
+
+			{ inUse && inUse.pro && ! hasEngineFill && (
 				<Section
 					title={ __( 'Language and voice', 'text-to-audio' ) }
 					description={ __(

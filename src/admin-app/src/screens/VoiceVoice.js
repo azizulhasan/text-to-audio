@@ -23,7 +23,7 @@ import {
 	Spinner,
 	TextControl,
 } from '@wordpress/components';
-import { useCallback, useEffect, useState } from '@wordpress/element';
+import { useCallback, useEffect, useRef, useState } from '@wordpress/element';
 
 import { request } from '../api';
 import { useApp } from '../app-context';
@@ -276,6 +276,46 @@ export default function VoiceVoice() {
 	);
 	const [ failure, setFailure ] = useState( '' );
 	const [ busy, setBusy ] = useState( false );
+	// What an extension's part of the form (the voices of a Pro engine) saves.
+	const extensionSave = useRef( null );
+	const [ extensionDirty, setExtensionDirty ] = useState( false );
+	const [ extensionSaving, setExtensionSaving ] = useState( false );
+
+	const onExtensionSave = useCallback( ( run ) => {
+		extensionSave.current = typeof run === 'function' ? run : null;
+		setExtensionDirty( !! extensionSave.current );
+	}, [] );
+
+	// One Save for the whole screen: the extension's part first, so an engine
+	// is never saved with settings that were refused.
+	const saveAll = async () => {
+		const run = extensionSave.current;
+		if ( run ) {
+			setExtensionSaving( true );
+			try {
+				await run();
+			} catch ( error ) {
+				setExtensionSaving( false );
+				notify(
+					sprintf(
+						/* translators: %s: error message from the site. */
+						__( 'Not saved: %s', 'text-to-audio' ),
+						error.message
+					),
+					'error'
+				);
+
+				return;
+			}
+			setExtensionSaving( false );
+		}
+
+		if ( form.dirty ) {
+			await form.save();
+		} else if ( run ) {
+			notify( __( 'Voice settings saved.', 'text-to-audio' ) );
+		}
+	};
 	// A site that belongs to another email: { email, ownerHint, canMove, message }.
 	const [ owned, setOwned ] = useState( null );
 	const [ problem, setProblem ] = useState( '' );
@@ -434,9 +474,9 @@ export default function VoiceVoice() {
 			canvas
 			footer={
 				<SaveBar
-					dirty={ form.dirty }
-					saving={ form.saving }
-					onSave={ form.save }
+					dirty={ form.dirty || extensionDirty }
+					saving={ form.saving || extensionSaving }
+					onSave={ saveAll }
 				/>
 			}
 		>
@@ -448,6 +488,7 @@ export default function VoiceVoice() {
 						pending={
 							!! state.connected && !! state.pending_approval
 						}
+						onExtensionSave={ onExtensionSave }
 					/>
 				) : (
 					<div className="atlasvoice-section">
