@@ -422,18 +422,49 @@ class Posts {
 			return array();
 		}
 
+		return self::ids_with_status_among( $status, '_atlasvoice_cloud_jobs', self::JOB_SCAN );
+	}
+
+	/** How many posts with a fingerprint are looked at for the "outdated" filter. */
+	const OUTDATED_SCAN = 200;
+
+	/**
+	 * The posts whose text changed after their audio was made, as the column
+	 * shows them (TTS-347). Nothing is stored for it: "outdated" depends on
+	 * the voice in use and on the text as it is read now, so a stored mark
+	 * would be wrong after either changes. Only posts that keep a fingerprint
+	 * are looked at, last changed first (a post becomes outdated by being
+	 * changed), and no more than OUTDATED_SCAN of them.
+	 *
+	 * @return int[] Post numbers.
+	 */
+	public static function outdated_ids() {
+		return self::ids_with_status_among( 'outdated', self::FINGERPRINTS, self::OUTDATED_SCAN );
+	}
+
+	/**
+	 * The published posts that have a meta key and are in a status, last
+	 * changed first.
+	 *
+	 * @param string $status   The status to keep.
+	 * @param string $meta_key Only posts that have this meta are looked at.
+	 * @param int    $limit    How many posts are looked at, at most.
+	 *
+	 * @return int[] Post numbers.
+	 */
+	private static function ids_with_status_among( $status, $meta_key, $limit ) {
 		$query = new \WP_Query(
 			array(
 				'post_type'              => 'any',
 				'post_status'            => 'publish',
-				'posts_per_page'         => self::JOB_SCAN,
+				'posts_per_page'         => (int) $limit,
 				'fields'                 => 'ids',
 				'orderby'                => 'modified',
 				'order'                  => 'DESC',
 				'no_found_rows'          => true,
 				'update_post_term_cache' => false,
-				// phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key -- only posts that have a job, capped.
-				'meta_key'               => '_atlasvoice_cloud_jobs',
+				// phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key -- only posts that have this meta, capped.
+				'meta_key'               => $meta_key,
 			)
 		);
 

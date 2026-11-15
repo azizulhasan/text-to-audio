@@ -456,4 +456,143 @@ class PostsScreenTest extends WP_UnitTestCase {
 		$this->assertSame( array(), Posts::status_meta_query( 'making' ), 'Only what a query can find is offered.' );
 		$this->assertSame( array(), Posts::status_meta_query( 'all' ) );
 	}
+
+	// ---- the filter: outdated (TTS-347) ----------------------------------------
+
+	/** The key of the file the voice in use would play. */
+	private function file_key() {
+		$settings = \TTA\TTA_Helper::tts_get_settings();
+
+		return \TTA\TTA_Helper::tts_get_file_url_key( \TTA\TTA_Helper::tts_site_language( $settings ), \TTA\TTA_Helper::tts_get_voice( $settings ) );
+	}
+
+	/** A post with stored audio and the fingerprint of its text, optionally changed afterwards. */
+	private function post_with_audio( $changed = false, $key = null ) {
+		$post = $this->post();
+		\TTA\TTA_Helper::atlasvoice_store_audio_url( $post->ID, null === $key ? $this->file_key() : $key, 'https://example.com/audio/' . $post->ID . '.mp3' );
+		update_post_meta( $post->ID, Posts::MARK, true );
+		if ( $changed ) {
+			wp_update_post(
+				array(
+					'ID'           => $post->ID,
+					'post_content' => 'The text was changed after the audio was made.',
+				)
+			);
+		}
+
+		return get_post( $post->ID );
+	}
+
+	public function test_the_filter_offers_outdated_between_none_yet_and_being_made() {
+		ob_start();
+		Posts_Screen::render_filter( 'post' );
+		$html = (string) ob_get_clean();
+
+		$this->assertStringContainsString( '<option value="outdated">Audio: outdated</option>', $html );
+		$this->assertLessThan( strpos( $html, 'Audio: outdated' ), strpos( $html, 'Audio: none yet' ) );
+		$this->assertLessThan( strpos( $html, 'Audio: being made' ), strpos( $html, 'Audio: outdated' ) );
+
+		$_GET[ Posts_Screen::FILTER ] = 'outdated';
+		ob_start();
+		Posts_Screen::render_filter( 'post' );
+		$this->assertStringContainsString( '<option value="outdated" selected=\'selected\'>', (string) ob_get_clean(), 'The choice stays chosen.' );
+	}
+
+	public function test_the_filter_finds_the_posts_whose_text_changed_after_their_audio_was_made() {
+		$outdated = $this->post_with_audio( true );
+		$ready    = $this->post_with_audio();
+		$none     = $this->post();
+
+		$this->assertSame( 'outdated', Posts::one( $outdated )['status'], 'The column calls it outdated.' );
+		$this->assertSame( array( $outdated->ID ), Posts::outdated_ids() );
+		$this->assertNotContains( $ready->ID, Posts::outdated_ids() );
+		$this->assertNotContains( $none->ID, Posts::outdated_ids() );
+	}
+
+	public function test_audio_that_is_made_again_leaves_the_outdated_list() {
+		$post = $this->post_with_audio( true );
+		$this->assertSame( array( $post->ID ), Posts::outdated_ids() );
+
+		\TTA\TTA_Helper::atlasvoice_mark_audio_current( $post->ID, $this->file_key(), $post->ID . '.mp3' );
+
+		$this->assertSame( array(), Posts::outdated_ids() );
+	}
+
+	public function test_what_the_outdated_filter_lists_is_what_the_column_shows() {
+		// A file from before fingerprints, and the file of another voice: the column says ready.
+		$old = $this->post();
+		update_post_meta( $old->ID, Posts::MARK, true );
+		wp_update_post(
+			array(
+				'ID'           => $old->ID,
+				'post_content' => 'Changed.',
+			)
+		);
+		$other = $this->post_with_audio( true, 'zz--voice--someone-else' );
+		// A new try that failed: the column says failed, with the reason.
+		$failed = $this->post_with_audio( true );
+		$this->job( $failed->ID, 'failed', 'The text is too long.' );
+		// A job that runs now: the column says it is being made.
+		$making = $this->post_with_audio( true );
+		$this->job( $making->ID, 'running' );
+		// A draft is not on the public site.
+		$draft = $this->post_with_audio( true );
+		wp_update_post(
+			array(
+				'ID'          => $draft->ID,
+				'post_status' => 'draft',
+			)
+		);
+
+		$this->assertSame( 'ready', Posts::one( get_post( $old->ID ) )['status'] );
+		$this->assertSame( 'ready', Posts::one( $other )['status'] );
+		$this->assertSame( array(), Posts::outdated_ids() );
+		$this->assertSame( array( $failed->ID ), Posts::ids_with_job_status( 'failed' ) );
+		$this->assertSame( array( $making->ID ), Posts::ids_with_job_status( 'making' ) );
+	}
+
+	public function test_the_outdated_posts_come_last_changed_first() {
+		$first  = $this->post_with_audio( true );
+		$second = $this->post_with_audio( true );
+		global $wpdb;
+		$wpdb->update( $wpdb->posts, array( 'post_modified' => '2020-01-01 00:00:00' ), array( 'ID' => $second->ID ) );
+		clean_post_cache( $second->ID );
+
+		$this->assertSame( array( $first->ID, $second->ID ), Posts::outdated_ids() );
+	}
+
+	public function test_the_outdated_filter_stores_nothing_and_sends_nothing() {
+		$post   = $this->post_with_audio( true );
+		$before = get_post_meta( $post->ID );
+
+		Posts::outdated_ids();
+
+		$this->assertSame( $before, get_post_meta( $post->ID ) );
+		$this->assertSame( array(), $this->sent );
+	}
+
+	public function test_the_list_is_narrowed_to_the_outdated_posts_and_to_nothing_when_there_are_none() {
+		global $pagenow;
+		$pagenow = 'edit.php'; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
+		set_current_screen( 'edit-post' );
+
+		$run = static function ( $status ) {
+			global $wp_the_query;
+			$_GET[ Posts_Screen::FILTER ] = $status;
+			$query                       = new WP_Query();
+			$wp_the_query                = $query; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
+			Posts_Screen::apply_filter( $query );
+
+			return $query->get( 'post__in' );
+		};
+
+		$this->post_with_audio();
+		$this->assertSame( array( 0 ), $run( 'outdated' ), 'Nothing is outdated: the list is empty, not everything.' );
+
+		$outdated = $this->post_with_audio( true );
+		$this->assertSame( array( $outdated->ID ), $run( 'outdated' ) );
+
+		$pagenow = 'index.php'; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
+		set_current_screen( 'front' );
+	}
 }
