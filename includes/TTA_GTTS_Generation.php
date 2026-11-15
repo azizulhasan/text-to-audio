@@ -42,6 +42,12 @@ class TTA_GTTS_Generation {
 			return self::fail( 'post_not_available' );
 		}
 
+		// TTS-347: an editor chose "never make audio for this post". Its page is
+		// read by the browser's voice; this stops a request made by hand.
+		if ( \TTA\Cloud\Jobs::is_off( $post_id ) && empty( get_post_meta( $post_id, 'tts_mp3_file_urls', true ) ) ) {
+			return self::fail( 'audio_off_for_post' );
+		}
+
 		$user_id    = isset( $body['user_id'] ) ? sanitize_text_field( (string) $body['user_id'] ) : '';
 		$content    = isset( $body['content'] ) ? trim( (string) $body['content'] ) : '';
 		$title      = TTA_Audio_Storage::safe_name( isset( $body['title'] ) ? $body['title'] : '' );

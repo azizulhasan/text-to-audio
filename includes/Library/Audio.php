@@ -62,6 +62,62 @@ class Audio {
 		add_action( 'atlasvoice_cloud_job_done', array( __CLASS__, 'attach' ), 10, 4 );
 		add_action( 'transition_post_status', array( __CLASS__, 'on_status' ), 10, 3 );
 		add_action( self::START_HOOK, array( __CLASS__, 'start_planned' ), 10, 1 );
+		add_filter( 'tta_should_load_button', array( __CLASS__, 'no_player_without_audio' ), 20, 2 );
+	}
+
+	/**
+	 * What visitors get on a post an editor switched audio off for ("never
+	 * for this post") while it has no stored audio.
+	 *
+	 * The free plugin's own player reads such a post with the browser's
+	 * voice. A player of an extension has no such way, so it is not shown
+	 * there: it could only say that the audio cannot be made.
+	 *
+	 * @param int $post_id The post.
+	 *
+	 * @return string '' (nothing changes), 'browser' or 'none'.
+	 */
+	public static function visitors_get( $post_id ) {
+		$player_id = (int) TTA_Helper::get_player_id();
+
+		if ( ! Jobs::is_off( $post_id ) || ! in_array( $player_id, self::job_players(), true ) || ! empty( get_post_meta( $post_id, 'tts_mp3_file_urls', true ) ) ) {
+			return '';
+		}
+
+		return \TTA_Admin\TTA_Admin::renders_mp3_player( $player_id ) ? 'browser' : 'none';
+	}
+
+	/**
+	 * Leaves the player out of the page of a post that is switched off, has
+	 * no audio and whose player could not fall back to the browser's voice.
+	 * Only on the site itself: the post editor still shows its panel.
+	 *
+	 * @param bool          $load Whether the post gets a player.
+	 * @param \WP_Post|null $post The post.
+	 *
+	 * @return bool
+	 */
+	public static function no_player_without_audio( $load, $post = null ) {
+		if ( ! $load || is_admin() || ! $post instanceof \WP_Post ) {
+			return $load;
+		}
+
+		return 'none' === self::visitors_get( (int) $post->ID ) ? false : $load;
+	}
+
+	/**
+	 * The players whose audio a job can make.
+	 *
+	 * @return int[]
+	 */
+	public static function job_players() {
+		/**
+		 * Filters the players whose audio a job can make. The free plugin's
+		 * natural voice is one; an extension adds its own.
+		 *
+		 * @param int[] $players Player ids.
+		 */
+		return array_map( 'intval', (array) apply_filters( 'atlasvoice_job_players', array( TTA_AtlasVoice_Service::PLAYER_ID ) ) );
 	}
 
 	/**
@@ -70,15 +126,7 @@ class Audio {
 	 * @return array{available: bool, reason: string} reason: '', 'voice' or 'not_connected'.
 	 */
 	public static function availability() {
-		/**
-		 * Filters the players whose audio a job can make. The free plugin's
-		 * natural voice is one; an extension adds its own.
-		 *
-		 * @param int[] $players Player ids.
-		 */
-		$players = array_map( 'intval', (array) apply_filters( 'atlasvoice_job_players', array( TTA_AtlasVoice_Service::PLAYER_ID ) ) );
-
-		if ( ! in_array( (int) TTA_Helper::get_player_id(), $players, true ) ) {
+		if ( ! in_array( (int) TTA_Helper::get_player_id(), self::job_players(), true ) ) {
 			return array(
 				'available' => false,
 				'reason'    => 'voice',

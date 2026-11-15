@@ -3,6 +3,8 @@ import { act, cleanup, render, screen } from '@testing-library/react';
 
 import { BlockPanel, mount } from './editor';
 
+jest.mock( '../../metabox/index', () => ( { Panel: () => null } ) );
+
 const BOOT = {
 	restUrl: 'https://site.test/wp-json/',
 	restNonce: 'nonce',
@@ -20,8 +22,17 @@ const PANEL = {
 		can_make: false,
 		reason: 'voice',
 		job: null,
+		off: false,
 	},
-	listening: { counted: false, days: 30, plays: 0, listeners: 0 },
+	files: null,
+	files_key: '',
+	listening: {
+		counted: false,
+		days: 30,
+		plays: 0,
+		listeners: 0,
+		finished: 0,
+	},
 	shortcode: '[atlasvoice]',
 };
 

@@ -80,11 +80,25 @@ class Jobs {
 	 */
 	const LANGUAGE_CODE = '/^[A-Za-z]{2,3}([-_][A-Za-z0-9]{2,8}){0,3}$/';
 
+	/** Post meta: set when an editor chose "never make audio for this post". */
+	const OFF_META = '_atlasvoice_audio_off';
+
 	/**
 	 * A job nothing has touched for this long, with no check planned, lost its check.
 	 */
 	const LOST_AFTER = 120;
 	const MAX_WAIT = 300;
+
+	/**
+	 * Whether an editor switched audio off for a post (TTS-347).
+	 *
+	 * @param int $post_id The post.
+	 *
+	 * @return bool
+	 */
+	public static function is_off( $post_id ) {
+		return '' !== (string) get_post_meta( (int) $post_id, self::OFF_META, true );
+	}
 
 	/**
 	 * Starts the job of a post.
@@ -104,6 +118,12 @@ class Jobs {
 
 		if ( ! self::is_language_or_empty( $language ) ) {
 			return self::invalid_language();
+		}
+
+		// TTS-347: an editor chose "never for this post". Every way to start a
+		// job passes here, so a publish, a first play or a run for all posts stops too.
+		if ( self::is_off( $post_id ) ) {
+			return self::error( 'audio_off_for_post', __( 'Audio is switched off for this post. Switch it on in the post editor first.', 'text-to-audio' ), 409 );
 		}
 
 		if ( ! TTA_AtlasVoice_Service::is_connected() ) {

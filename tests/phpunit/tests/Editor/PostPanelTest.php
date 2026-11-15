@@ -10,6 +10,7 @@
 use TTA\CLI\Commands;
 use TTA\CLI\Post_Command;
 use TTA\Cloud\Cloud;
+use TTA\Cloud\Jobs;
 use TTA\Content\Where;
 use TTA\Editor\Post_Panel;
 use TTA\Library\Posts;
@@ -184,6 +185,7 @@ class PostPanelTest extends WP_UnitTestCase {
 				'days'      => 30,
 				'plays'     => 0,
 				'listeners' => 0,
+				'finished'  => 0,
 			),
 			$listening
 		);
@@ -197,11 +199,15 @@ class PostPanelTest extends WP_UnitTestCase {
 		$wpdb->query( "CREATE TABLE IF NOT EXISTS {$table} (id bigint unsigned NOT NULL AUTO_INCREMENT, user_id varchar(190), post_id bigint, analytics longtext, other_data longtext, play_count int DEFAULT 0, created_at datetime, updated_at datetime, PRIMARY KEY (id))" );
 		$post_id = $this->post();
 		$other   = $this->post();
+		$ended   = array(
+			'play' => array( 'count' => 1 ),
+			'end'  => array( 'count' => 1 ),
+		);
 		$rows    = array(
-			array( $post_id, 3, '-1 day' ),
-			array( $post_id, 2, '-29 days' ),
-			array( $post_id, 9, '-31 days' ),
-			array( $other, 50, '-1 day' ),
+			array( $post_id, 3, '-1 day', $ended ),
+			array( $post_id, 2, '-29 days', array( 'play' => array( 'count' => 2 ) ) ),
+			array( $post_id, 9, '-31 days', $ended ),
+			array( $other, 50, '-1 day', $ended ),
 		);
 		foreach ( $rows as $index => $row ) {
 			$wpdb->insert( // phpcs:ignore
@@ -210,6 +216,7 @@ class PostPanelTest extends WP_UnitTestCase {
 					'user_id'    => 'u' . $index,
 					'post_id'    => $row[0],
 					'play_count' => $row[1],
+					'analytics'  => maybe_serialize( $row[3] ),
 					'updated_at' => gmdate( 'Y-m-d H:i:s', strtotime( $row[2] ) ),
 				)
 			);
@@ -220,6 +227,8 @@ class PostPanelTest extends WP_UnitTestCase {
 		$this->assertTrue( $listening['counted'] );
 		$this->assertSame( 5, $listening['plays'] );
 		$this->assertSame( 2, $listening['listeners'] );
+		// One of the two listeners of the last 30 days heard it to the end.
+		$this->assertSame( 50, $listening['finished'] );
 	}
 
 	// ---- the player on this post -----------------------------------------------
@@ -301,6 +310,194 @@ class PostPanelTest extends WP_UnitTestCase {
 		foreach ( $this->sent as $url ) {
 			$this->assertStringNotContainsString( 'av_live_secret', $url );
 		}
+	}
+
+	// ---- never for this post ---------------------------------------------------
+
+	public function test_audio_follows_the_site_until_it_is_switched_off_for_a_post() {
+		$this->with_jobs();
+		$post_id = $this->post();
+		$other   = $this->post();
+		$this->assertFalse( Post_Panel::get( $post_id )['audio']['off'] );
+
+		$panel = Post_Panel::audio_off( $post_id, true );
+
+		$this->assertTrue( $panel['audio']['off'] );
+		$this->assertFalse( $panel['audio']['can_make'] );
+		$this->assertTrue( Jobs::is_off( $post_id ) );
+		$this->assertFalse( Jobs::is_off( $other ) );
+		$this->assertTrue( Post_Panel::get( $other )['audio']['can_make'] );
+	}
+
+	public function test_a_post_that_is_switched_off_starts_no_job_by_any_way() {
+		$this->with_jobs();
+		$post_id = $this->post( array( 'post_content' => 'Some words to read aloud.' ) );
+		Post_Panel::audio_off( $post_id, true );
+
+		$this->assertSame( 'atlasvoice_audio_off', Post_Panel::make_audio( $post_id )->get_error_code() );
+		// The service's own door: a publish, a first play and a run for all posts go through it.
+		$this->assertSame( 'audio_off_for_post', Jobs::start( $post_id )->get_error_code() );
+		$this->assertSame( array(), $this->sent );
+	}
+
+	public function test_a_run_for_all_posts_leaves_a_switched_off_post_out() {
+		$this->with_jobs();
+		$first  = $this->post();
+		$second = $this->post();
+		$this->assertSame( array( $first, $second ), Posts::missing_ids() );
+		$this->assertSame( 2, Posts::missing_count() );
+
+		Post_Panel::audio_off( $first, true );
+
+		$this->assertSame( array( $second ), Posts::missing_ids() );
+		$this->assertSame( 1, Posts::missing_count() );
+	}
+
+	public function test_visitors_of_a_switched_off_post_hear_the_browser_voice_with_the_free_player() {
+		$this->with_jobs();
+		$post_id = $this->post();
+		$this->assertSame( '', Post_Panel::get( $post_id )['audio']['visitors'] );
+
+		Post_Panel::audio_off( $post_id, true );
+		$this->assertSame( 'browser', Post_Panel::get( $post_id )['audio']['visitors'] );
+
+		// On the page of that post the free player becomes the browser voice.
+		$this->go_to( get_permalink( $post_id ) );
+		( new \TTA_Admin\TTA_Admin( 'text-to-audio', '1' ) )->serve_player_1_until_ready();
+		$this->assertSame( 1, (int) get_player_id() );
+		$this->assertTrue( \TTA\Library\Audio::no_player_without_audio( true, get_post( $post_id ) ), 'The player still shows.' );
+	}
+
+	public function test_a_post_that_is_not_switched_off_keeps_the_natural_voice_on_its_page() {
+		$this->with_jobs();
+		$post_id = $this->post();
+
+		$this->go_to( get_permalink( $post_id ) );
+		( new \TTA_Admin\TTA_Admin( 'text-to-audio', '1' ) )->serve_player_1_until_ready();
+
+		$this->assertSame( Service::PLAYER_ID, (int) get_player_id() );
+	}
+
+	public function test_an_extensions_player_is_not_shown_on_a_switched_off_post_without_audio() {
+		$this->with_jobs();
+		add_filter( 'atlasvoice_free_mp3_player', '__return_false' );
+		$post_id = $this->post();
+		$post    = get_post( $post_id );
+		$this->assertTrue( \TTA\Library\Audio::no_player_without_audio( true, $post ) );
+
+		Post_Panel::audio_off( $post_id, true );
+
+		$this->assertSame( 'none', Post_Panel::get( $post_id )['audio']['visitors'] );
+		$this->assertFalse( \TTA\Library\Audio::no_player_without_audio( true, $post ) );
+
+		// With stored audio the player stays: the file plays without making anything.
+		update_post_meta( $post_id, 'tts_mp3_file_urls', array( 'en' => 'https://example.org/a.mp3' ) );
+		$this->assertSame( '', Post_Panel::get( $post_id )['audio']['visitors'] );
+		$this->assertTrue( \TTA\Library\Audio::no_player_without_audio( true, $post ) );
+		remove_filter( 'atlasvoice_free_mp3_player', '__return_false' );
+	}
+
+	public function test_the_play_route_makes_nothing_for_a_switched_off_post() {
+		$this->with_jobs();
+		$post_id = $this->post();
+		Post_Panel::audio_off( $post_id, true );
+
+		$result = \TTA\TTA_GTTS_Generation::handle(
+			array(
+				'post_id'    => $post_id,
+				'content'    => 'Some words.',
+				'title'      => 'a-post',
+				'temp_title' => 'a-post-1',
+			)
+		);
+
+		$this->assertFalse( $result['status'] );
+		$this->assertSame( 'audio_off_for_post', $result['data']['message'] );
+		$this->assertSame( array(), $this->sent );
+	}
+
+	public function test_switching_it_on_again_removes_the_mark_and_the_post_can_be_made() {
+		$this->with_jobs();
+		$post_id = $this->post();
+		Post_Panel::audio_off( $post_id, true );
+
+		$panel = Post_Panel::audio_off( $post_id, false );
+
+		$this->assertFalse( $panel['audio']['off'] );
+		$this->assertTrue( $panel['audio']['can_make'] );
+		$this->assertSame( array(), get_post_meta( $post_id, Jobs::OFF_META ) );
+		$this->assertSame( array( $post_id ), Posts::missing_ids() );
+	}
+
+	public function test_stored_audio_stays_when_audio_is_switched_off() {
+		$this->with_jobs();
+		$post_id = $this->post();
+		update_post_meta( $post_id, Posts::MARK, true );
+
+		$panel = Post_Panel::audio_off( $post_id, true );
+
+		$this->assertSame( 'ready', $panel['audio']['status'] );
+		$this->assertNotEmpty( get_post_meta( $post_id, Posts::MARK, true ) );
+	}
+
+	public function test_audio_of_a_post_that_does_not_exist_cannot_be_switched_off() {
+		$this->assertSame( 'atlasvoice_no_post', Post_Panel::audio_off( 999999, true )->get_error_code() );
+	}
+
+	public function test_the_route_switches_audio_off_for_who_can_edit_the_post_only() {
+		$this->with_jobs();
+		$post_id = $this->post();
+
+		$this->assertSame( 400, $this->rest( 'POST', $post_id . '/audio-off', array() )->get_status() );
+		$response = $this->rest( 'POST', $post_id . '/audio-off', array( 'off' => true ) );
+		$this->assertSame( 200, $response->get_status() );
+		$this->assertTrue( $response->get_data()['audio']['off'] );
+
+		wp_set_current_user( self::factory()->user->create( array( 'role' => 'subscriber' ) ) );
+		$this->assertContains( $this->rest( 'POST', $post_id . '/audio-off', array( 'off' => false ) )->get_status(), array( 401, 403 ) );
+		$this->assertTrue( Jobs::is_off( $post_id ) );
+	}
+
+	public function test_the_command_switches_audio_off_and_on() {
+		$post_id = $this->post();
+		$command = new Post_Command();
+
+		$command->never( array( $post_id ) );
+		$this->assertTrue( Jobs::is_off( $post_id ) );
+		$this->assertSame( 'success', WP_CLI::$log[0][0] );
+
+		$command->follow( array( $post_id ) );
+		$this->assertFalse( Jobs::is_off( $post_id ) );
+	}
+
+	// ---- the files of the post -------------------------------------------------
+
+	public function test_the_panel_holds_the_rows_of_the_audio_files_for_a_voice_that_stores_them() {
+		$this->assertNull( Post_Panel::get( $this->post() )['files'] );
+
+		$this->use_player( 3 );
+		$post_id = $this->post();
+		$panel   = Post_Panel::get( $post_id );
+
+		$this->assertSame( \TTA\TTA_Helper::atlasvoice_panel_state( get_post( $post_id ) ), $panel['files'] );
+		$this->assertSame( 32, strlen( $panel['files_key'] ) );
+
+		update_post_meta( $post_id, 'tts_mp3_file_urls', array( 'en' => 'https://example.org/a.mp3' ) );
+		$this->assertNotSame( $panel['files_key'], Post_Panel::get( $post_id )['files_key'], 'A changed file gives the rows a new key.' );
+	}
+
+	public function test_the_separate_audio_box_is_not_shown_beside_the_panel() {
+		$this->assertTrue( apply_filters( 'atlasvoice_render_audio_panel', true ), 'The classic admin keeps its box.' );
+
+		add_filter(
+			'atlasvoice_admin_ui',
+			static function () {
+				return Admin_App::UI_NEW;
+			}
+		);
+
+		$this->assertSame( ! Post_Panel::is_active(), apply_filters( 'atlasvoice_render_audio_panel', true ) );
+		$this->assertFalse( apply_filters( 'atlasvoice_render_audio_panel', false ), 'What switched the box off stays in force.' );
 	}
 
 	// ---- the routes ------------------------------------------------------------
@@ -387,7 +584,7 @@ class PostPanelTest extends WP_UnitTestCase {
 			}
 		}
 
-		$this->assertSame( 3, $count );
+		$this->assertSame( 4, $count );
 	}
 
 	// ---- the command -----------------------------------------------------------

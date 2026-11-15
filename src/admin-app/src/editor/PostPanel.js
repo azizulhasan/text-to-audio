@@ -15,12 +15,14 @@ import {
 	Button,
 	Notice,
 	PanelBody,
+	RadioControl,
 	Spinner,
 	TextControl,
 	ToggleControl,
 } from '@wordpress/components';
 import { useCallback, useEffect, useState } from '@wordpress/element';
 
+import { Panel as AudioFiles } from '../../../metabox/index';
 import { request } from '../api';
 
 /** How often a post whose audio is being made is asked about again. */
@@ -84,10 +86,25 @@ export function audioWords( audio ) {
 			whenWords( audio.kind === 'jobs' ? audio.when : 'play' )
 		);
 	}
+	if (
+		audio.off &&
+		audio.status !== 'ready' &&
+		audio.status !== 'outdated'
+	) {
+		return audio.visitors === 'none'
+			? __(
+					'No audio is made for this post, so the player is not shown on it.',
+					'text-to-audio'
+			  )
+			: __(
+					'No audio is made for this post. Visitors hear it in their browser’s voice.',
+					'text-to-audio'
+			  );
+	}
 	if ( audio.kind === 'files' ) {
 		return audio.status === 'ready' || audio.status === 'outdated'
 			? __(
-					'This post has audio. Its files are in the box “AtlasVoice audio”.',
+					'This post has audio. It was made when the post was played.',
 					'text-to-audio'
 			  )
 			: __(
@@ -149,6 +166,23 @@ export default function PostPanel( { boot, refresh = 0 } ) {
 	const [ failure, setFailure ] = useState( '' );
 	const [ busy, setBusy ] = useState( '' );
 	const [ message, setMessage ] = useState( null );
+	const [ filesChanged, setFilesChanged ] = useState( 0 );
+
+	// The rows of the audio files say when one was replaced or deleted:
+	// the state of the audio is read again.
+	useEffect( () => {
+		const hooks = window.wp && window.wp.hooks;
+		if ( ! hooks ) {
+			return undefined;
+		}
+		const name = 'atlasvoice/post-panel/' + boot.postId;
+		hooks.addAction( 'atlasvoice.audioPanel.changed', name, () =>
+			setFilesChanged( ( count ) => count + 1 )
+		);
+
+		return () =>
+			hooks.removeAction( 'atlasvoice.audioPanel.changed', name );
+	}, [ boot.postId ] );
 
 	const load = useCallback( async () => {
 		try {
@@ -161,7 +195,7 @@ export default function PostPanel( { boot, refresh = 0 } ) {
 
 	useEffect( () => {
 		load();
-	}, [ load, refresh ] );
+	}, [ load, refresh, filesChanged ] );
 
 	// A job runs on the server: ask now and then until it has ended.
 	const making = panel?.audio?.status === 'making';
@@ -262,7 +296,8 @@ export default function PostPanel( { boot, refresh = 0 } ) {
 
 	return (
 		<div className="atlasvoice-editor-panel">
-			{ message && (
+			{ /* "Started" is only news while the audio is being made. */ }
+			{ message && ! ( message.started && ! making ) && (
 				<Notice
 					status={ message.status }
 					onRemove={ () => setMessage( null ) }
@@ -313,6 +348,60 @@ export default function PostPanel( { boot, refresh = 0 } ) {
 							) }
 						</p>
 					</>
+				) }
+				{ panel.files && (
+					<div className="atlasvoice-editor-files atlasvoice-metabox">
+						{ /* A new key draws the rows again from what was just read. */ }
+						<AudioFiles
+							key={ panel.files_key }
+							initialState={ panel.files }
+						/>
+					</div>
+				) }
+				{ audio.kind === 'jobs' && (
+					<RadioControl
+						label={ __( 'Audio for this post', 'text-to-audio' ) }
+						selected={ audio.off ? 'never' : 'site' }
+						disabled={ !! busy }
+						options={ [
+							{
+								label:
+									audio.when === 'publish'
+										? __(
+												'Use the site setting (when published)',
+												'text-to-audio'
+										  )
+										: __(
+												'Use the site setting (on the first play)',
+												'text-to-audio'
+										  ),
+								value: 'site',
+							},
+							{
+								label: __(
+									'Never for this post',
+									'text-to-audio'
+								),
+								value: 'never',
+							},
+						] }
+						onChange={ ( value ) =>
+							act(
+								'off',
+								route + '/audio-off',
+								{ off: value === 'never' },
+								value === 'never'
+									? __(
+											'No audio is made for this post. Audio that is stored already keeps playing.',
+											'text-to-audio'
+									  )
+									: __(
+											'This post follows the site setting again.',
+											'text-to-audio'
+									  )
+							)
+						}
+					/>
 				) }
 				{ audio.kind === 'browser' && link( '#/voice' ) && (
 					<Button variant="link" href={ link( '#/voice' ) }>
@@ -405,6 +494,12 @@ export default function PostPanel( { boot, refresh = 0 } ) {
 							</dt>
 							<dd>{ listening.listeners.toLocaleString() }</dd>
 						</div>
+						{ listening.listeners > 0 && (
+							<div>
+								<dt>{ __( 'finished', 'text-to-audio' ) }</dt>
+								<dd>{ listening.finished + '%' }</dd>
+							</div>
+						) }
 					</dl>
 				) : (
 					<p>

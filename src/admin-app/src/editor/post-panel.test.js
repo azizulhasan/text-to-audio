@@ -18,6 +18,25 @@ import PostPanel, {
 
 expect.extend( toHaveNoViolations );
 
+// The rows of the audio files are the "AtlasVoice audio" box's own part.
+jest.mock( '../../../metabox/index', () => ( {
+	Panel: ( { initialState } ) => (
+		<ul data-testid="audio-files">
+			{ initialState.rows.map( ( row ) => (
+				<li key={ row.key }>{ row.name + ': ' + row.status }</li>
+			) ) }
+		</ul>
+	),
+} ) );
+
+const FILES = {
+	postId: 161,
+	rows: [
+		{ key: 'en', name: 'English', status: 'ready' },
+		{ key: 'es', name: 'Spanish', status: 'missing' },
+	],
+};
+
 const BOOT = {
 	restUrl: 'https://site.test/wp-json/',
 	restNonce: 'nonce',
@@ -43,9 +62,18 @@ function panelOf( audio = {}, changes = {} ) {
 			can_make: true,
 			reason: '',
 			job: null,
+			off: false,
 			...audio,
 		},
-		listening: { counted: true, days: 30, plays: 412, listeners: 38 },
+		files: null,
+		files_key: '',
+		listening: {
+			counted: true,
+			days: 30,
+			plays: 412,
+			listeners: 38,
+			finished: 52,
+		},
 		shortcode: '[atlasvoice]',
 		...changes,
 	};
@@ -410,6 +438,173 @@ describe( 'the AtlasVoice panel of the post editor', () => {
 		expect( screen.getByText( 'plays' ) ).toBeInTheDocument();
 		expect( screen.getByText( '38' ) ).toBeInTheDocument();
 		expect( screen.getByText( 'listeners' ) ).toBeInTheDocument();
+	} );
+
+	test( 'it shows how many listeners heard it to the end', async () => {
+		await show();
+
+		expect( screen.getByText( '52%' ) ).toBeInTheDocument();
+		expect( screen.getByText( 'finished' ) ).toBeInTheDocument();
+	} );
+
+	test( 'a post nobody listened to has no share of finished listens', async () => {
+		await show( {
+			panel: panelOf(
+				{},
+				{
+					listening: {
+						counted: true,
+						days: 30,
+						plays: 0,
+						listeners: 0,
+						finished: 0,
+					},
+				}
+			),
+		} );
+
+		expect( screen.queryByText( 'finished' ) ).toBeNull();
+	} );
+
+	test( 'the files of each language are in the panel, and are drawn again when they changed', async () => {
+		const { site, rerender } = await show( {
+			panel: panelOf( {}, { files: FILES, files_key: 'a' } ),
+		} );
+
+		expect( screen.getByText( 'English: ready' ) ).toBeInTheDocument();
+		expect( screen.getByText( 'Spanish: missing' ) ).toBeInTheDocument();
+
+		site.panel = panelOf(
+			{},
+			{
+				files: {
+					...FILES,
+					rows: [ { key: 'en', name: 'English', status: 'missing' } ],
+				},
+				files_key: 'b',
+			}
+		);
+		rerender( <PostPanel boot={ BOOT } refresh={ 1 } /> );
+
+		expect(
+			await screen.findByText( 'English: missing' )
+		).toBeInTheDocument();
+		expect( screen.queryByText( 'Spanish: missing' ) ).toBeNull();
+	} );
+
+	test( 'a voice without files shows no rows', async () => {
+		await show( {
+			panel: panelOf( { kind: 'browser', status: '', can_make: false } ),
+		} );
+
+		expect( screen.queryByTestId( 'audio-files' ) ).toBeNull();
+	} );
+
+	test( 'after a file was replaced or deleted the audio is read again', async () => {
+		const actions = {};
+		window.wp = {
+			hooks: {
+				addAction: ( hook, name, run ) => {
+					actions[ hook ] = run;
+				},
+				removeAction: ( hook ) => {
+					delete actions[ hook ];
+				},
+			},
+		};
+		const { site, unmount } = await show( {
+			panel: panelOf( {}, { files: FILES, files_key: 'a' } ),
+		} );
+
+		await act( async () => actions[ 'atlasvoice.audioPanel.changed' ]() );
+
+		await waitFor( () => expect( site.calls ).toHaveLength( 2 ) );
+		unmount();
+		expect( actions ).toEqual( {} );
+		delete window.wp;
+	} );
+
+	test( 'audio can be switched off for this post, and on again', async () => {
+		const { site } = await show( {
+			after: panelOf( { off: true, can_make: false } ),
+		} );
+		expect(
+			screen.getByLabelText( 'Use the site setting (on the first play)' )
+		).toBeChecked();
+
+		fireEvent.click( screen.getByLabelText( 'Never for this post' ) );
+
+		await waitFor( () =>
+			expect(
+				screen.getByLabelText( 'Never for this post' )
+			).toBeChecked()
+		);
+		expect( site.calls[ 1 ] ).toEqual( {
+			method: 'POST',
+			path: 'tta/v1/post-panel/161/audio-off',
+			body: { off: true },
+			nonce: 'nonce',
+		} );
+		// Nothing can be made while it is off, and the panel says what visitors get.
+		expect(
+			screen.queryByRole( 'button', { name: 'Make audio now' } )
+		).toBeNull();
+		expect(
+			screen.getByText(
+				'No audio is made for this post. Visitors hear it in their browser’s voice.'
+			)
+		).toBeInTheDocument();
+
+		site.panel = panelOf();
+		fireEvent.click(
+			screen.getByLabelText( 'Use the site setting (on the first play)' )
+		);
+		await waitFor( () =>
+			expect( site.calls[ site.calls.length - 1 ].body ).toEqual( {
+				off: false,
+			} )
+		);
+	} );
+
+	test( 'with a player that cannot use the browser’s voice it says the player is not shown', async () => {
+		await show( {
+			panel: panelOf( { off: true, can_make: false, visitors: 'none' } ),
+		} );
+
+		expect(
+			screen.getByText(
+				'No audio is made for this post, so the player is not shown on it.'
+			)
+		).toBeInTheDocument();
+	} );
+
+	test( 'a post with stored audio that is switched off still says its audio is there', async () => {
+		await show( {
+			panel: panelOf( { status: 'ready', off: true, can_make: false } ),
+		} );
+
+		expect(
+			screen.getByText( 'The audio is up to date with the text.' )
+		).toBeInTheDocument();
+		expect(
+			screen.queryByRole( 'button', { name: 'Make again' } )
+		).toBeNull();
+	} );
+
+	test( 'the choice names when the site makes audio', async () => {
+		await show( { panel: panelOf( { when: 'publish' } ) } );
+
+		expect(
+			screen.getByLabelText( 'Use the site setting (when published)' )
+		).toBeChecked();
+	} );
+
+	test( 'a voice that does not use jobs has no such choice', async () => {
+		await show( {
+			panel: panelOf( { kind: 'files', can_make: false } ),
+		} );
+
+		expect( screen.queryByLabelText( 'Never for this post' ) ).toBeNull();
 	} );
 
 	test( 'a site that does not count listening says so', async () => {

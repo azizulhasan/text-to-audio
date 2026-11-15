@@ -81,3 +81,12 @@
 	padding: 0;
 }
 
+/* The rows of the post's audio files, and the choice under them. */
+.atlasvoice-editor-panel .atlasvoice-editor-files {
+	margin: 0 0 16px;
+}
+
+.atlasvoice-editor-panel .components-radio-control {
+	margin: 0 0 12px;
+}
+

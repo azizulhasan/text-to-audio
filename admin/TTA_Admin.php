@@ -682,7 +682,10 @@ class TTA_Admin
             return;
         }
         $player_id = get_player_id();
-        if (!self::renders_mp3_player($player_id) || \TTA\TTA_AtlasVoice_Service::can_serve_visitors()) {
+        // TTS-347: a post an editor switched audio off for ("never for this
+        // post") is read by the visitor's browser too, so none of its text is sent.
+        $audio_off = is_singular() && \TTA\Cloud\Jobs::is_off(get_queried_object_id());
+        if (!self::renders_mp3_player($player_id) || (\TTA\TTA_AtlasVoice_Service::can_serve_visitors() && !$audio_off)) {
             return;
         }
         // Per post: a post that already has its MP3 keeps player 3 and plays

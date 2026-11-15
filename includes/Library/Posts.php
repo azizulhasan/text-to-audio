@@ -255,7 +255,7 @@ class Posts {
 
 		add_filter( 'posts_where', $where );
 		$query = new \WP_Query(
-			self::query_args( 'missing' ) + array(
+			self::with_audio_off( self::query_args( 'missing' ), false ) + array(
 				'posts_per_page'         => max( 1, min( self::PER_PAGE_MAX, (int) $limit ) ),
 				'fields'                 => 'ids',
 				'orderby'                => 'ID',
@@ -279,7 +279,41 @@ class Posts {
 			return 0;
 		}
 
-		return max( 0, self::count( 'all' ) - self::count( 'ready' ) );
+		// A post an editor switched audio off for is not waiting for audio.
+		$off = new \WP_Query(
+			self::with_audio_off( self::query_args( 'missing' ), true ) + array(
+				'posts_per_page'         => 1,
+				'fields'                 => 'ids',
+				'update_post_meta_cache' => false,
+			)
+		);
+
+		return max( 0, self::count( 'all' ) - self::count( 'ready' ) - (int) $off->found_posts );
+	}
+
+	/**
+	 * Narrows a query to the posts an editor switched audio off for, or to
+	 * the others.
+	 *
+	 * @param array $args WP_Query arguments.
+	 * @param bool  $off  True for the posts that are switched off.
+	 *
+	 * @return array WP_Query arguments.
+	 */
+	private static function with_audio_off( array $args, $off ) {
+		$clause = array(
+			'key'     => Jobs::OFF_META,
+			'compare' => $off ? 'EXISTS' : 'NOT EXISTS',
+		);
+
+		// phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query -- a run through the site's own posts, in steps.
+		$args['meta_query'] = isset( $args['meta_query'] ) ? array(
+			'relation' => 'AND',
+			$args['meta_query'],
+			$clause,
+		) : array( $clause );
+
+		return $args;
 	}
 
 	/**

@@ -39,12 +39,42 @@ class Post_Panel {
 	const DAYS = 30;
 
 	/**
+	 * True while this class itself asks whether AtlasVoice runs for the post.
+	 *
+	 * @var bool
+	 */
+	private static $asking = false;
+
+	/**
 	 * Hooks the routes and the editor.
 	 */
 	public static function register() {
 		add_action( 'rest_api_init', array( __CLASS__, 'register_routes' ) );
 		add_action( 'enqueue_block_editor_assets', array( __CLASS__, 'enqueue' ) );
 		add_action( 'add_meta_boxes', array( __CLASS__, 'add_box' ), 20 );
+		add_filter( 'atlasvoice_render_audio_panel', array( __CLASS__, 'replaces_audio_box' ), 99 );
+	}
+
+	/**
+	 * Whether the panel is what the editor shows: the new admin is in use
+	 * and the panel's script is built.
+	 *
+	 * @return bool
+	 */
+	public static function is_active() {
+		return Admin_App::is_enabled() && is_readable( self::build_path( 'editor.asset.php' ) );
+	}
+
+	/**
+	 * The panel holds the rows of the post's audio files, so the separate
+	 * "AtlasVoice audio" box is not shown beside it.
+	 *
+	 * @param bool $show Whether the "AtlasVoice audio" box shows.
+	 *
+	 * @return bool
+	 */
+	public static function replaces_audio_box( $show ) {
+		return self::$asking || ! self::is_active() ? $show : false;
 	}
 
 	/**
@@ -55,8 +85,9 @@ class Post_Panel {
 	 * @return array|\WP_Error {
 	 *     post: array{id:int, published:bool},
 	 *     player: array{shown:bool},
-	 *     audio: array{kind:string, status:string, when:string, can_make:bool, reason:string, job:array|null},
-	 *     listening: array{counted:bool, days:int, plays:int, listeners:int},
+	 *     audio: array{kind:string, status:string, when:string, can_make:bool, reason:string, job:array|null, off:bool},
+	 *     files: array|null, files_key: string,
+	 *     listening: array{counted:bool, days:int, plays:int, listeners:int, finished:int},
 	 *     shortcode: string
 	 * }
 	 *
@@ -87,6 +118,9 @@ class Post_Panel {
 			$status = $published ? $one['status'] : 'draft';
 		}
 
+		$off   = Jobs::is_off( $post->ID );
+		$files = $stores ? TTA_Helper::atlasvoice_panel_state( $post ) : null;
+
 		$customize = (array) get_option( 'tta_customize_settings' );
 		$shortcode = isset( $customize['tta_play_btn_shortcode'] ) && is_string( $customize['tta_play_btn_shortcode'] ) && '' !== $customize['tta_play_btn_shortcode'] ? $customize['tta_play_btn_shortcode'] : '[atlasvoice]';
 
@@ -102,10 +136,16 @@ class Post_Panel {
 				'kind'     => $kind,
 				'status'   => $status,
 				'when'     => $jobs['when'],
-				'can_make' => 'jobs' === $kind && $published && 'making' !== $status,
+				'can_make' => 'jobs' === $kind && $published && 'making' !== $status && ! $off,
 				'reason'   => $jobs['reason'],
 				'job'      => $one['job'],
+				'off'      => $off,
+				// What a visitor gets while it is off: '' (as usual), 'browser' or 'none'.
+				'visitors' => Audio::visitors_get( (int) $post->ID ),
 			),
+			// The rows of the post's audio files, as the "AtlasVoice audio" box builds them.
+			'files'     => $files,
+			'files_key' => $files ? md5( (string) wp_json_encode( $files ) ) : '',
 			'listening' => self::listening( (int) $post->ID ),
 			'shortcode' => sanitize_text_field( $shortcode ),
 		);
@@ -139,6 +179,30 @@ class Post_Panel {
 	}
 
 	/**
+	 * Switches audio off for one post ("never for this post"), or lets it
+	 * follow the site again. Audio that is stored already keeps playing.
+	 *
+	 * @param int  $post_id The post.
+	 * @param bool $off     True: no audio is made for this post.
+	 *
+	 * @return array|\WP_Error The panel after the save.
+	 */
+	public static function audio_off( $post_id, $off ) {
+		$post = get_post( (int) $post_id );
+		if ( ! $post ) {
+			return new \WP_Error( 'atlasvoice_no_post', __( 'This post does not exist.', 'text-to-audio' ), array( 'status' => 404 ) );
+		}
+
+		if ( $off ) {
+			update_post_meta( $post->ID, Jobs::OFF_META, '1' );
+		} else {
+			delete_post_meta( $post->ID, Jobs::OFF_META );
+		}
+
+		return self::get( $post->ID );
+	}
+
+	/**
 	 * Starts the audio job of one post.
 	 *
 	 * @param int $post_id The post.
@@ -159,6 +223,9 @@ class Post_Panel {
 					: __( 'The voice in use does not make its audio in the background. It is made when the post is played.', 'text-to-audio' ),
 				array( 'status' => 409 )
 			);
+		}
+		if ( $panel['audio']['off'] ) {
+			return new \WP_Error( 'atlasvoice_audio_off', __( 'Audio is switched off for this post. Let it follow the site setting first.', 'text-to-audio' ), array( 'status' => 409 ) );
 		}
 		if ( ! $panel['post']['published'] ) {
 			return new \WP_Error( 'atlasvoice_post_not_published', __( 'Audio is made from the published page. Publish the post first.', 'text-to-audio' ), array( 'status' => 409 ) );
@@ -225,6 +292,28 @@ class Post_Panel {
 
 		register_rest_route(
 			'tta/v1',
+			'/post-panel/(?P<id>\d+)/audio-off',
+			array(
+				array(
+					'methods'             => \WP_REST_Server::CREATABLE,
+					'label'               => __( 'Never make audio for one post, or follow the site again', 'text-to-audio' ),
+					'description'         => __( 'With off: true no audio is made for this post: not on publish, not on the first play, not in a run for all posts and not by a click. With off: false the post follows the site setting again. Audio that is stored already keeps playing. For anyone who can edit the post.', 'text-to-audio' ),
+					'callback'            => array( __CLASS__, 'rest_audio_off' ),
+					'permission_callback' => $access,
+					'args'                => array(
+						'id'  => $id,
+						'off' => array(
+							'type'        => 'boolean',
+							'required'    => true,
+							'description' => __( 'true switches audio off for this post, false lets it follow the site setting.', 'text-to-audio' ),
+						),
+					),
+				),
+			)
+		);
+
+		register_rest_route(
+			'tta/v1',
 			'/post-panel/(?P<id>\d+)/audio',
 			array(
 				array(
@@ -237,6 +326,17 @@ class Post_Panel {
 				),
 			)
 		);
+	}
+
+	/**
+	 * POST: switch audio off for the post, or on again.
+	 *
+	 * @param \WP_REST_Request $request Request with `id` and `off`.
+	 *
+	 * @return \WP_REST_Response|\WP_Error
+	 */
+	public static function rest_audio_off( $request ) {
+		return rest_ensure_response( self::audio_off( (int) $request['id'], (bool) $request->get_param( 'off' ) ) );
 	}
 
 	/**
@@ -279,7 +379,15 @@ class Post_Panel {
 	 * @return int The post, or 0.
 	 */
 	public static function post_on_screen() {
-		if ( ! Admin_App::is_enabled() || ! is_readable( self::build_path( 'editor.asset.php' ) ) || ! TTA_Helper::atlasvoice_show_audio_panel() ) {
+		if ( ! self::is_active() ) {
+			return 0;
+		}
+
+		// The same answer the "AtlasVoice audio" box got before this panel took its place.
+		self::$asking = true;
+		$runs         = TTA_Helper::atlasvoice_show_audio_panel();
+		self::$asking = false;
+		if ( ! $runs ) {
 			return 0;
 		}
 
@@ -360,6 +468,21 @@ class Post_Panel {
 			'before'
 		);
 
+		// The rows of the audio files are the "AtlasVoice audio" box's own part; it starts from this.
+		wp_add_inline_script(
+			self::HANDLE,
+			'window.atlasVoiceMetabox = ' . wp_json_encode(
+				array(
+					'state'     => TTA_Helper::atlasvoice_panel_state( get_post( $post_id ) ),
+					'apiURL'    => esc_url_raw( rest_url() ) . 'tta/v1/',
+					'restNonce' => wp_create_nonce( 'wp_rest' ),
+				)
+			) . ';',
+			'before'
+		);
+
+		wp_enqueue_style( 'dashicons' );
+		wp_enqueue_style( 'atlasvoice-audio-panel', TTA_PLUGIN_URL . 'admin/css/atlasvoice-audio-panel.css', array( 'wp-components' ), TEXT_TO_AUDIO_VERSION );
 		if ( is_readable( self::build_path( 'editor.css' ) ) ) {
 			wp_enqueue_style( self::HANDLE, self::build_url( 'editor.css' ), array( 'wp-components' ), $version );
 		}
@@ -397,7 +520,10 @@ class Post_Panel {
 			// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared,WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching -- the plugin's own table; a small count for one post.
 			$numbers = $wpdb->get_row(
 				$wpdb->prepare(
-					"SELECT COUNT(*) AS listeners, COALESCE(SUM(play_count), 0) AS plays FROM {$table} WHERE post_id = %d AND updated_at >= %s",
+					// A listener's row holds what the player counted; "end" is in it once the audio was heard to the end.
+					"SELECT COUNT(*) AS listeners, COALESCE(SUM(analytics LIKE %s OR analytics LIKE %s), 0) AS finished, COALESCE(SUM(play_count), 0) AS plays FROM {$table} WHERE post_id = %d AND updated_at >= %s",
+					'%' . $wpdb->esc_like( 's:3:"end";a:' ) . '%',
+					'%' . $wpdb->esc_like( '"end":{' ) . '%',
 					$post_id,
 					gmdate( 'Y-m-d H:i:s', time() - self::DAYS * DAY_IN_SECONDS )
 				)
@@ -406,11 +532,15 @@ class Post_Panel {
 			$wpdb->suppress_errors( $quiet );
 		}
 
+		$listeners = $numbers ? (int) $numbers->listeners : 0;
+
 		return array(
 			'counted'   => $counted,
 			'days'      => self::DAYS,
 			'plays'     => $numbers ? (int) $numbers->plays : 0,
-			'listeners' => $numbers ? (int) $numbers->listeners : 0,
+			'listeners' => $listeners,
+			// The share of listeners who heard it to the end, in percent.
+			'finished'  => $listeners > 0 ? (int) round( 100 * (int) $numbers->finished / $listeners ) : 0,
 		);
 	}
 

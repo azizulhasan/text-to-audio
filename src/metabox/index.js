@@ -237,8 +237,10 @@ function Row( { row, state, playback, busyKey, onToggle, onReplace, onDelete } )
 	);
 }
 
-function Panel() {
-	const [ state, setState ] = useState( () => filterState( boot.state || {} ) );
+// TTS-347: the post editor's AtlasVoice panel draws these rows inside itself
+// and gives them the state it has just read (`initialState`).
+function Panel( { initialState } = {} ) {
+	const [ state, setState ] = useState( () => filterState( initialState || boot.state || {} ) );
 	const [ message, setMessage ] = useState( null );
 	const [ busyKey, setBusyKey ] = useState( '' );
 	const [ playback, setPlayback ] = useState( { key: '', playing: false, current: 0, duration: 0 } );
@@ -518,6 +520,8 @@ function Panel() {
 
 	return el( 'div', { className: 'av-panel' }, ...children );
 }
+
+export { Panel };
 
 const root = document.getElementById( 'atlasvoice-metabox-root' );
 if ( root ) {

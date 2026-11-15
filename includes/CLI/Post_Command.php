@@ -67,10 +67,10 @@ class Post_Command {
 		}
 
 		\WP_CLI::line( 'player: ' . ( $panel['player']['shown'] ? 'shown' : 'hidden' ) );
-		\WP_CLI::line( 'audio: ' . $audio );
+		\WP_CLI::line( 'audio: ' . $audio . ( $panel['audio']['off'] ? ' (switched off for this post)' : '' ) );
 		\WP_CLI::line(
 			$panel['listening']['counted']
-				? sprintf( 'plays in the last %1$d days: %2$d (%3$d listeners)', $panel['listening']['days'], $panel['listening']['plays'], $panel['listening']['listeners'] )
+				? sprintf( 'plays in the last %1$d days: %2$d (%3$d listeners, %4$d%% finished)', $panel['listening']['days'], $panel['listening']['plays'], $panel['listening']['listeners'], $panel['listening']['finished'] )
 				: 'listening is not counted on this site'
 		);
 		\WP_CLI::line( 'shortcode: ' . $panel['shortcode'] );
@@ -112,6 +112,64 @@ class Post_Command {
 	 */
 	public function hide( $args ) {
 		$this->set( $args, false );
+	}
+
+	/**
+	 * Switches audio off for one post: no audio is made for it, not on
+	 * publish, not on the first play and not in a run for all posts.
+	 *
+	 * ## OPTIONS
+	 *
+	 * <id>
+	 * : The post.
+	 *
+	 * ## EXAMPLES
+	 *
+	 *     $ wp atlasvoice post never 161
+	 *     Success: No audio is made for post 161.
+	 *
+	 * @param array $args Positional arguments: the post.
+	 */
+	public function never( $args ) {
+		$this->audio( $args, true );
+	}
+
+	/**
+	 * Lets one post follow the site's audio setting again.
+	 *
+	 * ## OPTIONS
+	 *
+	 * <id>
+	 * : The post.
+	 *
+	 * ## EXAMPLES
+	 *
+	 *     $ wp atlasvoice post follow 161
+	 *     Success: Post 161 follows the site setting again.
+	 *
+	 * @param array $args Positional arguments: the post.
+	 */
+	public function follow( $args ) {
+		$this->audio( $args, false );
+	}
+
+	/**
+	 * Saves the audio choice and says how it ended.
+	 *
+	 * @param array $args Positional arguments: the post.
+	 * @param bool  $off  Whether audio is switched off.
+	 */
+	private function audio( $args, $off ) {
+		$id    = isset( $args[0] ) ? (int) $args[0] : 0;
+		$panel = Post_Panel::audio_off( $id, $off );
+
+		if ( is_wp_error( $panel ) ) {
+			\WP_CLI::error( $panel->get_error_message() );
+
+			return;
+		}
+
+		\WP_CLI::success( sprintf( $off ? 'No audio is made for post %d.' : 'Post %d follows the site setting again.', $id ) );
 	}
 
 	/**
