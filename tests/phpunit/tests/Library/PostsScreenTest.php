@@ -394,7 +394,16 @@ class PostsScreenTest extends WP_UnitTestCase {
 		$this->assertSame( array(), $this->sent );
 
 		\TTA\Library\Audio::request( $post->ID, 0 );
-		$this->assertCount( 1, array_filter( (array) _get_cron_array(), static function ( $hooks ) { return isset( $hooks[ \TTA\Library\Audio::REQUEST_HOOK ] ); } ), 'Asking twice plans it once.' );
+		$this->assertCount(
+			1,
+			array_filter(
+				(array) _get_cron_array(),
+				static function ( $hooks ) {
+					return isset( $hooks[ \TTA\Library\Audio::REQUEST_HOOK ] );
+				}
+			),
+			'Asking twice plans it once.'
+		);
 	}
 
 	public function test_no_job_is_planned_for_a_post_that_cannot_have_one() {
