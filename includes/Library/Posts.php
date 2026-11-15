@@ -33,6 +33,9 @@ defined( 'ABSPATH' ) || exit;
  * Placement). Posts outside it get no player, so they are not in the
  * library and no audio is made for them.
  *
+ * A post with a password is not in the library either: no audio is made
+ * for it from here, by hand or by a run.
+ *
  * A voice that reads in the browser stores no files, so there is no
  * library for it; get() says so with `stores_audio`.
  *
@@ -319,6 +322,10 @@ class Posts {
 			// A type that is not registered any more is left out; no type at all lists nothing.
 			'post_type'              => $types ? array_values( array_filter( array_map( 'sanitize_key', $types ), 'post_type_exists' ) ) : array( 'atlasvoice-none' ),
 			'post_status'            => 'publish',
+			// A post with a password is left out: its audio file would be reachable
+			// by anyone who has its address, and a run for all posts would send
+			// its text without anybody choosing that.
+			'has_password'           => false,
 			'ignore_sticky_posts'    => true,
 			'update_post_term_cache' => false,
 		);

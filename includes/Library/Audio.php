@@ -252,6 +252,12 @@ class Audio {
 		$settings = (array) TTA_Helper::tts_get_settings( 'settings' );
 		$types    = isset( $settings['tta__settings_allow_listening_for_post_types'] ) ? (array) $settings['tta__settings_allow_listening_for_post_types'] : array();
 
-		return in_array( $post->post_type, $types, true );
+		if ( ! in_array( $post->post_type, $types, true ) ) {
+			return false;
+		}
+
+		// A post outside the period the site set (Player › Placement) gets no
+		// player, so its audio would be made, and paid for, for nobody.
+		return (bool) TTA_Helper::display_player_based_on_date_range( $post );
 	}
 }

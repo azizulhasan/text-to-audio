@@ -527,4 +527,21 @@ class PostsTest extends WP_UnitTestCase {
 	public function test_the_plain_title_of_a_post_that_does_not_exist_is_empty() {
 		$this->assertSame( '', \TTA\TTA_Helper::atlasvoice_plain_title( 999999 ) );
 	}
+
+	// TTS-354: found with real jobs (2026-11-15).
+
+	public function test_a_post_with_a_password_is_not_in_the_library() {
+		$open   = $this->post( 'Open' );
+		$locked = $this->post( 'Locked', false, array( 'post_password' => 'secret' ) );
+
+		$library = Posts::get();
+		$listed  = wp_list_pluck( $library['posts'], 'id' );
+
+		$this->assertContains( $open, $listed );
+		$this->assertNotContains( $locked, $listed );
+		$this->assertSame( 1, $library['counts']['all'] );
+		// So a run for all posts never sends its text.
+		$this->assertSame( array( $open ), Posts::missing_ids() );
+		$this->assertSame( 1, Posts::missing_count() );
+	}
 }

@@ -562,4 +562,39 @@ class AudioTest extends WP_UnitTestCase {
 		$this->assertSame( 'missing', $posts[ $none ]['status'] );
 		$this->assertNull( $posts[ $none ]['job'] );
 	}
+
+	// TTS-354: found with real jobs (2026-11-15).
+
+	public function test_publishing_plans_nothing_for_a_post_outside_the_period_of_the_site() {
+		Audio::save( array( 'when' => 'publish' ) );
+		$saved = \TTA\Player\Placement::save(
+			array(
+				'date_from' => '2026-01-01',
+				'date_to'   => '2026-06-30',
+			)
+		);
+		$this->assertNotWPError( $saved );
+
+		$outside = self::factory()->post->create( array( 'post_date' => '2025-06-01 10:00:00' ) );
+		$inside  = self::factory()->post->create( array( 'post_date' => '2026-03-01 10:00:00' ) );
+
+		// It gets no player, so its audio would be made, and paid for, for nobody.
+		$this->assertFalse( wp_next_scheduled( Audio::START_HOOK, array( $outside ) ) );
+		$this->assertNotFalse( wp_next_scheduled( Audio::START_HOOK, array( $inside ) ) );
+		delete_option( \TTA\Player\Placement::CUSTOMIZE_OPTION );
+		\TTA\TTA_Cache::flush();
+	}
+
+	public function test_a_post_planned_before_the_period_was_set_is_not_started() {
+		Audio::save( array( 'when' => 'publish' ) );
+		$post_id = self::factory()->post->create( array( 'post_date' => '2025-06-01 10:00:00' ) );
+		$this->assertNotFalse( wp_next_scheduled( Audio::START_HOOK, array( $post_id ) ) );
+
+		\TTA\Player\Placement::save( array( 'date_from' => '2026-01-01' ) );
+		Audio::start_planned( $post_id );
+
+		$this->assertSame( array(), $this->sent );
+		delete_option( \TTA\Player\Placement::CUSTOMIZE_OPTION );
+		\TTA\TTA_Cache::flush();
+	}
 }
