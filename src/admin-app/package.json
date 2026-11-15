@@ -5,8 +5,8 @@
   "description": "The AtlasVoice admin app (TTS-347). It has its own tools so the classic dashboard build (Laravel Mix, React 17) is not touched until that dashboard is removed.",
   "license": "GPL-3.0-or-later",
   "scripts": {
-    "build": "wp-scripts build src/index.js --output-path=../../build/admin-app",
-    "start": "wp-scripts start src/index.js --output-path=../../build/admin-app",
+    "build": "wp-scripts build src/index.js src/editor.js --output-path=../../build/admin-app",
+    "start": "wp-scripts start src/index.js src/editor.js --output-path=../../build/admin-app",
     "lint:js": "wp-scripts lint-js src",
     "lint:css": "wp-scripts lint-style \"src/**/*.css\"",
     "test": "wp-scripts test-unit-js --testTimeout=20000",

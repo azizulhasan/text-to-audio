@@ -150,6 +150,21 @@ class Posts {
 	}
 
 	/**
+	 * The audio of one post, for the post editor: the same status and job
+	 * the library shows in its row.
+	 *
+	 * @param \WP_Post $post The post.
+	 *
+	 * @return array{status:string, job:array|null}
+	 */
+	public static function one( \WP_Post $post ) {
+		return array(
+			'status' => self::status_of( $post, TTA_Helper::tts_get_settings() ),
+			'job'    => self::job_of( (int) $post->ID ),
+		);
+	}
+
+	/**
 	 * The audio status of one post: its file, or what its job says.
 	 *
 	 * @param \WP_Post $post     The post.

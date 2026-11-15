@@ -1,0 +1,83 @@
+/* The "AtlasVoice" panel of the post editor (TTS-347). */
+.atlasvoice-editor-panel .components-notice {
+	margin: 0 0 8px;
+}
+
+.atlasvoice-editor-panel .components-panel__body > p {
+	margin: 0 0 12px;
+}
+
+.atlasvoice-editor-panel .atlasvoice-editor-loading {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	margin: 0;
+	padding: 16px;
+}
+
+.atlasvoice-editor-panel .atlasvoice-editor-status {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+}
+
+.atlasvoice-editor-panel .atlasvoice-editor-status b {
+	padding: 2px 8px;
+	border-radius: 2px;
+	background: #f0f0f0;
+	font-weight: 500;
+}
+
+.atlasvoice-editor-panel .atlasvoice-editor-status.is-ready b {
+	background: #edfaef;
+	color: #005c12;
+}
+
+.atlasvoice-editor-panel .atlasvoice-editor-status.is-outdated b,
+.atlasvoice-editor-panel .atlasvoice-editor-status.is-making b {
+	background: #fcf9e8;
+	color: #614200;
+}
+
+.atlasvoice-editor-panel .atlasvoice-editor-status.is-failed b {
+	background: #fcf0f1;
+	color: #8a2424;
+}
+
+.atlasvoice-editor-panel .atlasvoice-editor-weak {
+	margin: 8px 0 12px;
+	color: #757575;
+	font-size: 12px;
+}
+
+.atlasvoice-editor-panel .atlasvoice-editor-numbers {
+	display: flex;
+	gap: 24px;
+	margin: 0 0 12px;
+}
+
+.atlasvoice-editor-panel .atlasvoice-editor-numbers div {
+	display: flex;
+	flex-direction: column-reverse;
+}
+
+.atlasvoice-editor-panel .atlasvoice-editor-numbers dd {
+	margin: 0;
+	font-size: 20px;
+	font-weight: 600;
+}
+
+.atlasvoice-editor-panel .atlasvoice-editor-numbers dt {
+	color: #757575;
+}
+
+.atlasvoice-editor-panel .components-base-control + .components-button {
+	margin-top: 8px;
+}
+
+/* Classic Editor: the box has its own padding. */
+#atlasvoice-post-panel .inside {
+	margin: 0;
+	padding: 0;
+}
+

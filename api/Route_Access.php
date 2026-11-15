@@ -41,4 +41,26 @@ class Route_Access {
 			array( 'status' => rest_authorization_required_code() )
 		);
 	}
+
+	/**
+	 * Allows everyone who can edit the post the route names in `id`. For
+	 * what belongs to one post (its audio, its player), not to the site.
+	 *
+	 * @param \WP_REST_Request $request Request with `id`.
+	 *
+	 * @return true|\WP_Error
+	 */
+	public static function post_editor( $request ) {
+		$post_id = (int) $request['id'];
+
+		if ( $post_id > 0 && get_post( $post_id ) && current_user_can( 'edit_post', $post_id ) ) {
+			return true;
+		}
+
+		return new \WP_Error(
+			'rest_forbidden',
+			__( 'You do not have permission to do this.', 'text-to-audio' ),
+			array( 'status' => rest_authorization_required_code() )
+		);
+	}
 }
