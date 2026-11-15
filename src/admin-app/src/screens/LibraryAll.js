@@ -375,7 +375,7 @@ export default function LibraryAll() {
 
 					{ posts.length ? (
 						<div className="atlasvoice-table-wrap">
-							<table className="atlasvoice-table">
+							<table className="atlasvoice-table atlasvoice-library-table">
 								<thead>
 									<tr>
 										<th scope="col">
@@ -417,7 +417,13 @@ export default function LibraryAll() {
 											<td>
 												<AudioStatus post={ post } />
 											</td>
-											<td>
+											<td className="atlasvoice-library-when">
+												<span className="atlasvoice-library-when-label">
+													{ __(
+														'Last changed:',
+														'text-to-audio'
+													) }{ ' ' }
+												</span>
 												{ shortDate( post.modified ) }
 											</td>
 											<td className="atlasvoice-td-end">

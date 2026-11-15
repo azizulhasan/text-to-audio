@@ -361,3 +361,34 @@ describe( 'Audio library › All posts', () => {
 		expect( await axe( empty.container ) ).toHaveNoViolations();
 	} );
 } );
+
+describe( 'Audio library › All posts on a phone', () => {
+	it( 'names the date in each row, where the column has no heading', async () => {
+		fakeSite();
+		renderWithApp( <LibraryAll /> );
+
+		const row = (
+			await screen.findByRole( 'rowheader', { name: /The old mill/ } )
+		).closest( 'tr' );
+		const when = row.querySelector( '.atlasvoice-library-when' );
+
+		expect( when ).toHaveTextContent( /^Last changed: / );
+		expect( when ).toHaveTextContent(
+			shortDate( POSTS.find( ( post ) => post.id === 12 ).modified )
+		);
+	} );
+
+	it( 'keeps the table and its headings for screen readers', async () => {
+		fakeSite();
+		const { container } = renderWithApp( <LibraryAll /> );
+		await screen.findByRole( 'rowheader', { name: /The old mill/ } );
+
+		expect( screen.getByRole( 'table' ) ).toHaveClass(
+			'atlasvoice-library-table'
+		);
+		expect(
+			screen.getByRole( 'columnheader', { name: 'Last changed' } )
+		).toBeInTheDocument();
+		expect( await axe( container ) ).toHaveNoViolations();
+	} );
+} );

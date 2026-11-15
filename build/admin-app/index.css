@@ -1976,6 +1976,74 @@ body.atlasvoice-app-page #atlasvoice-app {
 	align-items: center;
 }
 
+/* The name of the date, shown where the column has no heading (phones). */
+.atlasvoice-root .atlasvoice-library-when-label {
+	display: none;
+}
+
+/*
+ * On a phone a row of the library is a small card: the post, its audio, the
+ * date and the actions under each other. As a table it was wider than the
+ * screen and the action was cut off.
+ */
+@media (max-width: 782px) {
+
+	.atlasvoice-root .atlasvoice-library-table,
+	.atlasvoice-root .atlasvoice-library-table tbody,
+	.atlasvoice-root .atlasvoice-library-table tr,
+	.atlasvoice-root .atlasvoice-library-table th,
+	.atlasvoice-root .atlasvoice-library-table td {
+		display: block;
+		width: auto;
+	}
+
+	/* The headings stay for screen readers. */
+	.atlasvoice-root .atlasvoice-library-table thead {
+		position: absolute;
+		width: 1px;
+		height: 1px;
+		overflow: hidden;
+		clip-path: inset(50%);
+		white-space: nowrap;
+	}
+
+	.atlasvoice-root .atlasvoice-library-table tbody tr {
+		padding: 12px 16px;
+		border-bottom: 1px solid var(--atlasvoice-line-weak);
+	}
+
+	.atlasvoice-root .atlasvoice-library-table tbody tr:last-child {
+		border-bottom: 0;
+	}
+
+	.atlasvoice-root .atlasvoice-library-table tbody th,
+	.atlasvoice-root .atlasvoice-library-table tbody td {
+		height: auto;
+		padding: 0;
+		border: 0;
+		text-align: left;
+		white-space: normal;
+	}
+
+	.atlasvoice-root .atlasvoice-library-table tbody td {
+		margin-top: 6px;
+	}
+
+	.atlasvoice-root .atlasvoice-library-table .atlasvoice-library-when {
+		color: var(--atlasvoice-text-weak);
+		font-size: 12px;
+	}
+
+	.atlasvoice-root .atlasvoice-library-when-label {
+		display: inline;
+	}
+
+	.atlasvoice-root .atlasvoice-library-table .atlasvoice-library-links {
+		flex-wrap: wrap;
+		margin-top: 4px;
+	}
+}
+
 .atlasvoice-root .atlasvoice-library-pager {
 	display: flex;
 	flex-wrap: wrap;
