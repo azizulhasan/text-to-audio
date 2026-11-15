@@ -14,17 +14,20 @@ import Plyr from 'plyr';
 import AtlasVoiceAnalytics from './AtlasVoiceAnalytics';
 import AtlasVoiceProgressivePlayer from './tts/AtlasVoiceProgressivePlayer';
 import RestNonce from './tts/RestNonce';
+import EditorNote from './tts/AtlasVoiceEditorNote';
 
 const { __, sprintf } = wp.i18n;
 
 /** Stop a lock wait after this many retries (10 s each). */
 const MAX_LOCK_RETRIES = 12;
 
-/** Browser voice for the rest of the visit when audio cannot be made. */
-// invalid_api_key: the key was revoked in the dashboard (the site disconnects
-// itself, so the next page view is player 1); approval_required: waiting for
-// the account owner.
-const FALLBACK_CODES = ['not_connected', 'quota_exceeded', 'player_not_active', 'invalid_api_key', 'approval_required'];
+/**
+ * TTS-347: whatever the reason, a visitor is never told that audio could not
+ * be made: the post is read with the device's voice instead, and the people
+ * who can edit the post get the reason in a note. Only a post with no text
+ * to read has nothing to fall back to.
+ */
+const NO_FALLBACK_CODES = ['empty'];
 
 /** Player 1's button, registered under this name when loaded for a fallback. */
 const FALLBACK_BUTTON_TAG = 'atlasvoice-fallback-button';
@@ -135,6 +138,11 @@ export class AtlasVoiceMp3Player extends AtlasVoiceProgressivePlayer {
 
         this.wrapper.append(this.audio, this.status);
         this.host.append(this.wrapper);
+
+        // TTS-347: editors see that visitors hear an older version, and can make it again.
+        if (this.url) {
+            EditorNote.showOutdated(this.wrapper, this.extra.editor, (route) => this.startJob(route));
+        }
 
         this.plyr = new Plyr(this.audio, {
             controls: ['play', 'progress', 'current-time', 'mute', 'volume', 'settings'],
@@ -262,8 +270,8 @@ export class AtlasVoiceMp3Player extends AtlasVoiceProgressivePlayer {
                 if (!this.isProgressiveActive()) {
                     this.showStatus(batches.length > 1
                         /* translators: 1: current part, 2: number of parts. */
-                        ? sprintf(__('Preparing audio (%1$d of %2$d)…', 'text-to-audio'), i + 1, batches.length)
-                        : __('Preparing audio…', 'text-to-audio'));
+                        ? sprintf(__('Making the audio · part %1$d of %2$d', 'text-to-audio'), i + 1, batches.length)
+                        : __('Making the audio…', 'text-to-audio'));
                 }
 
                 last = await this.send({
@@ -290,7 +298,7 @@ export class AtlasVoiceMp3Player extends AtlasVoiceProgressivePlayer {
 
             if (last?.data?.message === 'locked') {
                 // Another visitor is making this post's audio; wait for it.
-                this.showStatus(__('Audio is being prepared. One moment…', 'text-to-audio'));
+                this.showStatus(__('This audio is being prepared. One moment…', 'text-to-audio'));
                 await new Promise((resolve) => setTimeout(resolve, 10000));
                 continue;
             }
@@ -299,6 +307,26 @@ export class AtlasVoiceMp3Player extends AtlasVoiceProgressivePlayer {
         }
 
         return { code: 'locked' };
+    }
+
+    /**
+     * TTS-347: starts the post's audio job from the editors' note.
+     *
+     * @param {string} route The site's route for this post's audio.
+     * @return {Promise} Resolves when the job started; rejects with why not.
+     */
+    async startJob(route) {
+        const base = String(window.ttsObj?.api_url || '/wp-json/').replace(/\/?$/, '/');
+        const res = await fetch(base + route, {
+            method: 'POST',
+            credentials: 'same-origin',
+            headers: { 'X-WP-Nonce': window.ttsObj?.rest_nonce || '' },
+        });
+        const data = await res.json().catch(() => null);
+        if (!res.ok) {
+            throw new Error((data && data.message) || '');
+        }
+        return data;
     }
 
     async send(body, retried = false) {
@@ -332,10 +360,13 @@ export class AtlasVoiceMp3Player extends AtlasVoiceProgressivePlayer {
      */
     fallBack(code) {
         this.showStatus('');
-        if (!FALLBACK_CODES.includes(code) && code !== 'locked') {
+        if (NO_FALLBACK_CODES.includes(code)) {
             this.showStatus(__('Audio is not available right now. Please try again later.', 'text-to-audio'));
             return;
         }
+
+        // The reason, for the people who can edit the post only.
+        EditorNote.showReason(this.wrapper, code, this.extra.editor);
 
         AtlasVoiceMp3Player.loadFallbackButton()
             .then(() => this.mountFallbackButton())

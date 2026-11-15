@@ -369,6 +369,21 @@ export default class TextToSpeech {
                     onresume: (utterance) => {
                         console.log("Resume utterance");
                     },
+                    // TTS-347: a phone refused to speak because the press that
+                    // started it was no longer fresh (a slow page, an in-app
+                    // browser). The button goes back to its start and says that
+                    // one more tap starts the voice; nothing is counted as played.
+                    onerror: (e) => {
+                        if (e && e.error === 'not-allowed' && !this._speechBlocked) {
+                            // Once per press: every queued sentence is refused the same way.
+                            this._speechBlocked = true;
+                            setTimeout(() => { this._speechBlocked = false; }, 1000);
+                            try { speech.cancel(); } catch (err) { /* nothing was speaking */ }
+                            this.listenStatus = 'listen';
+                            this.displayButtonText(this.listenStatus);
+                            wp.hooks.doAction('atlasvoice.speech.blocked', this.buttonId);
+                        }
+                    },
                     onboundary: (e) => {
                         // TTS-256: fire one action per spoken word so the highlighter can
                         // paint it. charIndex is relative to the current sentence; some

@@ -867,6 +867,18 @@ class TTSPlayButton extends HTMLElement {
 
         this.trackInit();
 
+        // TTS-347: the phone refused to start the voice; the button says so.
+        if (window.wp && wp.hooks) {
+            wp.hooks.addAction('atlasvoice.speech.blocked', 'atlasvoice/button/' + buttonId, (blockedId) => {
+                if (String(blockedId) === String(buttonId)) {
+                    // Back to the start: the next tap speaks, and the icon says so.
+                    this.listenStatus = 'listen';
+                    this.updateButtonUI(wrapper, buttonId, settings);
+                    this.showSpeechBlocked(wrapper);
+                }
+            });
+        }
+
         // Button click handler (for play/pause area only)
         const handlePlayClick = (e) => {
             // Prevent click if clicking on settings icon
@@ -1053,11 +1065,27 @@ class TTSPlayButton extends HTMLElement {
     }
 
     /**
+     * TTS-347: a phone did not let the voice start. The button asks for one
+     * more tap, and the live region says why.
+     */
+    showSpeechBlocked(wrapper) {
+        const label = wrapper.querySelector('.tts-button-left span');
+        if (label) {
+            label.textContent = __('Tap again to listen', 'text-to-audio');
+        }
+        const liveRegion = wrapper.querySelector('.tts-live-region');
+        if (liveRegion) {
+            // After the button's own announcement (50 ms), so this is what is heard.
+            setTimeout(() => { liveRegion.textContent = __('Your phone needs one more tap to start the voice.', 'text-to-audio'); }, 120);
+        }
+    }
+
+    /**
      * TTS-350: shown on click when the browser has no speech engine (in-app
      * browsers, app web views). The label and live region carry the message.
      */
     showNoSpeechEngine(wrapper) {
-        const message = __('Listening is not available in this browser. Open the page in Chrome or Safari.', 'text-to-audio');
+        const message = __('This browser can’t read aloud. Try Chrome, Edge or Safari.', 'text-to-audio');
         const label = wrapper.querySelector('.tts-button-left span');
         if (label) {
             label.textContent = message;

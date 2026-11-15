@@ -216,6 +216,17 @@ class TTA_AtlasVoice_Service {
 	 *
 	 * @return bool
 	 */
+	/**
+	 * TTS-347: until when this month's characters are used up.
+	 *
+	 * @return int A Unix time; 0 when they are not used up.
+	 */
+	public static function exhausted_until() {
+		$until = (int) self::get()['exhausted_until'];
+
+		return $until > time() ? $until : 0;
+	}
+
 	public static function is_exhausted() {
 		return self::get()['exhausted_until'] > time();
 	}

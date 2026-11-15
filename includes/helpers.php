@@ -635,6 +635,14 @@ function get_enqueued_js_object($params, $plugin_all_settings)
         ),
     );
 
+    // TTS-347: what the player tells the people who can edit this post (why
+    // audio could not be made, or that visitors hear an older version). A
+    // visitor's page has no such key.
+    $editor_note = class_exists( '\\TTA\\Player\\Editor_Note' ) ? \TTA\Player\Editor_Note::for_post( $post ) : null;
+    if ( $editor_note ) {
+        $payload['extra']['editor'] = $editor_note;
+    }
+
     // TTS-270: the hydrator is deliberately POST-INDEPENDENT — identical bytes on
     // every page — so an optimizer merging it into a shared bundle is harmless.
     // Only the JSON above varies per post, and that no longer travels in JS.
