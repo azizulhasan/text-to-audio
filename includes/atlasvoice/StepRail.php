@@ -187,6 +187,29 @@ class StepRail {
 		// Language plugins (WPML, Polylang, etc.) hook tts_sentence_delimiter to
 		// return a locale-appropriate separator (e.g. '。' for Japanese).
 		$delimiter = (string) apply_filters( 'tts_sentence_delimiter', '. ' );
+
+		// TTS-347: the words the panel's script shows, so they can be translated.
+		$type  = $post_id ? get_post_type_object( (string) get_post_type( $post_id ) ) : null;
+		$words = array(
+			'thisPost'   => __( 'This post', 'text-to-audio' ),
+			/* translators: %s: a kind of content in the plural, e.g. "posts", "pages". */
+			'allOfType'  => sprintf( __( 'All %s', 'text-to-audio' ), $type ? strtolower( $type->labels->name ) : __( 'posts', 'text-to-audio' ) ),
+			'wholeSite'  => __( 'Whole site', 'text-to-audio' ),
+			'freeScope'  => __( 'The whole site.', 'text-to-audio' ),
+			/* translators: 1: posts where the part was found, 2: posts that were checked, 3: a number of words. */
+			'found'      => __( 'Found on %1$d of %2$d posts · about %3$d words each.', 'text-to-audio' ),
+			/* translators: %d: posts that were checked. */
+			'notFound'   => __( 'Not found on any of the %d posts that were checked.', 'text-to-audio' ),
+			/* translators: %d: a number of posts. */
+			'checking'   => __( 'Checking %d posts…', 'text-to-audio' ),
+			'pickFirst'  => __( 'Pick the part to read first.', 'text-to-audio' ),
+			'noPosts'    => __( 'There are no other published posts to check.', 'text-to-audio' ),
+			'checkFail'  => __( 'The posts could not be checked.', 'text-to-audio' ),
+			/* translators: %d: a number of words. */
+			'words'      => __( '%d words', 'text-to-audio' ),
+			'showText'   => __( 'Show the text', 'text-to-audio' ),
+			'hideText'   => __( 'Hide the text', 'text-to-audio' ),
+		);
 		?>
 		<div
 			id="av-steprail-root"
@@ -203,6 +226,7 @@ class StepRail {
 			data-post-title="<?php echo esc_attr( $post_title ); ?>"
 			data-post-excerpt="<?php echo esc_attr( $post_excerpt ); ?>"
 			data-delimiter="<?php echo esc_attr( $delimiter ); ?>"
+			data-words="<?php echo esc_attr( (string) wp_json_encode( $words ) ); ?>"
 			aria-hidden="true"
 		>
 			<!-- LEFT: floating tab -->
@@ -211,13 +235,13 @@ class StepRail {
 				class="av-tab av-tab--left"
 				aria-expanded="false"
 				aria-controls="av-rail-panel"
-				title="<?php echo esc_attr__( 'AtlasVoice — pick content region', 'text-to-audio' ); ?>"
-			><span><?php echo esc_html__( 'AtlasVoiceSelector', 'text-to-audio' ); ?></span></button>
+				title="<?php echo esc_attr__( 'AtlasVoice: pick what is read', 'text-to-audio' ); ?>"
+			><span><?php echo esc_html__( 'What is read', 'text-to-audio' ); ?></span></button>
 
 			<!-- LEFT: sliding step rail panel -->
-			<div id="av-rail-panel" class="av-rail-panel" role="dialog" aria-modal="false" aria-label="<?php echo esc_attr__( 'AtlasVoice content selector', 'text-to-audio' ); ?>" hidden>
+			<div id="av-rail-panel" class="av-rail-panel" role="dialog" aria-modal="false" aria-label="<?php echo esc_attr__( 'Pick what is read', 'text-to-audio' ); ?>" hidden>
 				<div class="av-rail-panel__header">
-					<span class="av-rail-panel__title"><?php echo esc_html__( 'Content Selector', 'text-to-audio' ); ?></span>
+					<span class="av-rail-panel__title"><small class="av-rail-panel__private"><?php echo esc_html__( 'Only you can see this panel', 'text-to-audio' ); ?></small><?php echo esc_html__( 'What is read', 'text-to-audio' ); ?></span>
 					<a class="av-rail-panel__help" href="https://atlasaidev.com/docs/text-to-speech/getting-started/atlasvoice-content-selector-staging-live/" target="_blank" rel="noopener noreferrer" title="<?php echo esc_attr__( 'How the content selector & Staging / Live work — read the docs', 'text-to-audio' ); ?>" aria-label="<?php echo esc_attr__( 'Read the documentation', 'text-to-audio' ); ?>"><span><?php echo esc_html__( 'Docs', 'text-to-audio' ); ?></span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 3h6v6"></path><path d="M10 14 21 3"></path><path d="M21 14v5a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5"></path></svg></a>
 					<button type="button" class="av-rail-panel__close" aria-label="<?php echo esc_attr__( 'Close', 'text-to-audio' ); ?>">&times;</button>
 				</div>
@@ -226,8 +250,8 @@ class StepRail {
 					<!-- Step ① Scope -->
 					<section class="av-step" data-step="scope">
 						<div class="av-step__head">
-							<span class="av-step__num">&#9312;</span>
-							<strong><?php echo esc_html__( 'Scope', 'text-to-audio' ); ?></strong>
+							<span class="av-step__num">1.</span>
+							<strong><?php echo esc_html__( 'Applies to', 'text-to-audio' ); ?></strong>
 						</div>
 						<div class="av-step__body">
 							<div class="av-scope-readout"><?php echo esc_html__( 'Loading…', 'text-to-audio' ); ?></div>
@@ -237,44 +261,49 @@ class StepRail {
 					<!-- Step ③ Content region (include) -->
 					<section class="av-step" data-step="region">
 						<div class="av-step__head">
-							<span class="av-step__num">&#9313;</span>
-							<strong><?php echo esc_html__( 'Content region', 'text-to-audio' ); ?></strong>
+							<span class="av-step__num">2.</span>
+							<strong><?php echo esc_html__( 'Read this part', 'text-to-audio' ); ?></strong>
 						</div>
 						<div class="av-step__body">
-							<p class="av-hint"><?php echo esc_html__( 'Click any element on the page to set its selector. Click again to deselect.', 'text-to-audio' ); ?></p>
+							<p class="av-hint"><?php echo esc_html__( 'Click the part of the page that should be read, or drag over its text. Click it again to undo.', 'text-to-audio' ); ?></p>
 							<div class="av-region-actions">
 								<button type="button" class="av-btn av-btn--pick" data-state="idle">
-									&#11040; <?php echo esc_html__( 'Pick element', 'text-to-audio' ); ?>
+									<?php echo esc_html__( 'Click to pick', 'text-to-audio' ); ?>
 								</button>
-								<button type="button" class="av-btn av-btn--select" data-state="idle" title="<?php echo esc_attr__( 'Drag across the page to mark the content region.', 'text-to-audio' ); ?>">
-									&#9112; <?php echo esc_html__( 'Select to include', 'text-to-audio' ); ?>
+								<button type="button" class="av-btn av-btn--select" data-state="idle" title="<?php echo esc_attr__( 'Drag over the text you want read.', 'text-to-audio' ); ?>">
+									<?php echo esc_html__( 'Drag over text', 'text-to-audio' ); ?>
 								</button>
 								<span class="av-word-count" hidden></span>
 							</div>
+							<label class="av-field-label" for="av-selector-input"><?php echo esc_html__( 'CSS selector', 'text-to-audio' ); ?></label>
 							<div class="av-selector-display" hidden>
-								<input type="text" class="av-selector-value av-selector-input av-chip-input" placeholder="<?php echo esc_attr__( 'e.g. div.entry-content', 'text-to-audio' ); ?>" />
+								<input type="text" id="av-selector-input" class="av-selector-value av-selector-input av-chip-input" placeholder="<?php echo esc_attr__( 'e.g. div.entry-content', 'text-to-audio' ); ?>" />
 								<button type="button" class="av-btn av-btn--clear-selector" title="<?php echo esc_attr__( 'Clear selector', 'text-to-audio' ); ?>">&times;</button>
 							</div>
 						</div>
 					</section>
 
 					<?php if ( '1' === $pro ) : ?>
-					<!-- Step ④ Skip areas (CSS excludes) — Pro -->
+					<div class="av-step-group">
+					<div class="av-step__head av-step-group__head">
+						<span class="av-step__num">3.</span>
+						<strong><?php echo esc_html__( 'Skip parts of it', 'text-to-audio' ); ?></strong>
+					</div>
+					<!-- Skip areas (CSS excludes) — Pro -->
 					<section class="av-step av-step--chips" data-step="tta__settings_exclude_content_by_css_selectors" data-chip-kind="tta__settings_exclude_content_by_css_selectors">
 						<div class="av-step__head">
-							<span class="av-step__num">&#9314;</span>
-							<strong><?php echo esc_html__( 'Skip these areas', 'text-to-audio' ); ?></strong>
+							<strong><?php echo esc_html__( 'Areas of the page', 'text-to-audio' ); ?></strong>
 							<span class="av-pro-pill" hidden>Pro</span>
 						</div>
 						<div class="av-step__body">
-							<p class="av-hint"><?php echo esc_html__( 'Elements matching these selectors are removed before reading (e.g. .sidebar, .share-bar).', 'text-to-audio' ); ?></p>
+							<p class="av-hint"><?php echo esc_html__( 'These parts are left out before reading, for example a share bar or a sidebar.', 'text-to-audio' ); ?></p>
 							<div class="av-chips" role="list"></div>
 							<div class="av-chip-add">
 								<button type="button" class="av-btn av-btn--pick-excl" data-kind="tta__settings_exclude_content_by_css_selectors">
-									&#11040; <?php echo esc_html__( 'Pick to exclude', 'text-to-audio' ); ?>
+									<?php echo esc_html__( 'Click to skip', 'text-to-audio' ); ?>
 								</button>
 								<button type="button" class="av-btn av-btn--select-excl" data-kind="tta__settings_exclude_content_by_css_selectors" title="<?php echo esc_attr__( 'Drag across the page to mark areas to exclude.', 'text-to-audio' ); ?>">
-									&#9112; <?php echo esc_html__( 'Select to exclude', 'text-to-audio' ); ?>
+									<?php echo esc_html__( 'Drag over text', 'text-to-audio' ); ?>
 								</button>
 								<span class="av-chip-sep"><?php echo esc_html__( 'or', 'text-to-audio' ); ?></span>
 								<input type="text" class="av-chip-input" placeholder="<?php echo esc_attr__( 'Type selector…', 'text-to-audio' ); ?>" />
@@ -286,12 +315,11 @@ class StepRail {
 					<!-- Step ⑤ Skip tags — Pro -->
 					<section class="av-step av-step--chips" data-step="tta__settings_exclude_tags" data-chip-kind="tta__settings_exclude_tags">
 						<div class="av-step__head">
-							<span class="av-step__num">&#9315;</span>
-							<strong><?php echo esc_html__( 'Skip these tag types', 'text-to-audio' ); ?></strong>
+							<strong><?php echo esc_html__( 'Kinds of element', 'text-to-audio' ); ?></strong>
 							<span class="av-pro-pill" hidden>Pro</span>
 						</div>
 						<div class="av-step__body">
-							<p class="av-hint"><?php echo esc_html__( 'Elements with these tag names are skipped (e.g. aside, figure, blockquote).', 'text-to-audio' ); ?></p>
+							<p class="av-hint"><?php echo esc_html__( 'Every element of these kinds is left out, for example captions (figure) or quotes (blockquote).', 'text-to-audio' ); ?></p>
 							<div class="av-tags-checkboxes"><?php
 								// render_common_tag_checkboxes() builds static markup
 								// and escapes every dynamic value internally with
@@ -309,12 +337,11 @@ class StepRail {
 					<!-- Step ⑥ Skip phrases — Pro -->
 					<section class="av-step av-step--chips" data-step="tta__settings_exclude_texts" data-chip-kind="tta__settings_exclude_texts">
 						<div class="av-step__head">
-							<span class="av-step__num">&#9316;</span>
-							<strong><?php echo esc_html__( 'Skip these phrases', 'text-to-audio' ); ?></strong>
+							<strong><?php echo esc_html__( 'Phrases', 'text-to-audio' ); ?></strong>
 							<span class="av-pro-pill" hidden>Pro</span>
 						</div>
 						<div class="av-step__body">
-							<p class="av-hint"><?php echo esc_html__( 'Exact phrases stripped from the extracted text wherever they appear (e.g. "Share this", "Read more").', 'text-to-audio' ); ?></p>
+							<p class="av-hint"><?php echo esc_html__( 'These exact words are left out wherever they appear, for example "Share this" or "Read more".', 'text-to-audio' ); ?></p>
 							<div class="av-chips" role="list"></div>
 							<div class="av-chip-add">
 								<input type="text" class="av-chip-input" placeholder="<?php echo esc_attr__( 'Add phrase…', 'text-to-audio' ); ?>" />
@@ -322,52 +349,53 @@ class StepRail {
 							</div>
 						</div>
 					</section>
+					</div><!-- /.av-step-group -->
 					<?php else : ?>
 					<!-- Free: single promotional CTA in place of the three Pro
 					     "skip" steps. No interactive controls — Guideline 5. -->
 					<section class="av-step av-step--pro-cta" data-step="pro-cta">
 						<div class="av-step__head">
-							<span class="av-step__num">&#9314;</span>
-							<strong><?php echo esc_html__( 'Skip areas, tags & phrases', 'text-to-audio' ); ?></strong>
+							<span class="av-step__num">3.</span>
+							<strong><?php echo esc_html__( 'Skip parts of it', 'text-to-audio' ); ?></strong>
 							<span class="av-pro-pill-static">Pro</span>
 						</div>
 						<div class="av-step__body">
-							<p class="av-hint"><?php echo esc_html__( 'Excluding areas, HTML tags, and phrases from narration is an AtlasVoice Pro feature. On Free you can set the content region above.', 'text-to-audio' ); ?></p>
-							<a class="av-btn av-btn--upgrade" href="<?php echo esc_url( $upgrade_url ); ?>" target="_blank" rel="noopener noreferrer"><?php echo esc_html__( 'Upgrade to Pro', 'text-to-audio' ); ?> &rarr;</a>
+							<p class="av-hint"><?php echo esc_html__( 'Skip share bars, captions and phrases.', 'text-to-audio' ); ?> <a href="<?php echo esc_url( $upgrade_url ); ?>" target="_blank" rel="noopener noreferrer"><?php echo esc_html__( 'See Pro', 'text-to-audio' ); ?></a></p>
 						</div>
 					</section>
 					<?php endif; ?>
 
-					<!-- Step ⑦ Verify across posts — D14 -->
+					<!-- 4. Check other posts -->
 					<section class="av-step" data-step="verify">
 						<div class="av-step__head">
-							<span class="av-step__num">&#9317;</span>
-							<strong><?php echo esc_html__( 'Verify across posts', 'text-to-audio' ); ?></strong>
+							<span class="av-step__num">4.</span>
+							<strong><?php echo esc_html__( 'Check other posts', 'text-to-audio' ); ?></strong>
 						</div>
 						<div class="av-step__body">
-							<p class="av-hint"><?php echo esc_html__( 'Run the saved rule against a few random posts in the same scope. Catches brittle selectors before visitors hit a bad page.', 'text-to-audio' ); ?></p>
+							<p class="av-hint"><?php echo esc_html__( 'Looks for the same part on a few other posts, so a post where it is missing shows up before visitors find it.', 'text-to-audio' ); ?></p>
 							<div class="av-verify-actions">
-								<button type="button" class="av-btn av-btn--verify">
-									&#9654; <?php echo esc_html__( 'Test rule across', 'text-to-audio' ); ?>
-									<input type="number" class="av-verify-size" min="1" max="20" step="1" value="3" aria-label="<?php echo esc_attr__( 'Sample size', 'text-to-audio' ); ?>" />
-									<?php echo esc_html__( 'posts', 'text-to-audio' ); ?>
-								</button>
-								<label class="av-verify-orderby-label">
-									<?php echo esc_html__( 'Order:', 'text-to-audio' ); ?>
-									<select class="av-verify-orderby" aria-label="<?php echo esc_attr__( 'Sample order', 'text-to-audio' ); ?>">
-										<option value="rand"      selected><?php echo esc_html__( 'Random',       'text-to-audio' ); ?></option>
+								<label class="av-verify-field">
+									<span class="av-field-label"><?php echo esc_html__( 'How many', 'text-to-audio' ); ?></span>
+									<input type="number" class="av-verify-size" min="1" max="20" step="1" value="5" />
+								</label>
+								<label class="av-verify-field">
+									<span class="av-field-label"><?php echo esc_html__( 'Which posts', 'text-to-audio' ); ?></span>
+									<select class="av-verify-orderby">
+										<option value="rand"      selected><?php echo esc_html__( 'Any', 'text-to-audio' ); ?></option>
 										<option value="date_desc"          ><?php echo esc_html__( 'Newest first', 'text-to-audio' ); ?></option>
 										<option value="date_asc"           ><?php echo esc_html__( 'Oldest first', 'text-to-audio' ); ?></option>
 									</select>
 								</label>
-								<span class="av-verify-status" aria-live="polite"></span>
+								<button type="button" class="av-btn av-btn--verify"><?php echo esc_html__( 'Check', 'text-to-audio' ); ?></button>
 							</div>
+							<p class="av-verify-status" aria-live="polite"></p>
 							<div class="av-verify-results" hidden></div>
 						</div>
 					</section>
 				</div><!-- /.av-rail-panel__body -->
 
 				<div class="av-rail-panel__footer">
+					<button type="button" class="av-btn av-btn--show-text" aria-expanded="false" aria-controls="av-preview-panel"><?php echo esc_html__( 'Show the text', 'text-to-audio' ); ?></button>
 					<span class="av-status" aria-live="polite"></span>
 					<button type="button" class="av-btn av-btn--save" disabled>
 						<?php echo esc_html__( 'Save', 'text-to-audio' ); ?>
@@ -383,18 +411,18 @@ class StepRail {
 				class="av-tab av-tab--right"
 				aria-expanded="false"
 				aria-controls="av-preview-panel"
-				title="<?php echo esc_attr__( 'Preview extracted TTS content', 'text-to-audio' ); ?>"
-			><span><?php echo esc_html__( 'Preview Content', 'text-to-audio' ); ?></span></button>
+				title="<?php echo esc_attr__( 'The text that will be read', 'text-to-audio' ); ?>"
+			><span><?php echo esc_html__( 'The text', 'text-to-audio' ); ?></span></button>
 
 			<!-- RIGHT: draggable preview overlay -->
 			<div id="av-preview-panel" class="av-preview-panel" hidden>
 				<div class="av-preview-panel__handle" title="<?php echo esc_attr__( 'Drag to move', 'text-to-audio' ); ?>">
-					<span class="av-preview-panel__title"><?php echo esc_html__( 'Content Preview', 'text-to-audio' ); ?></span>
+					<span class="av-preview-panel__title"><?php echo esc_html__( 'The text that is read', 'text-to-audio' ); ?></span>
 					<span class="av-preview-panel__meta"></span>
 					<button type="button" class="av-preview-panel__close" aria-label="<?php echo esc_attr__( 'Close preview', 'text-to-audio' ); ?>">&times;</button>
 				</div>
 				<div class="av-preview-panel__body">
-					<p class="av-preview-panel__empty"><?php echo esc_html__( 'Pick a content region first — the extracted text will appear here.', 'text-to-audio' ); ?></p>
+					<p class="av-preview-panel__empty"><?php echo esc_html__( 'Pick the part to read first. Its text then shows here.', 'text-to-audio' ); ?></p>
 				</div>
 				<div class="av-resize-handle av-resize-handle--left-edge"></div>
 				<div class="av-resize-handle av-resize-handle--bottom"></div>
@@ -535,6 +563,18 @@ class StepRail {
   flex:none;
 }
 .av-rail-panel__title{font:600 14px/1.3 inherit;flex:1;}
+.av-rail-panel__private{display:block;font-weight:400;font-size:12px;opacity:.8;}
+.av-step-group{border-top:1px solid #e5e7eb;}
+.av-step-group__head{padding:12px 16px 0;}
+.av-step-group .av-step{border-top:0;padding-top:8px;}
+.av-step-group .av-step .av-step__head strong{font-weight:500;}
+.av-field-label{display:block;margin:8px 0 4px;font-size:11px;font-weight:500;text-transform:uppercase;color:#1e1e1e;}
+.av-verify-field{display:flex;flex-direction:column;}
+.av-verify-field .av-field-label{margin-top:0;}
+.av-verify-size{width:72px;}
+.av-verify-status{margin:8px 0 0;}
+.av-verify-status:empty{display:none;}
+.av-btn--show-text{background:none;border:0;color:#184c53;text-decoration:underline;cursor:pointer;padding:6px 0;}
 .av-rail-panel__help{
   display:inline-flex!important;align-items:center;gap:4px;
   flex:none;margin-right:2px;padding:2px 8px;
@@ -807,7 +847,7 @@ body.av-select-mode-excl * {cursor:text!important;}
 }
 
 /* ── Verify across posts (D14) ──────────────────────────────── */
-.av-verify-actions{display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
+.av-verify-actions{display:flex;align-items:flex-end;gap:8px;flex-wrap:wrap;}
 .av-verify-size{
   width:48px;font:inherit;padding:1px 4px;border:1px solid #d1d5db;
   border-radius:3px;background:#fff;text-align:center;

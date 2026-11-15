@@ -131,6 +131,25 @@
 
     function $(sel, root) { return (root || state.shell).querySelector(sel); }
 
+    // TTS-347: the words the site translated for this panel (data-words). The
+    // English in each call is used when a word is missing.
+    function word(key, fallback) {
+        if (!state.words) {
+            try { state.words = JSON.parse((state.shell && state.shell.getAttribute('data-words')) || '{}') || {}; }
+            catch (e) { state.words = {}; }
+        }
+        return (typeof state.words[key] === 'string' && state.words[key]) ? state.words[key] : fallback;
+    }
+
+    // Fills %d / %1$d places of a translated sentence.
+    function fill(text, values) {
+        var next = 0;
+        return String(text).replace(/%(?:(\d+)\$)?[ds]/g, function (m, n) {
+            var i = n ? (parseInt(n, 10) - 1) : next++;
+            return (values[i] === undefined) ? m : String(values[i]);
+        });
+    }
+
     function status(msg) {
         var el = state.shell && state.shell.querySelector('.av-status');
         if (el) { el.textContent = msg || ''; }
@@ -1179,6 +1198,7 @@
                     title:     post.title,
                     matched:   !!(m && m.matched),
                     charCount: (m && m.charCount) || 0,
+                    wordCount: (m && m.wordCount) || 0,
                     error:     err || (m && m.error) || null
                 });
             }
@@ -1254,7 +1274,7 @@
         });
 
         var raw = (clone.textContent || '').trim();
-        return { matched: true, charCount: raw.length };
+        return { matched: true, charCount: raw.length, wordCount: raw ? raw.split(/\s+/).filter(Boolean).length : 0 };
     }
 
     // Wire the "Test rule across N posts" button. Click → runs the engine,
@@ -1267,7 +1287,7 @@
         btn.addEventListener('click', function () {
             if (btn.classList.contains('is-running')) { return; }
             if (!state.selection.tta__settings_css_selectors) {
-                renderVerifyResults({ ok: false, error: 'Pick a content region first.' });
+                renderVerifyResults({ ok: false, error: word('pickFirst', 'Pick the part to read first.') });
                 return;
             }
             var sizeInp    = state.shell.querySelector('.av-verify-size');
@@ -1275,11 +1295,11 @@
             var size    = sizeInp ? Math.max(1, Math.min(20, parseInt(sizeInp.value, 10) || 3)) : 3;
             var orderby = orderbyInp ? orderbyInp.value : 'rand';
             btn.classList.add('is-running');
-            setVerifyStatus('Loading ' + size + ' post' + (size === 1 ? '' : 's') + '…');
+            setVerifyStatus(fill(word('checking', 'Checking %d posts…'), [size]));
             runVerifyAcrossPosts({ sampleSize: size, orderby: orderby }).then(function (res) {
                 renderVerifyResults(res);
             }).catch(function (e) {
-                renderVerifyResults({ ok: false, error: (e && e.message) || 'Verify failed.' });
+                renderVerifyResults({ ok: false, error: (e && e.message) || word('checkFail', 'The posts could not be checked.') });
             }).then(function () {
                 btn.classList.remove('is-running');
             });
@@ -1303,7 +1323,7 @@
             var err = d.createElement('p');
             err.className = 'av-verify-row';
             err.style.color = '#b91c1c';
-            err.textContent = (res && res.error) || 'Verify failed.';
+            err.textContent = (res && res.error) || word('checkFail', 'The posts could not be checked.');
             box.appendChild(err);
             setVerifyStatus('');
             return;
@@ -1314,12 +1334,12 @@
             var none = d.createElement('p');
             none.className = 'av-verify-row';
             none.style.color = '#6b7280';
-            none.textContent = 'No matching published posts found for this scope.';
+            none.textContent = word('noPosts', 'There are no other published posts to check.');
             box.appendChild(none);
             setVerifyStatus('');
             return;
         }
-        var passed = 0, totalChars = 0;
+        var passed = 0, totalChars = 0, totalWords = 0;
         posts.forEach(function (p) {
             var row = d.createElement('div');
             row.className = 'av-verify-row';
@@ -1340,25 +1360,17 @@
 
             var count = d.createElement('span');
             count.className = 'av-verify-row__count';
-            count.textContent = p.error ? p.error : (p.charCount + ' chars');
+            count.textContent = p.error ? p.error : fill(word('words', '%d words'), [p.wordCount || 0]);
             row.appendChild(count);
 
             box.appendChild(row);
-            if (p.matched) { passed++; totalChars += (p.charCount || 0); }
+            if (p.matched) { passed++; totalChars += (p.charCount || 0); totalWords += (p.wordCount || 0); }
         });
-        var summary = d.createElement('div');
-        summary.className = 'av-verify-summary';
-        var matchedCount = d.createElement('span');
-        matchedCount.textContent = passed + ' / ' + posts.length + ' matched';
-        var avg = passed > 0 ? Math.round(totalChars / passed) : 0;
-        var avgEl = d.createElement('span');
-        avgEl.textContent = passed > 0 ? ('avg ' + avg + ' chars') : 'no matches';
-        summary.appendChild(matchedCount);
-        summary.appendChild(avgEl);
-        box.appendChild(summary);
-
         box.hidden = false;
-        setVerifyStatus(passed === posts.length ? 'All ' + posts.length + ' matched.' : (passed + ' of ' + posts.length + ' matched.'));
+        // One line says it all: on how many posts the part was found, and how long it is.
+        setVerifyStatus(passed > 0
+            ? fill(word('found', 'Found on %1$d of %2$d posts · about %3$d words each.'), [passed, posts.length, Math.round(totalWords / passed)])
+            : fill(word('notFound', 'Not found on any of the %d posts that were checked.'), [posts.length]));
     }
 
     /* ─── Pro upgrade prompt ────────────────────────────────────── */
@@ -1439,9 +1451,9 @@
     // bare ?atlasvoice_picker=1 keeps its existing default. Free shows only
     // the global pill (per-post / per-type are Pro).
     function scopePillLabel(kind) {
-        if (kind === 'post')      { return 'Only this post'; }
-        if (kind === 'post_type') { return 'This post type'; }
-        return 'Everywhere';
+        if (kind === 'post')      { return word('thisPost', 'This post'); }
+        if (kind === 'post_type') { return word('allOfType', 'All posts'); }
+        return word('wholeSite', 'Whole site');
     }
 
     function scopeHint(kind) {
@@ -1481,7 +1493,7 @@
 
         var h = state.pro
             ? scopeHint(current)
-            : { text: 'Free uses one content rule for your whole site.', warn: false };
+            : { text: word('freeScope', 'The whole site.'), warn: false };
         var hint = d.createElement('p');
         hint.className = 'av-scope-hint' + (h.warn ? ' av-scope-hint--warn' : '');
         hint.textContent = h.text;
@@ -2144,6 +2156,12 @@
             tab.setAttribute('aria-expanded', 'false');
             state.rightOpen = false;
         }
+        // The panel's own "Show the text" button says what a press does now.
+        var show = state.shell && state.shell.querySelector('.av-btn--show-text');
+        if (show) {
+            show.setAttribute('aria-expanded', open ? 'true' : 'false');
+            show.textContent = open ? word('hideText', 'Hide the text') : word('showText', 'Show the text');
+        }
     }
 
     /* ─── save ──────────────────────────────────────────────────── */
@@ -2419,6 +2437,8 @@
         var rightTab = shell.querySelector('.av-tab--right');
         if (leftTab)  { leftTab.addEventListener('click',  function () { toggleLeft();  }); }
         if (rightTab) { rightTab.addEventListener('click', function () { toggleRight(); }); }
+        var showText = shell.querySelector('.av-btn--show-text');
+        if (showText) { showText.addEventListener('click', function () { toggleRight(); }); }
 
         // Panel close buttons.
         var railPanel = d.getElementById('av-rail-panel');
