@@ -342,6 +342,8 @@ class Posts_Screen {
 			''        => __( 'Audio: any', 'text-to-audio' ),
 			'ready'   => __( 'Audio: ready', 'text-to-audio' ),
 			'missing' => __( 'Audio: none yet', 'text-to-audio' ),
+			'making'  => __( 'Audio: being made', 'text-to-audio' ),
+			'failed'  => __( 'Audio: failed', 'text-to-audio' ),
 		);
 
 		echo '<label class="screen-reader-text" for="atlasvoice-audio-filter">' . esc_html__( 'Filter by audio', 'text-to-audio' ) . '</label>';
@@ -366,6 +368,15 @@ class Posts_Screen {
 
 		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- a filter of a list, it changes nothing.
 		$status = isset( $_GET[ self::FILTER ] ) ? sanitize_key( wp_unslash( $_GET[ self::FILTER ] ) ) : '';
+		// "Being made" and "failed" are in a post's job, which a query cannot
+		// read: the posts are found first and the list is narrowed to them.
+		if ( in_array( $status, array( 'making', 'failed' ), true ) ) {
+			$ids = Posts::ids_with_job_status( $status );
+			$query->set( 'post__in', $ids ? $ids : array( 0 ) );
+
+			return;
+		}
+
 		$filter = in_array( $status, array( 'ready', 'missing' ), true ) ? Posts::status_meta_query( $status ) : array();
 		if ( ! $filter ) {
 			return;

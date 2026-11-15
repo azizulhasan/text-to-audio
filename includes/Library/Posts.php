@@ -405,6 +405,50 @@ class Posts {
 		return $args;
 	}
 
+	/** How many posts with a job are looked at for the "being made" and "failed" filters. */
+	const JOB_SCAN = 500;
+
+	/**
+	 * The posts whose audio is being made, or whose last try failed, as the
+	 * column shows them (TTS-347). Only posts that have a job are looked at,
+	 * newest first, and no more than JOB_SCAN of them.
+	 *
+	 * @param string $status making or failed.
+	 *
+	 * @return int[] Post numbers; empty for any other status.
+	 */
+	public static function ids_with_job_status( $status ) {
+		if ( ! in_array( $status, array( 'making', 'failed' ), true ) ) {
+			return array();
+		}
+
+		$query = new \WP_Query(
+			array(
+				'post_type'              => 'any',
+				'post_status'            => 'publish',
+				'posts_per_page'         => self::JOB_SCAN,
+				'fields'                 => 'ids',
+				'orderby'                => 'modified',
+				'order'                  => 'DESC',
+				'no_found_rows'          => true,
+				'update_post_term_cache' => false,
+				// phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key -- only posts that have a job, capped.
+				'meta_key'               => '_atlasvoice_cloud_jobs',
+			)
+		);
+
+		$settings = TTA_Helper::tts_get_settings();
+		$found    = array();
+		foreach ( $query->posts as $post_id ) {
+			$post = get_post( (int) $post_id );
+			if ( $post && self::status_of( $post, $settings ) === $status ) {
+				$found[] = (int) $post_id;
+			}
+		}
+
+		return $found;
+	}
+
 	/**
 	 * The meta query of the posts with stored audio ("ready") or without
 	 * ("missing"), for a list outside the Audio library (the Posts list).

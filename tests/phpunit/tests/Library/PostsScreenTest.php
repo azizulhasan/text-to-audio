@@ -295,7 +295,7 @@ class PostsScreenTest extends WP_UnitTestCase {
 		$html = (string) ob_get_clean();
 
 		$this->assertStringContainsString( 'name="' . Posts_Screen::FILTER . '"', $html );
-		foreach ( array( 'Audio: any', 'Audio: ready', 'Audio: none yet' ) as $label ) {
+		foreach ( array( 'Audio: any', 'Audio: ready', 'Audio: none yet', 'Audio: being made', 'Audio: failed' ) as $label ) {
 			$this->assertStringContainsString( '>' . $label . '</option>', $html );
 		}
 		$this->assertStringContainsString( '<label class="screen-reader-text" for="atlasvoice-audio-filter">', $html );
@@ -303,6 +303,126 @@ class PostsScreenTest extends WP_UnitTestCase {
 		ob_start();
 		Posts_Screen::render_filter( 'page' );
 		$this->assertSame( '', ob_get_clean(), 'A kind of post AtlasVoice does not run for has no filter.' );
+	}
+
+	/**
+	 * Gives a post a job, as the job service stores it.
+	 */
+	private function job( $post_id, $status, $error = '' ) {
+		update_post_meta(
+			$post_id,
+			'_atlasvoice_cloud_jobs',
+			wp_slash(
+				array(
+					'en' => array(
+						'id'         => 'job-' . $post_id,
+						'status'     => $status,
+						'key'        => 'k',
+						'ref'        => 'r',
+						'created'    => time(),
+						'updated'    => time(),
+						'parts'      => 4,
+						'parts_done' => 1,
+						'error'      => $error,
+						'file_path'  => '',
+						'file_url'   => '',
+						'request_id' => '',
+					),
+				)
+			)
+		);
+	}
+
+	public function test_the_filter_finds_the_posts_whose_audio_is_being_made_or_failed() {
+		$making = $this->post();
+		$failed = $this->post();
+		$quiet  = $this->post();
+		$this->job( $making->ID, 'running' );
+		$this->job( $failed->ID, 'failed', 'The text is too long.' );
+
+		$this->assertSame( 'making', Posts::one( $making )['status'], 'The stand-in job is read as a running job.' );
+		$this->assertSame( array( $making->ID ), Posts::ids_with_job_status( 'making' ) );
+		$this->assertSame( array( $failed->ID ), Posts::ids_with_job_status( 'failed' ) );
+		$this->assertSame( array(), Posts::ids_with_job_status( 'ready' ), 'Only the two states a job holds are looked for this way.' );
+		$this->assertNotContains( $quiet->ID, Posts::ids_with_job_status( 'failed' ) );
+	}
+
+	public function test_a_failed_try_on_a_post_with_good_audio_is_not_listed_as_failed() {
+		$post = $this->post();
+		update_post_meta( $post->ID, Posts::MARK, true );
+		$this->job( $post->ID, 'failed', 'x' );
+
+		$this->assertSame( 'ready', Posts::one( $post )['status'] );
+		$this->assertSame( array(), Posts::ids_with_job_status( 'failed' ), 'The filter shows what the column shows.' );
+	}
+
+	public function test_the_list_is_narrowed_to_those_posts_and_to_nothing_when_there_are_none() {
+		global $pagenow;
+		$failed = $this->post();
+		$this->job( $failed->ID, 'failed', 'x' );
+		$pagenow = 'edit.php'; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
+		set_current_screen( 'edit-post' );
+
+		$run = static function ( $status ) {
+			global $wp_the_query;
+			$_GET[ Posts_Screen::FILTER ] = $status;
+			$query                       = new WP_Query();
+			$wp_the_query                = $query; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
+			Posts_Screen::apply_filter( $query );
+
+			return $query->get( 'post__in' );
+		};
+
+		$this->assertSame( array( $failed->ID ), $run( 'failed' ) );
+		$this->assertSame( array( 0 ), $run( 'making' ), 'No post is being made: the list is empty, not everything.' );
+		$this->assertEmpty( $run( '' ) );
+
+		$pagenow = 'index.php'; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
+		set_current_screen( 'front' );
+	}
+
+	// ---- a job somebody asked for ----------------------------------------------
+
+	public function test_a_job_is_planned_for_wp_cron_and_nothing_is_sent_yet() {
+		$this->connect();
+		$post = $this->post();
+
+		$this->assertTrue( \TTA\Library\Audio::request( $post->ID, 30 ) );
+
+		$when = wp_next_scheduled( \TTA\Library\Audio::REQUEST_HOOK, array( $post->ID ) );
+		$this->assertGreaterThanOrEqual( time() + 25, $when );
+		$this->assertSame( array(), $this->sent );
+
+		\TTA\Library\Audio::request( $post->ID, 0 );
+		$this->assertCount( 1, array_filter( (array) _get_cron_array(), static function ( $hooks ) { return isset( $hooks[ \TTA\Library\Audio::REQUEST_HOOK ] ); } ), 'Asking twice plans it once.' );
+	}
+
+	public function test_no_job_is_planned_for_a_post_that_cannot_have_one() {
+		$draft = $this->post( array( 'post_status' => 'draft' ) );
+		$this->assertFalse( \TTA\Library\Audio::request( $this->post()->ID ), 'A site that is not connected.' );
+
+		$this->connect();
+		$off = $this->post();
+		update_post_meta( $off->ID, Jobs::OFF_META, '1' );
+		$locked = $this->post( array( 'post_password' => 'secret' ) );
+
+		$this->assertFalse( \TTA\Library\Audio::request( $draft->ID ) );
+		$this->assertFalse( \TTA\Library\Audio::request( $off->ID ) );
+		$this->assertFalse( \TTA\Library\Audio::request( $locked->ID ) );
+		$this->assertFalse( \TTA\Library\Audio::request( 999999 ) );
+	}
+
+	public function test_the_planned_job_is_started_by_wp_cron_and_checks_again_first() {
+		$this->connect();
+		$post = $this->post( array( 'post_content' => 'Some words to read aloud.' ) );
+
+		\TTA\Library\Audio::start_requested( $post->ID );
+		$this->assertNotEmpty( $this->sent, 'The job was asked of the service.' );
+
+		$this->sent = array();
+		update_post_meta( $post->ID, Jobs::OFF_META, '1' );
+		\TTA\Library\Audio::start_requested( $post->ID );
+		$this->assertSame( array(), $this->sent, 'Switched off in the meantime: nothing is sent.' );
 	}
 
 	public function test_the_filter_finds_the_posts_with_and_without_audio() {

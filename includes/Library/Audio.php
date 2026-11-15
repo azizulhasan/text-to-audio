@@ -44,6 +44,9 @@ class Audio {
 	const WHEN_PLAY    = 'play';
 	const WHEN_PUBLISH = 'publish';
 
+	/** WP-Cron hook: start the job somebody asked for (TTS-347). */
+	const REQUEST_HOOK = 'atlasvoice_requested_post_audio';
+
 	/**
 	 * WP-Cron hook that starts the job of one post.
 	 */
@@ -62,6 +65,7 @@ class Audio {
 		add_action( 'atlasvoice_cloud_job_done', array( __CLASS__, 'attach' ), 10, 4 );
 		add_action( 'transition_post_status', array( __CLASS__, 'on_status' ), 10, 3 );
 		add_action( self::START_HOOK, array( __CLASS__, 'start_planned' ), 10, 1 );
+		add_action( self::REQUEST_HOOK, array( __CLASS__, 'start_requested' ), 10, 1 );
 		add_filter( 'tta_should_load_button', array( __CLASS__, 'no_player_without_audio' ), 20, 2 );
 	}
 
@@ -103,6 +107,44 @@ class Audio {
 		}
 
 		return 'none' === self::visitors_get( (int) $post->ID ) ? false : $load;
+	}
+
+	/**
+	 * TTS-347: plans the audio job of a post that somebody asked for (a
+	 * selection on the Posts list), to be started by WP-Cron. Nothing is sent
+	 * from here, so a selection of many posts does not make the admin wait.
+	 *
+	 * @param int $post_id The post.
+	 * @param int $delay   Seconds from now; posts of one selection are spread out.
+	 *
+	 * @return bool False when no job can be made for it (not published, switched off, no job voice).
+	 */
+	public static function request( $post_id, $delay = 0 ) {
+		$post = get_post( (int) $post_id );
+		if ( ! $post || 'publish' !== $post->post_status || '' !== (string) $post->post_password || Jobs::is_off( $post->ID ) || ! self::availability()['available'] ) {
+			return false;
+		}
+
+		$args = array( (int) $post->ID );
+		wp_clear_scheduled_hook( self::REQUEST_HOOK, $args );
+
+		return false !== wp_schedule_single_event( time() + max( 0, (int) $delay ), self::REQUEST_HOOK, $args );
+	}
+
+	/**
+	 * Starts the job somebody asked for. Runs from WP-Cron.
+	 *
+	 * @param int $post_id The post.
+	 */
+	public static function start_requested( $post_id ) {
+		$post = get_post( (int) $post_id );
+
+		// What was true when it was asked for may not be true any more.
+		if ( ! $post || 'publish' !== $post->post_status || Jobs::is_off( $post->ID ) || ! self::availability()['available'] ) {
+			return;
+		}
+
+		Jobs::start( (int) $post->ID );
 	}
 
 	/**
