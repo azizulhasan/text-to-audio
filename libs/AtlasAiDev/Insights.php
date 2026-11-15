@@ -745,56 +745,29 @@ class Insights {
 	 */
 	private function __get_uninstall_reasons() {
 		
-		$reasons = [
-			[
-				'id'          => 'could-not-understand',
-				'text'        => esc_html__( 'I couldn\'t understand how to make it work', 'text-to-audio' ),
-				'type'        => 'textarea',
-				'placeholder' => esc_html__( 'Would you like us to assist you?', 'text-to-audio' ),
-			],
-			[
-				'id'          => 'found-better-plugin',
-				'text'        => esc_html__( 'I found a better plugin', 'text-to-audio' ),
-				'type'        => 'text',
-				'placeholder' => esc_html__( 'Which plugin?', 'text-to-audio' ),
-			],
-			[
-				'id'          => 'not-have-that-feature',
-				'text'        => esc_html__( 'The plugin is great, but I need specific feature that you don\'t support', 'text-to-audio' ),
-				'type'        => 'textarea',
-				'placeholder' => esc_html__( 'Could you tell us more about that feature?', 'text-to-audio' ),
-			],
-			[
-				'id'          => 'is-not-working',
-				'text'        => esc_html__( 'The plugin is not working', 'text-to-audio' ),
-				'type'        => 'textarea',
-				'placeholder' => esc_html__( 'Could you tell us a bit more whats not working?', 'text-to-audio' ),
-			],
-			[
-				'id'          => 'looking-for-other',
-				'text'        => esc_html__( 'It\'s not what I was looking for', 'text-to-audio' ),
-				'type'        => '',
-				'placeholder' => '',
-			],
-			[
-				'id'          => 'did-not-work-as-expected',
-				'text'        => esc_html__( 'The plugin didn\'t work as expected', 'text-to-audio' ),
-				'type'        => 'textarea',
-				'placeholder' => esc_html__( 'What did you expect?', 'text-to-audio' ),
-			],
-			[
-				'id'          => 'debugging',
-				'text'        => esc_html__( 'Temporary deactivation for debugging', 'text-to-audio' ),
-				'type'        => '',
-				'placeholder' => '',
-			],
-			[
-				'id'          => 'other',
-				'text'        => esc_html__( 'Other', 'text-to-audio' ),
-				'type'        => 'textarea',
-				'placeholder' => esc_html__( 'Could you tell us a bit more?', 'text-to-audio' ),
-			],
+		// TTS-347: the reasons of the approved design. They are what people
+		// write to support about, so each one can be acted on. Two keep the id
+		// they always had (could-not-understand, other), so what the tracker
+		// already holds still reads the same; the others are new ids.
+		// Any reason can be explained, or used to ask for help.
+		$tell_more = esc_html__( 'Tell us more, or ask for help (optional)', 'text-to-audio' );
+		$reasons   = [];
+		$texts     = [
+			'voice-robotic'        => esc_html__( 'Voice sounds robotic', 'text-to-audio' ),
+			'language-missing'     => esc_html__( 'My language is missing', 'text-to-audio' ),
+			'not-on-phones'        => esc_html__( 'Doesn’t work on phones', 'text-to-audio' ),
+			'could-not-understand' => esc_html__( 'Couldn’t find how to start', 'text-to-audio' ),
+			'player-wrong-place'   => esc_html__( 'Player in the wrong place', 'text-to-audio' ),
+			'other'                => esc_html__( 'Something else', 'text-to-audio' ),
 		];
+		foreach ( $texts as $id => $text ) {
+			$reasons[] = [
+				'id'          => $id,
+				'text'        => $text,
+				'type'        => 'textarea',
+				'placeholder' => $tell_more,
+			];
+		}
 		$extra = apply_filters( $this->client->getSlug() . '_extra_uninstall_reasons', [], $reasons );
 		if ( is_array( $extra ) && ! empty( $extra ) ) {
 			// extract the last (other) reason and add after extras.
