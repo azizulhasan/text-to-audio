@@ -50,7 +50,7 @@ class TTA_Dashboard_Widget {
 
 		wp_add_dashboard_widget(
 			'atlasvoice_quick_stats',
-			__( 'AtlasVoice — Quick Stats', 'text-to-audio' ),
+			__( 'AtlasVoice · Today', 'text-to-audio' ),
 			[ $this, 'render' ]
 		);
 	}
@@ -126,11 +126,12 @@ class TTA_Dashboard_Widget {
 
 			<!-- Links -->
 			<div style="display:flex;gap:16px;padding:0 12px;margin-bottom:4px;">
-				<a href="<?php echo esc_url( admin_url( 'admin.php?page=text-to-audio#/analytics' ) ); ?>" style="font-size:13px;">
-					<?php echo esc_html__( 'View Analytics', 'text-to-audio' ); ?>
+				<?php $links = self::links(); // TTS-347: the screens of the admin that is in use. ?>
+				<a href="<?php echo esc_url( $links['insights'] ); ?>" style="font-size:13px;">
+					<?php echo esc_html__( 'Open Insights', 'text-to-audio' ); ?>
 				</a>
-				<a href="<?php echo esc_url( admin_url( 'admin.php?page=text-to-audio#/customize' ) ); ?>" style="font-size:13px;">
-					<?php echo esc_html__( 'Customize Player', 'text-to-audio' ); ?>
+				<a href="<?php echo esc_url( $links['player'] ); ?>" style="font-size:13px;">
+					<?php echo esc_html__( 'Change the player', 'text-to-audio' ); ?>
 				</a>
 			</div>
 
@@ -158,6 +159,22 @@ class TTA_Dashboard_Widget {
 	 * a way to try AtlasVoice TTS) or this month's AtlasVoice TTS allowance.
 	 * Reads saved options only; no call to the service.
 	 */
+	/**
+	 * TTS-347: where the widget's two links go. The new admin and the classic
+	 * one name their screens differently.
+	 *
+	 * @return array{insights:string, player:string}
+	 */
+	public static function links() {
+		$new  = class_exists( '\\TTA_Admin\\Admin_App' ) && Admin_App::is_enabled();
+		$base = admin_url( 'admin.php?page=text-to-audio' );
+
+		return array(
+			'insights' => $base . ( $new ? '#/insights' : '#/analytics' ),
+			'player'   => $base . ( $new ? '#/player' : '#/customize' ),
+		);
+	}
+
 	private function render_voice_status() {
 		$summary = \TTA\TTA_AtlasVoice_Service::dashboard_summary();
 		$usage   = $summary['usage'];

@@ -25,6 +25,23 @@
             overlay.style.display = 'flex';
         }
 
+        // TTS-347: opening the dialog moves the keyboard into it, and closing it
+        // gives the keyboard back to the link that opened it.
+        function close() {
+            overlay.style.display = 'none';
+            deactivateLink.focus();
+        }
+        var cancelBtn = document.getElementById('tta-rescue-cancel');
+        if (cancelBtn) {
+            cancelBtn.addEventListener('click', close);
+        }
+        deactivateLink.addEventListener('click', function () {
+            if (!rescueShown && overlay.style.display === 'flex') {
+                var first = overlay.querySelector('a, button');
+                if (first) { first.focus(); }
+            }
+        });
+
         deactivateLink.addEventListener('click', rescueHandler, true);
 
         // Close modal when clicking the overlay background.

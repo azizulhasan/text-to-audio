@@ -1535,15 +1535,15 @@ class TTA_Admin
         $total = (int) get_sites(array('count' => true));
 
         echo '<div class="wrap">';
-        echo '<h1>' . esc_html__('AtlasVoice — Network Overview', 'text-to-audio') . '</h1>';
-        echo '<p>' . esc_html__('AtlasVoice settings are stored per site. This page shows where each site stands and links to its dashboard.', 'text-to-audio') . '</p>';
+        echo '<h1>' . esc_html__('AtlasVoice on this network', 'text-to-audio') . '</h1>';
+        echo '<p>' . esc_html__('Each site keeps its own mode, voice and content rules. This page shows where each site stands and opens AtlasVoice on it.', 'text-to-audio') . '</p>';
 
         echo '<table class="wp-list-table widefat fixed striped"><thead><tr>';
         echo '<th>' . esc_html__('Site', 'text-to-audio') . '</th>';
         echo '<th>' . esc_html__('Mode', 'text-to-audio') . '</th>';
-        echo '<th>' . esc_html__('Player', 'text-to-audio') . '</th>';
-        echo '<th>' . esc_html__('Configured', 'text-to-audio') . '</th>';
-        echo '<th>' . esc_html__('Actions', 'text-to-audio') . '</th>';
+        echo '<th>' . esc_html__('Voice', 'text-to-audio') . '</th>';
+        echo '<th>' . esc_html__('Set up', 'text-to-audio') . '</th>';
+        echo '<th><span class="screen-reader-text">' . esc_html__('Actions', 'text-to-audio') . '</span></th>';
         echo '</tr></thead><tbody>';
 
         foreach ($sites as $site) {
@@ -1571,15 +1571,15 @@ class TTA_Admin
             echo '<tr>';
             echo '<td><strong>' . esc_html($name ? $name : ('#' . $blog_id)) . '</strong><br />';
             echo '<a href="' . esc_url($home) . '">' . esc_html($home) . '</a></td>';
-            echo '<td>' . esc_html($mode_prod === $mode
-                ? __('Production', 'text-to-audio')
-                : __('Staging', 'text-to-audio')) . '</td>';
-            echo '<td>' . ($player_id ? esc_html((string) $player_id) : '&mdash;') . '</td>';
-            echo '<td>' . ($seeded
-                ? esc_html__('Yes', 'text-to-audio')
-                : '<span style="color:#d63638">' . esc_html__('Not configured', 'text-to-audio') . '</span>') . '</td>';
-            echo '<td><a class="button button-secondary" href="' . esc_url($dashboard) . '">'
-                . esc_html__('Open dashboard', 'text-to-audio') . '</a></td>';
+            // TTS-347: the words of the approved design (Live / Staging / Off, the voice by name).
+            $words = self::network_row_words($seeded, $mode_prod === $mode, $player_id);
+            echo '<td><span style="display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:6px;background:' . esc_attr($words['dot']) . '"></span>' . esc_html($words['mode']) . '</td>';
+            echo '<td>' . ('' !== $words['voice'] ? esc_html($words['voice']) : '&mdash;') . '</td>';
+            echo '<td>' . esc_html($words['set_up']) . '</td>';
+            echo '<td><a class="button button-secondary" href="' . esc_url($dashboard) . '" aria-label="'
+                /* translators: %s: the name of a site. */
+                . esc_attr(sprintf(__('Open AtlasVoice on %s', 'text-to-audio'), $name ? $name : ('#' . $blog_id))) . '">'
+                . esc_html__('Open', 'text-to-audio') . '</a></td>';
             echo '</tr>';
         }
 
@@ -1597,6 +1597,44 @@ class TTA_Admin
         }
 
         echo '</div>';
+    }
+
+    /**
+     * TTS-347: what the network table says about one site.
+     *
+     * @param bool $seeded    Whether the site has AtlasVoice settings.
+     * @param bool $is_live   Whether its mode is live.
+     * @param int  $player_id The voice engine it uses (0 when none is saved).
+     * @return array{mode:string, dot:string, voice:string, set_up:string}
+     */
+    public static function network_row_words($seeded, $is_live, $player_id)
+    {
+        $mode = __('Off', 'text-to-audio');
+        $dot  = '#a7aaad';
+        if ($seeded) {
+            $mode = $is_live ? __('Live', 'text-to-audio') : __('Staging', 'text-to-audio');
+            $dot  = $is_live ? '#00a32a' : '#dba617';
+        }
+
+        $voice     = '';
+        $player_id = (int) $player_id;
+        if ($seeded && $player_id > 0) {
+            $players = (array) TTA_Helper::get_available_players();
+            if ($player_id <= 2) {
+                $voice = __('Browser voice', 'text-to-audio');
+            } elseif (class_exists('\\TTA\\TTA_AtlasVoice_Service') && \TTA\TTA_AtlasVoice_Service::PLAYER_ID === $player_id) {
+                $voice = __('Natural voice', 'text-to-audio');
+            } elseif (isset($players[$player_id]['name'])) {
+                $voice = sanitize_text_field((string) $players[$player_id]['name']);
+            }
+        }
+
+        return array(
+            'mode'   => $mode,
+            'dot'    => $dot,
+            'voice'  => $voice,
+            'set_up' => $seeded ? __('Yes', 'text-to-audio') : __('No', 'text-to-audio'),
+        );
     }
 
     /**
@@ -1804,57 +1842,56 @@ class TTA_Admin
             return;
         }
 
-        $admin_url    = admin_url( 'admin.php?page=text-to-audio' );
-        $docs_url     = esc_url( $admin_url . '#/faq' );
-        $compat_url   = esc_url( $admin_url . '#/compatibility' );
-        $integrations_url = esc_url( $admin_url . '#/integrations' );
-        $support_url  = 'https://atlasaidev.com/contact-us/';
+        // TTS-347: the approved dialog. Its links open the screens of the admin that is in use.
+        $admin_url  = admin_url( 'admin.php?page=text-to-audio' );
+        $new_admin  = class_exists( '\\TTA_Admin\\Admin_App' ) && Admin_App::is_enabled();
+        $health_url = $admin_url . ( $new_admin ? '#/site/health' : '#/compatibility' );
+        $voice_url  = $admin_url . ( $new_admin ? '#/voice' : '#/integrations' );
+        $support_url = 'https://atlasaidev.com/contact-us/';
+        $row_style  = 'display:flex;justify-content:space-between;gap:12px;align-items:center;margin:0;padding:10px 12px;font-size:14px;color:#1d2327;border-top:1px solid #f0f0f1;';
+        $link_style = 'color:#2271b1;text-decoration:none;font-weight:500;white-space:nowrap;';
         ?>
         <div id="tta-rescue-modal-overlay" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.6);z-index:100100;align-items:center;justify-content:center;">
-            <div style="background:#fff;border-radius:8px;max-width:480px;width:90%;padding:28px 32px;box-shadow:0 4px 24px rgba(0,0,0,.25);position:relative;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Oxygen-Sans,Ubuntu,Cantarell,'Helvetica Neue',sans-serif;">
-                <h2 style="margin:0 0 8px;font-size:20px;color:#1d2327;">
-                    <?php echo esc_html__( 'Having trouble? We can help!', 'text-to-audio' ); ?>
+            <div role="dialog" aria-modal="true" aria-labelledby="tta-rescue-title" style="background:#fff;border-radius:8px;max-width:480px;width:90%;padding:28px 32px;box-shadow:0 4px 24px rgba(0,0,0,.25);position:relative;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Oxygen-Sans,Ubuntu,Cantarell,'Helvetica Neue',sans-serif;">
+                <h2 id="tta-rescue-title" style="margin:0 0 8px;font-size:20px;color:#1d2327;">
+                    <?php echo esc_html__( 'Can we help first?', 'text-to-audio' ); ?>
                 </h2>
                 <p style="margin:0 0 16px;color:#50575e;font-size:14px;">
-                    <?php echo esc_html__( 'Many issues can be fixed in under 2 minutes:', 'text-to-audio' ); ?>
+                    <?php echo esc_html__( 'Most problems take two minutes to fix.', 'text-to-audio' ); ?>
                 </p>
-                <ul style="margin:0 0 20px;padding:0;list-style:none;">
+                <ul style="margin:0 0 12px;padding:0;list-style:none;border:1px solid #f0f0f1;border-top:0;border-radius:4px;">
                     <?php if ( \TTA\TTA_Rollback::is_available() ) : ?>
-                    <li style="margin-bottom:10px;font-size:14px;color:#1d2327;">
+                    <li style="<?php echo esc_attr( $row_style ); ?>">
                         <?php // TTS-320: an update broke something — going back is often faster than deactivating. ?>
-                        <?php echo esc_html__( 'Started after an update', 'text-to-audio' ); ?> &rarr;
-                        <a href="<?php echo esc_url( \TTA\TTA_Rollback::screen_url() ); ?>" style="color:#2271b1;text-decoration:none;font-weight:500;">
-                            <?php echo esc_html__( 'Roll back to an earlier version', 'text-to-audio' ); ?>
+                        <span><?php echo esc_html__( 'It broke after an update', 'text-to-audio' ); ?></span>
+                        <a href="<?php echo esc_url( \TTA\TTA_Rollback::screen_url() ); ?>" style="<?php echo esc_attr( $link_style ); ?>">
+                            <?php echo esc_html__( 'Roll back', 'text-to-audio' ); ?>
                         </a>
                     </li>
                     <?php endif; ?>
-                    <li style="margin-bottom:10px;font-size:14px;color:#1d2327;">
-                        <?php echo esc_html__( 'Voice not working', 'text-to-audio' ); ?> &rarr;
-                        <a href="<?php echo esc_url( $docs_url ); ?>" style="color:#2271b1;text-decoration:none;font-weight:500;">
-                            <?php echo esc_html__( 'Quick Fix Guide', 'text-to-audio' ); ?>
+                    <li style="<?php echo esc_attr( $row_style ); ?>">
+                        <span><?php echo esc_html__( 'The player doesn’t show', 'text-to-audio' ); ?></span>
+                        <a href="<?php echo esc_url( $health_url ); ?>" style="<?php echo esc_attr( $link_style ); ?>">
+                            <?php echo esc_html__( 'Run the health check', 'text-to-audio' ); ?>
                         </a>
                     </li>
-                    <li style="margin-bottom:10px;font-size:14px;color:#1d2327;">
-                        <?php echo esc_html__( 'Player not showing', 'text-to-audio' ); ?> &rarr;
-                        <a href="<?php echo esc_url( $compat_url ); ?>" style="color:#2271b1;text-decoration:none;font-weight:500;">
-                            <?php echo esc_html__( 'Troubleshoot', 'text-to-audio' ); ?>
-                        </a>
-                    </li>
-                    <li style="margin-bottom:10px;font-size:14px;color:#1d2327;">
-                        <?php echo esc_html__( 'Need better voices', 'text-to-audio' ); ?> &rarr;
-                        <a href="<?php echo esc_url( $integrations_url ); ?>" style="color:#2271b1;text-decoration:none;font-weight:500;">
-                            <?php echo esc_html__( 'See AI Voices', 'text-to-audio' ); ?>
+                    <li style="<?php echo esc_attr( $row_style ); ?>">
+                        <span><?php echo esc_html__( 'The voice sounds robotic', 'text-to-audio' ); ?></span>
+                        <a href="<?php echo esc_url( $voice_url ); ?>" style="<?php echo esc_attr( $link_style ); ?>">
+                            <?php echo esc_html__( 'Try the natural voice', 'text-to-audio' ); ?>
                         </a>
                     </li>
                 </ul>
+                <p style="margin:0 0 20px;font-size:13px;color:#50575e;">
+                    <?php echo esc_html__( 'Something else?', 'text-to-audio' ); ?>
+                    <a href="<?php echo esc_url( $support_url ); ?>" target="_blank" rel="noopener noreferrer"><?php echo esc_html__( 'Contact support', 'text-to-audio' ); ?></a>
+                </p>
                 <div style="display:flex;gap:12px;justify-content:flex-end;flex-wrap:wrap;">
-                    <a href="<?php echo esc_url( $support_url ); ?>" target="_blank" rel="noopener noreferrer"
-                       class="button button-primary"
-                       style="text-decoration:none;">
-                        <?php echo esc_html__( 'Contact Support', 'text-to-audio' ); ?>
-                    </a>
+                    <button id="tta-rescue-cancel" class="button button-link" type="button">
+                        <?php echo esc_html__( 'Cancel', 'text-to-audio' ); ?>
+                    </button>
                     <button id="tta-rescue-continue-deactivate" class="button" type="button">
-                        <?php echo esc_html__( 'Continue to Deactivate', 'text-to-audio' ); ?> &rarr;
+                        <?php echo esc_html__( 'No thanks, deactivate', 'text-to-audio' ); ?>
                     </button>
                 </div>
             </div>
