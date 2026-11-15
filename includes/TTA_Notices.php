@@ -193,6 +193,8 @@ class TTA_Notices {
 			'legacy_option_key'     => '',
 			'version'               => '',
 			'version_option'        => '',
+			// TTS-347: which kind of notice it is (see PRIORITIES); '' = worked out from its id.
+			'priority'              => '',
 		);
 
 		$notice = wp_parse_args( $args, $defaults );
@@ -962,11 +964,134 @@ class TTA_Notices {
 	// =========================================================================
 
 	/**
+	 * TTS-347: the kinds of notice, most pressing first. Outside AtlasVoice's
+	 * own page a screen gets at most one AtlasVoice notice: the first of
+	 * these that has something to say.
+	 */
+	const PRIORITIES = array( 'problem', 'staging', 'usage', 'update', 'setup', 'review', 'news' );
+
+	/**
+	 * The kind of a notice: what it was registered with, else worked out
+	 * from its id, else "news".
+	 *
+	 * @param string $notice_id Notice ID.
+	 * @param array  $notice    Notice configuration.
+	 * @return string One of PRIORITIES.
+	 */
+	public static function priority_of( $notice_id, array $notice = array() ) {
+		$kind = isset( $notice['priority'] ) ? (string) $notice['priority'] : '';
+
+		if ( '' === $kind ) {
+			$by_id = array(
+				'browser_support'        => 'problem',
+				'cors_cdn_issue'         => 'problem',
+				'pro_update_required'    => 'problem',
+				'pro_writable'           => 'problem',
+				'pro_writable_permanent' => 'problem',
+				'atlasvoice_tts_pending' => 'problem',
+				'steprail_staging'       => 'staging',
+				'staging_sitewide'       => 'staging',
+				'steprail_production'    => 'staging',
+				'features'               => 'update',
+				'translation'            => 'update',
+				'onboarding'             => 'setup',
+				'atlasvoice_tts_intro'   => 'setup',
+				'review'                 => 'review',
+			);
+			if ( isset( $by_id[ $notice_id ] ) ) {
+				$kind = $by_id[ $notice_id ];
+			} elseif ( 0 === strpos( (string) $notice_id, 'atlasvoice_usage_' ) ) {
+				$kind = 'usage';
+			} elseif ( 0 === strpos( (string) $notice_id, 'atlasvoice_updated_' ) ) {
+				// "AtlasVoice updated to x.y.z", with the way back to the version before.
+				$kind = 'update';
+			} elseif ( 0 === strpos( (string) $notice_id, 'milestone' ) ) {
+				$kind = 'review';
+			}
+		}
+
+		/**
+		 * Filters the kind of an AtlasVoice notice.
+		 *
+		 * @param string $kind      One of TTA_Notices::PRIORITIES.
+		 * @param string $notice_id Notice ID.
+		 */
+		$kind = (string) apply_filters( 'atlasvoice_notice_priority', $kind, $notice_id );
+
+		return in_array( $kind, self::PRIORITIES, true ) ? $kind : 'news';
+	}
+
+	/**
+	 * Whether a screen gets one notice at a time: the new admin is in use and
+	 * the screen is not AtlasVoice's own page (there every notice goes into
+	 * the Notices bell).
+	 *
+	 * @return bool
+	 */
+	public static function one_at_a_time() {
+		if ( ! class_exists( '\\TTA_Admin\\Admin_App' ) || ! \TTA_Admin\Admin_App::is_enabled() ) {
+			return false;
+		}
+
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- only reads which admin page is open.
+		$page = isset( $_GET['page'] ) ? sanitize_key( wp_unslash( $_GET['page'] ) ) : '';
+
+		return 'text-to-audio' !== $page;
+	}
+
+	/**
+	 * The registered notices, most pressing kind first; within a kind, in
+	 * the order they were registered.
+	 *
+	 * @return array<string, array>
+	 */
+	public function notices_by_priority() {
+		$rank  = array_flip( self::PRIORITIES );
+		$order = array();
+		$index = 0;
+
+		foreach ( $this->notices as $notice_id => $notice ) {
+			$order[ $notice_id ] = array( $rank[ self::priority_of( $notice_id, $notice ) ], $index++ );
+		}
+		uasort(
+			$order,
+			static function ( $a, $b ) {
+				return $a[0] === $b[0] ? $a[1] - $b[1] : $a[0] - $b[0];
+			}
+		);
+
+		$sorted = array();
+		foreach ( array_keys( $order ) as $notice_id ) {
+			$sorted[ $notice_id ] = $this->notices[ $notice_id ];
+		}
+
+		return $sorted;
+	}
+
+	/**
 	 * Display all active notices.
 	 */
 	public function display_notices() {
-		foreach ( $this->notices as $notice_id => $notice ) {
+		if ( ! self::one_at_a_time() ) {
+			foreach ( $this->notices as $notice_id => $notice ) {
+				$this->display_notice( $notice_id, $notice );
+			}
+
+			return;
+		}
+
+		// TTS-347: one notice per screen. A notice that has nothing to say
+		// prints nothing, so the next kind gets its turn.
+		foreach ( $this->notices_by_priority() as $notice_id => $notice ) {
+			ob_start();
 			$this->display_notice( $notice_id, $notice );
+			$html = (string) ob_get_clean();
+
+			if ( '' !== trim( $html ) ) {
+				echo $html; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- built and escaped by display_notice().
+
+				return;
+			}
 		}
 	}
 
