@@ -54,6 +54,12 @@ class TTA_Posts_List
      */
     public function setup_hooks()
     {
+        // TTS-347: the new admin's "Audio" column describes each post; this
+        // tick-or-cross column stands back so a post is not described twice.
+        if (class_exists('\\TTA\\Library\\Posts_Screen') && \TTA\Library\Posts_Screen::is_active()) {
+            return false;
+        }
+
         $settings = TTA_Helper::tts_get_settings('settings');
         $tts_status = isset($settings['tta__settings_enable_tts_status'])
             ? $settings['tta__settings_enable_tts_status']

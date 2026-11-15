@@ -383,6 +383,9 @@ add_action( 'atlasvoice_cloud_job_poll', array( '\TTA\Cloud\Jobs', 'poll' ), 10,
 // TTS-347: the "AtlasVoice" panel of the post editor, for everyone who can edit the post.
 \TTA\Editor\Post_Panel::register();
 
+// TTS-347: the Audio column of the Posts list, with the Audio library's own words.
+\TTA\Library\Posts_Screen::register();
+
 // TTS-376: everything an admin can do on a screen is also a WP-CLI command.
 if ( defined( 'WP_CLI' ) && WP_CLI ) {
     \TTA\CLI\Commands::plan();

@@ -406,6 +406,18 @@ class Posts {
 	}
 
 	/**
+	 * The meta query of the posts with stored audio ("ready") or without
+	 * ("missing"), for a list outside the Audio library (the Posts list).
+	 *
+	 * @param string $status ready or missing.
+	 *
+	 * @return array A meta query, empty for anything else.
+	 */
+	public static function status_meta_query( $status ) {
+		return in_array( $status, array( 'ready', 'missing' ), true ) ? self::status_filter( $status ) : array();
+	}
+
+	/**
 	 * The meta query that narrows the posts to a status.
 	 *
 	 * @param string $status all, ready or missing.
