@@ -1015,6 +1015,32 @@ body.atlasvoice-app-page #atlasvoice-app {
 	min-width: 0;
 }
 
+/* A row with a name and fields beside it (an extension's table of settings). */
+.atlasvoice-root .atlasvoice-fields-row {
+	display: grid;
+	grid-template-columns: minmax(0, 1fr) minmax(0, 1.2fr) minmax(0, 1.2fr);
+	align-items: end;
+	gap: 16px;
+	margin: 0;
+	padding: 16px;
+}
+
+.atlasvoice-root .atlasvoice-fields-row > .atlasvoice-row-text {
+	align-self: center;
+}
+
+@media (max-width: 782px) {
+
+	.atlasvoice-root .atlasvoice-fields-row {
+		grid-template-columns: minmax(0, 1fr);
+		gap: 12px;
+	}
+
+	.atlasvoice-root .atlasvoice-fields-row > span:empty {
+		display: none;
+	}
+}
+
 .atlasvoice-root .atlasvoice-row-text b {
 	font-weight: 500;
 }
