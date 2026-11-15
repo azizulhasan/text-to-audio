@@ -9,7 +9,10 @@
 import TextToSpeech from './TextToSpeech';
 import AtlasVoiceProgressivePlayer from './tts/AtlasVoiceProgressivePlayer';
 import AtlasVoiceEditorNote from './tts/AtlasVoiceEditorNote';
+import AtlasVoiceBrowserFallback from './tts/AtlasVoiceBrowserFallback';
 
 TextToSpeech.ProgressivePlayer = AtlasVoiceProgressivePlayer;
 // TTS-347: the editors-only note under a player, for an extension's player too.
 TextToSpeech.EditorNote = AtlasVoiceEditorNote;
+// TTS-347: the device's voice behind a Listen button, when audio cannot be made.
+TextToSpeech.BrowserFallback = AtlasVoiceBrowserFallback;

@@ -15,6 +15,7 @@ import AtlasVoiceAnalytics from './AtlasVoiceAnalytics';
 import AtlasVoiceProgressivePlayer from './tts/AtlasVoiceProgressivePlayer';
 import RestNonce from './tts/RestNonce';
 import EditorNote from './tts/AtlasVoiceEditorNote';
+import BrowserFallback from './tts/AtlasVoiceBrowserFallback';
 
 const { __, sprintf } = wp.i18n;
 
@@ -413,34 +414,16 @@ export class AtlasVoiceMp3Player extends AtlasVoiceProgressivePlayer {
      * browser-voice class already on the page, behind a plain button.
      */
     mountBrowserVoice() {
-        const Speaker = window.TextToSpeech;
-        if (typeof Speaker !== 'function' || !('speechSynthesis' in window)) {
+        if (!BrowserFallback.canSpeak() || !this.content) {
             this.showStatus(__('Audio is not available right now. Please try again later.', 'text-to-audio'));
             return;
         }
 
         try { this.plyr.destroy(); } catch (e) { /* already gone */ }
-        this.wrapper.innerHTML = '';
 
-        // Player 1's own button class, styled by player 1's stylesheet (loaded
-        // with this bundle), so the fallback looks like player 1, not a stray
-        // button. A site that is not connected never gets here: it is served
-        // player 1 from the start (TTA_Admin::serve_player_1_until_ready).
-        const button = document.createElement('button');
-        button.type = 'button';
-        button.className = 'tts__listent_content atlasvoice-mp3-player__fallback';
-        button.id = this.buttonId;
-        this.wrapper.append(button);
-
-        const speaker = new Speaker(this.buttonId, this.content, button, this.TTS);
-        // The browser-voice class draws and updates its button only as player 1
-        // (its own player); start it with player 1's normal "Listen" content.
-        speaker.playButtonNo = 1;
-        button.innerHTML = speaker.playButtonContent();
-        button.addEventListener('click', () => speaker._init(null, true));
-
-        // Start reading right away: the visitor already pressed play.
-        speaker._init(null, true);
+        // A site that is not connected never gets here: it is served player 1
+        // from the start (TTA_Admin::serve_player_1_until_ready).
+        BrowserFallback.mount(this.wrapper, { buttonId: this.buttonId, content: this.content, TTS: this.TTS });
     }
 
     /**
