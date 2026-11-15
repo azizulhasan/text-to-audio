@@ -16,6 +16,7 @@ import AtlasVoiceProgressivePlayer from './tts/AtlasVoiceProgressivePlayer';
 import RestNonce from './tts/RestNonce';
 import EditorNote from './tts/AtlasVoiceEditorNote';
 import BrowserFallback from './tts/AtlasVoiceBrowserFallback';
+import StatusMeter from './tts/AtlasVoiceStatusMeter';
 
 const { __, sprintf } = wp.i18n;
 
@@ -196,9 +197,20 @@ export class AtlasVoiceMp3Player extends AtlasVoiceProgressivePlayer {
         this.audio.addEventListener('timeupdate', () => { if (!this.isProgressiveActive()) a?.trackProgress(this.audio.currentTime); });
     }
 
-    showStatus(text) {
+    /**
+     * The line under the player.
+     *
+     * @param {string} text  What to say; '' hides the line.
+     * @param {number} share TTS-347: how much of the audio is made, 0 to 1.
+     *                       With it the line also has a meter and a percentage.
+     */
+    showStatus(text, share) {
         this.status.textContent = text;
         this.status.hidden = !text;
+
+        if (text) {
+            this.status.append(...StatusMeter.meterFor(share, text));
+        }
     }
 
     async generateAndPlay() {
@@ -272,7 +284,9 @@ export class AtlasVoiceMp3Player extends AtlasVoiceProgressivePlayer {
                     this.showStatus(batches.length > 1
                         /* translators: 1: current part, 2: number of parts. */
                         ? sprintf(__('Making the audio · part %1$d of %2$d', 'text-to-audio'), i + 1, batches.length)
-                        : __('Making the audio…', 'text-to-audio'));
+                        : __('Making the audio…', 'text-to-audio'),
+                    // The parts before this one are made.
+                    batches.length > 1 ? i / batches.length : undefined);
                 }
 
                 last = await this.send({

@@ -779,6 +779,10 @@ class TTA_Admin
             . ".atlasvoice-mp3-player .plyr--audio .plyr__control,.atlasvoice-mp3-player .plyr--audio .plyr__control:hover{background-color:{$bg};color:{$fg};}"
             . ".atlasvoice-mp3-player .plyr--full-ui input[type=range]{color:{$fg};}"
             . ".atlasvoice-mp3-player__status{margin-top:6px;font-size:13px;opacity:.85;}"
+            // TTS-347: how much of the audio is made, as a thin meter and a percentage.
+            . ".atlasvoice-mp3-player__meter{display:inline-block;vertical-align:middle;width:96px;height:4px;margin:0 8px;border-radius:2px;background:rgba(0,0,0,.15);overflow:hidden;}"
+            . ".atlasvoice-mp3-player__meter i{display:block;height:100%;background:currentColor;transition:width .3s;}"
+            . ".atlasvoice-mp3-player__percent{font-variant-numeric:tabular-nums;}"
             // TTS-321: while parts play the post's length is unknown: no seek bar,
             // no per-part time, no download of a part.
             . ".atlasvoice-progressive .plyr__progress__container,.atlasvoice-progressive .plyr__time,.atlasvoice-progressive [data-plyr=\"download\"]{display:none!important;}"

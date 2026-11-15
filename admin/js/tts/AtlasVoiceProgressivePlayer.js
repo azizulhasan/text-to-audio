@@ -365,9 +365,9 @@ export default class AtlasVoiceProgressivePlayer {
         }
         if (p.totalParts > 1) {
             /* translators: 1: parts ready, 2: parts in the post. */
-            return sprintf(__('Preparing the rest (%1$d of %2$d). You can skip around once it is ready.', 'text-to-audio'), p.parts.length, p.totalParts);
+            return sprintf(__('Getting the audio ready · part %1$d of %2$d. The first part is playing now.', 'text-to-audio'), p.parts.length, p.totalParts);
         }
-        return __('Preparing the rest. You can skip around once it is ready.', 'text-to-audio');
+        return __('Getting the rest of the audio ready. The first part is playing now.', 'text-to-audio');
     }
 
     // ── hooks a subclass may override ────────────────────────────────────
