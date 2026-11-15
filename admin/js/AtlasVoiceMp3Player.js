@@ -294,6 +294,8 @@ export class AtlasVoiceMp3Player extends AtlasVoiceProgressivePlayer {
                     content: batches[i],
                     temp_title: title + '-' + (i + 1),
                     is_last_batch: i === batches.length - 1,
+                    // TTS-347: so a visitor who waits for this run can be told how far it is.
+                    total_parts: batches.length,
                     // The whole post's size, on the first batch: a Free site whose
                     // allowance cannot cover it is refused before anything is billed.
                     ...(i === 0 ? { total_chars: totalChars } : {}),
@@ -313,7 +315,13 @@ export class AtlasVoiceMp3Player extends AtlasVoiceProgressivePlayer {
 
             if (last?.data?.message === 'locked') {
                 // Another visitor is making this post's audio; wait for it.
-                this.showStatus(__('This audio is being prepared. One moment…', 'text-to-audio'));
+                // TTS-347: with the part that run is at, when the site knows it.
+                const joined = StatusMeter.joinedProgress(last.data);
+                this.showStatus(joined
+                    /* translators: 1: the part being made, 2: number of parts. */
+                    ? sprintf(__('This audio is being prepared · part %1$d of %2$d', 'text-to-audio'), joined.part, joined.parts)
+                    : __('This audio is being prepared. One moment…', 'text-to-audio'),
+                joined ? joined.share : undefined);
                 await new Promise((resolve) => setTimeout(resolve, 10000));
                 continue;
             }

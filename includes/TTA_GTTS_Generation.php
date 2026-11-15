@@ -58,6 +58,8 @@ class TTA_GTTS_Generation {
 		$language   = isset( $settings['language'] ) ? sanitize_text_field( (string) $settings['language'] ) : '';
 		// The whole post's size, sent with its first batch (see synthesize()).
 		$total      = isset( $body['total_chars'] ) ? absint( $body['total_chars'] ) : 0;
+		// TTS-347: how many batches this run has, so a visitor who waits for it can be told how far it is.
+		$parts      = isset( $body['total_parts'] ) ? absint( $body['total_parts'] ) : 0;
 
 		if ( '' === $title || '' === $temp_title || '' === $content ) {
 			return self::fail( 'missing_parameters' );
@@ -128,8 +130,15 @@ class TTA_GTTS_Generation {
 		// Another run is already generating this post (another visitor, or this
 		// visitor's own earlier run): back off rather than paying twice for the
 		// same audio. The player waits and then plays the finished file.
-		if ( ! TTA_Generation_Lock::acquire( $post_id, $user_id, TTA_Generation_Lock::batch_number( $temp_title ) ) ) {
-			return self::ok( '', 'locked', false );
+		if ( ! TTA_Generation_Lock::acquire( $post_id, $user_id, TTA_Generation_Lock::batch_number( $temp_title ), $parts ) ) {
+			$locked = self::ok( '', 'locked', false );
+			// TTS-347: which part the other run is at, when it is known.
+			$progress = TTA_Generation_Lock::progress( $post_id );
+			if ( $progress ) {
+				$locked['data'] += $progress;
+			}
+
+			return $locked;
 		}
 
 		$result = TTA_AtlasVoice_Service::synthesize( $content, $language, 'post-' . $post_id, $total );

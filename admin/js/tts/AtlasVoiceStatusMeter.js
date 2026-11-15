@@ -47,4 +47,22 @@ export function meterFor(share, label) {
     return [meter, number];
 }
 
-export default { percentOf, meterFor };
+/**
+ * How far another visitor's run is, from the site's answer "locked".
+ *
+ * @param {Object} data The answer's data: part and parts, when the site knows them.
+ * @return {{part: number, parts: number, share: number}|null} Null when there is nothing to count.
+ */
+export function joinedProgress(data) {
+    const part = Number(data?.part);
+    const parts = Number(data?.parts);
+
+    if (!Number.isInteger(part) || !Number.isInteger(parts) || parts < 2 || part < 1 || part > parts) {
+        return null;
+    }
+
+    // The parts before the one being made are done.
+    return { part, parts, share: (part - 1) / parts };
+}
+
+export default { percentOf, meterFor, joinedProgress };

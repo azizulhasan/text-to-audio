@@ -38,3 +38,15 @@ test('the meter says its value to a screen reader and shows the number', () => {
     assert.equal(meter.children[0].style.width, '40%');
     assert.equal(number.textContent, '40%');
 });
+
+test('a visitor who waits for another run is told which part it is at', () => {
+    assert.deepEqual(StatusMeter.joinedProgress({ message: 'locked', part: 9, parts: 14 }), { part: 9, parts: 14, share: 8 / 14 });
+    assert.deepEqual(StatusMeter.joinedProgress({ part: 1, parts: 2 }), { part: 1, parts: 2, share: 0 });
+    assert.equal(StatusMeter.percentOf(StatusMeter.joinedProgress({ part: 9, parts: 14 }).share), 57);
+});
+
+test('without a believable part count the visitor gets the plain line', () => {
+    for (const data of [undefined, null, {}, { message: 'locked' }, { part: 1, parts: 1 }, { part: 0, parts: 5 }, { part: 6, parts: 5 }, { part: '3', parts: 'many' }, { part: 1.5, parts: 4 }, { part: 2 }]) {
+        assert.equal(StatusMeter.joinedProgress(data), null);
+    }
+});
