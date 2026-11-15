@@ -1,5 +1,11 @@
 import '@testing-library/jest-dom';
-import { cleanup, fireEvent, screen, within } from '@testing-library/react';
+import {
+	cleanup,
+	fireEvent,
+	screen,
+	waitFor,
+	within,
+} from '@testing-library/react';
 import { addFilter, removeFilter } from '@wordpress/hooks';
 import { axe, toHaveNoViolations } from 'jest-axe';
 
@@ -218,6 +224,78 @@ describe( 'Voice › Your own provider', () => {
 
 			cleanup();
 			removeFilter( 'atlasvoice.slot.voice.providers', 'test/pro' );
+		} );
+	} );
+
+	describe( 'with forms in the place for them', () => {
+		const withForms = ( fill ) => {
+			addFilter(
+				'atlasvoice.slot.voice.providers',
+				'test/forms',
+				( fills ) => [ ...fills, fill ]
+			);
+
+			return () => {
+				cleanup();
+				removeFilter( 'atlasvoice.slot.voice.providers', 'test/forms' );
+			};
+		};
+
+		it( 'shows the forms and not its own list beside them', async () => {
+			const done = withForms( () => <p>The key forms</p> );
+			fakeSite( PRO );
+			const { container } = renderWithApp( <VoiceProviders />, {
+				boot: { isPro: true },
+			} );
+
+			expect(
+				await screen.findByText( 'The key forms' )
+			).toBeInTheDocument();
+			expect( screen.queryByText( 'Connected' ) ).not.toBeInTheDocument();
+			expect(
+				container.querySelectorAll( '.atlasvoice-row' )
+			).toHaveLength( 0 );
+			// Who is billed is still said.
+			expect(
+				screen.getAllByText( /the provider bills you for what you use/ )
+					.length
+			).toBeGreaterThan( 0 );
+
+			done();
+		} );
+
+		it( 'has no link to the classic screen: a key is changed here', async () => {
+			const done = withForms( () => <p>The key forms</p> );
+			fakeSite( PRO );
+			renderWithApp( <VoiceProviders />, { boot: { isPro: true } } );
+			await screen.findByText( 'The key forms' );
+
+			expect( screen.queryByRole( 'link' ) ).not.toBeInTheDocument();
+			expect(
+				screen.queryByText( /classic screen/ )
+			).not.toBeInTheDocument();
+
+			done();
+		} );
+
+		it( 'lets the forms make the screen read the providers again', async () => {
+			const done = withForms( ( { reload } ) => (
+				<button onClick={ reload }>Changed a key</button>
+			) );
+			const site = fakeSite( PRO );
+			renderWithApp( <VoiceProviders />, { boot: { isPro: true } } );
+			const before = site.calls.length;
+
+			fireEvent.click(
+				await screen.findByRole( 'button', { name: 'Changed a key' } )
+			);
+
+			await waitFor( () =>
+				expect( site.calls.length ).toBe( before + 1 )
+			);
+			expect( site.calls[ site.calls.length - 1 ].method ).toBe( 'GET' );
+
+			done();
 		} );
 	} );
 

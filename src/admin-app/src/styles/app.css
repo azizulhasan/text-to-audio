@@ -1015,6 +1015,26 @@ body.atlasvoice-app-page #atlasvoice-app {
 	min-width: 0;
 }
 
+/* A field for a key: what is typed is hidden, and it is not a password field,
+   so a browser does not fill a login into it or offer to save the key. */
+.atlasvoice-root .atlasvoice-secret input {
+	-webkit-text-security: disc;
+	font-family: Consolas, Monaco, monospace;
+}
+
+/* Cards under one another (an extension's forms on a screen). */
+.atlasvoice-root .atlasvoice-stack > * + * {
+	margin-top: 16px;
+}
+
+.atlasvoice-root .atlasvoice-provider-head {
+	border-bottom: 1px solid var(--atlasvoice-line-weak);
+}
+
+.atlasvoice-root .atlasvoice-provider-note {
+	margin: 0 0 12px;
+}
+
 /* A row with a name and fields beside it (an extension's table of settings). */
 .atlasvoice-root .atlasvoice-fields-row {
 	display: grid;

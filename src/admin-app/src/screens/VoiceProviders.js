@@ -6,10 +6,14 @@
  * whether each is connected. A key is never shown: the site only answers
  * yes or no, and the name of the account where there is one.
  *
- * The provider engines and their key settings are in AtlasVoice Pro today.
- * So this screen is a status page: with Pro it shows the state and opens the
- * classic screen to change a key; without Pro it says what the providers
+ * The provider engines and their key settings are in AtlasVoice Pro. So in
+ * the free plugin this screen is a status page: it says what the providers
  * are and shows one line about Pro. It only reads (GET tta/v1/providers).
+ *
+ * The plugin that holds the providers puts its own forms into the place
+ * "voice.providers". When it does, those forms are the screen: this list is
+ * not shown beside them, so nothing is said twice. Without forms in that
+ * place (an older Pro) the list stays, with a link to the classic screen.
  */
 import { __, sprintf } from '@wordpress/i18n';
 import { Button, Card, Notice, Spinner } from '@wordpress/components';
@@ -17,7 +21,7 @@ import { useCallback, useEffect, useState } from '@wordpress/element';
 
 import { request } from '../api';
 import { useApp } from '../app-context';
-import Slot from '../extend/Slot';
+import Slot, { getSlotFills } from '../extend/Slot';
 import { classicHashFor } from '../routes';
 import { Chip, Pane, ProNote, Scroll, Section } from '../shell/parts';
 
@@ -154,7 +158,30 @@ export default function VoiceProviders() {
 		( provider ) => provider.kind === 'storage'
 	);
 	const available = !! data.available;
+	const hasForms = getSlotFills( 'voice.providers' ).length > 0;
 	const classicUrl = boot.classicUrl + classicHashFor( 'voice:providers' );
+
+	if ( hasForms ) {
+		return (
+			<Pane canvas>
+				<Scroll width={ 860 }>
+					<div className="atlasvoice-section">
+						<Notice status="info" isDismissible={ false }>
+							{ __(
+								'You connect your own account at the provider, and the provider bills you for what you use. AtlasVoice charges nothing extra for these voices.',
+								'text-to-audio'
+							) }
+						</Notice>
+					</div>
+					{ /* The forms read their own state; `reload` reads this screen's again. */ }
+					<Slot
+						name="voice.providers"
+						fillProps={ { data, reload: load } }
+					/>
+				</Scroll>
+			</Pane>
+		);
+	}
 
 	return (
 		<Pane canvas>
@@ -201,9 +228,6 @@ export default function VoiceProviders() {
 					</Section>
 				) }
 
-				{ /* The plugin that holds the providers puts its key forms here. */ }
-				<Slot name="voice.providers" fillProps={ { data } } />
-
 				{ available ? (
 					<div className="atlasvoice-actions">
 						<Button
@@ -218,7 +242,7 @@ export default function VoiceProviders() {
 						</Button>
 						<span className="atlasvoice-weak">
 							{ __(
-								'A key is never shown here. Changing one moves to this screen in a later update.',
+								'A key is never shown here.',
 								'text-to-audio'
 							) }
 						</span>
