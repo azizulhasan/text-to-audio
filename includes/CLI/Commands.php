@@ -21,6 +21,24 @@ defined( 'ABSPATH' ) || exit;
 class Commands {
 
 	/**
+	 * When the commands are registered: on `init`, after the plugins that add
+	 * commands have started.
+	 *
+	 * AtlasVoice Pro starts on `init` (priority 10) and adds its commands there.
+	 * Registering on `plugins_loaded` came before that, so `wp atlasvoice bulk`
+	 * and `wp atlasvoice seo` never existed in a real terminal (found with the
+	 * real wp program on 2026-11-15; the tests only asked the filter).
+	 */
+	const PRIORITY = 20;
+
+	/**
+	 * Plans the registration. Called once when WP-CLI is running.
+	 */
+	public static function plan() {
+		add_action( 'init', array( __CLASS__, 'register' ), self::PRIORITY );
+	}
+
+	/**
 	 * Registers every command. Called only when WP-CLI is running.
 	 */
 	public static function register() {

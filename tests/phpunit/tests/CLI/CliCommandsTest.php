@@ -160,4 +160,34 @@ class CliCommandsTest extends WP_UnitTestCase {
 			$this->assertFalse( Mode::is_production() );
 		}
 	}
+
+	// TTS-354: found with the real wp program (2026-11-15).
+
+	public function test_the_commands_are_registered_after_the_plugins_that_add_some_have_started() {
+		remove_action( 'init', array( Commands::class, 'register' ), Commands::PRIORITY );
+		remove_action( 'plugins_loaded', array( Commands::class, 'register' ) );
+
+		Commands::plan();
+
+		// AtlasVoice Pro starts on init at the usual priority and adds its commands then.
+		$this->assertSame( Commands::PRIORITY, has_action( 'init', array( Commands::class, 'register' ) ) );
+		$this->assertGreaterThan( 10, Commands::PRIORITY );
+		$this->assertFalse( has_action( 'plugins_loaded', array( Commands::class, 'register' ) ) );
+		remove_action( 'init', array( Commands::class, 'register' ), Commands::PRIORITY );
+	}
+
+	public function test_a_command_added_while_the_plugins_start_is_registered() {
+		// What Pro does: its filter is added during init, before the commands are registered.
+		$late = static function ( $commands ) {
+			$commands['atlasvoice late'] = Ui_Command::class;
+
+			return $commands;
+		};
+		add_filter( 'atlasvoice_cli_commands', $late );
+
+		Commands::register();
+		remove_filter( 'atlasvoice_cli_commands', $late );
+
+		$this->assertSame( Ui_Command::class, WP_CLI::$commands['atlasvoice late'] );
+	}
 }
