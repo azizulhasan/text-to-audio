@@ -1020,7 +1020,7 @@ class Insights {
 			<?php } ?>
 			<div class="<?php echo $ns; ?>-dr-modal-wrap reason">
 				<div class="<?php echo $ns; ?>-dr-modal-header">
-					<h3><?php esc_html_e( 'If you have a moment, please let us know why you are deactivating:', 'text-to-audio' ); ?></h3>
+					<h3><?php esc_html_e( 'Before you go, why are you leaving?', 'text-to-audio' ); ?></h3>
 					<a href="javascript:void 0;" class="<?php echo $ns; ?>-dr-modal-close" aria-label="<?php esc_attr_e( 'Close', 'text-to-audio' ); ?>">
 						<!--suppress HtmlUnknownAttribute -->
 						<svg class="" focusable="false" viewBox="0 0 24 24" aria-hidden="true" role="presentation">
@@ -1044,8 +1044,8 @@ class Insights {
 					</ul>
 				</div>
 				<div class="<?php echo $ns; ?>-dr-modal-footer">
-					<a href="#" class="button button-link dont-bother-me"><?php esc_html_e( 'I rather wouldn\'t say', 'text-to-audio' ); ?></a>
-					<button class="button button-secondary deactivate"><?php esc_html_e( 'Submit & Deactivate', 'text-to-audio' ); ?></button>
+					<a href="#" class="button button-link dont-bother-me"><?php esc_html_e( 'Skip and deactivate', 'text-to-audio' ); ?></a>
+					<button class="button button-secondary deactivate"><?php esc_html_e( 'Send and deactivate', 'text-to-audio' ); ?></button>
 					<button class="button button-primary modal-close"><?php esc_html_e( 'Cancel', 'text-to-audio' ); ?></button>
 				</div>
 			</div>
