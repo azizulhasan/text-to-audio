@@ -35,6 +35,8 @@ class TTA_Reset {
             'tta__button_text_arr',
             // TTS-347: the optional AI notice of the player.
             'tta_ai_notice_settings',
+            // TTS-347: the optional line "Voiced by AtlasVoice" under the player.
+            'tta_player_credit_settings',
             // TTS-354: when audio is made (on first play, or when a post is published).
             'tta_audio_settings',
             'tta_alias_settings',

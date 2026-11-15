@@ -59,6 +59,7 @@ class Commands {
 			'atlasvoice look'          => Look_Command::class,
 			'atlasvoice words'         => Words_Command::class,
 			'atlasvoice ai-notice'     => AI_Notice_Command::class,
+			'atlasvoice credit'        => Credit_Command::class,
 			'atlasvoice embed'         => Embed_Command::class,
 			'atlasvoice where'         => Where_Command::class,
 			'atlasvoice text'          => Text_Command::class,

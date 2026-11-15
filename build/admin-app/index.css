@@ -456,6 +456,11 @@ body.atlasvoice-app-page #atlasvoice-app {
 	margin-bottom: 24px;
 }
 
+/* A section that follows a closing remark of the one before it. */
+.atlasvoice-root p.atlasvoice-weak + .atlasvoice-section {
+	margin-top: 24px;
+}
+
 .atlasvoice-root .atlasvoice-section-head {
 	display: flex;
 	align-items: flex-end;
@@ -1559,6 +1564,13 @@ body.atlasvoice-app-page #atlasvoice-app {
 	color: #fff;
 	font-weight: 600;
 	line-height: 1;
+}
+
+.atlasvoice-root .atlasvoice-credit-preview {
+	margin: 4px 0;
+	font-size: 11px;
+	line-height: 1.4;
+	opacity: 0.7;
 }
 
 .atlasvoice-root .atlasvoice-ai-notice-preview {

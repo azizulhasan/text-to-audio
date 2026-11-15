@@ -6,6 +6,10 @@
  * and a preview: nothing is written until Save.
  *
  * The settings are one small option of their own (TTA\Player\AI_Notice).
+ *
+ * Below it, the optional line "Voiced by AtlasVoice" (TTA\Player\Credit):
+ * also off until the owner turns it on, saved by the same Save button, and
+ * offered only where the free plugin renders the player itself.
  */
 import { __, sprintf } from '@wordpress/i18n';
 import {
@@ -23,6 +27,7 @@ import { Pane, Section } from '../shell/parts';
 import SaveBar from '../shell/SaveBar';
 
 const ROUTE = 'tta/v1/ai-notice';
+const CREDIT_ROUTE = 'tta/v1/credit';
 
 /** The longest notice the site accepts (TTA\Player\AI_Notice::TEXT_LENGTH). */
 export const TEXT_LENGTH = 200;
@@ -32,9 +37,10 @@ export const TEXT_LENGTH = 200;
  *
  * @param {Object} props
  * @param {Object} props.values The settings on screen.
+ * @param {string} props.credit The credit line, when it is turned on.
  * @return {*} The preview.
  */
-function Preview( { values } ) {
+function Preview( { values, credit } ) {
 	const text = values.text || values.default_text;
 	const notice = values.enabled && (
 		<div className="atlasvoice-ai-notice-preview">{ text }</div>
@@ -54,6 +60,9 @@ function Preview( { values } ) {
 					<span>▶</span>
 					{ __( 'Listen', 'text-to-audio' ) }
 				</div>
+				{ credit && (
+					<div className="atlasvoice-credit-preview">{ credit }</div>
+				) }
 				{ values.position !== 'before' && notice }
 				<p>
 					{ __(
@@ -91,6 +100,18 @@ export default function PlayerAiNotice() {
 		)
 	);
 	const { values, set } = form;
+	const credit = useSettingsForm(
+		CREDIT_ROUTE,
+		__(
+			'Credit line saved. Visitors see the change on their next page load.',
+			'text-to-audio'
+		)
+	);
+	const creditOn = !! credit.values?.enabled;
+	const saveAll = () => {
+		form.save();
+		credit.save();
+	};
 
 	if ( form.failure ) {
 		return (
@@ -136,9 +157,9 @@ export default function PlayerAiNotice() {
 			canvas
 			footer={
 				<SaveBar
-					dirty={ form.dirty }
-					saving={ form.saving }
-					onSave={ form.save }
+					dirty={ form.dirty || credit.dirty }
+					saving={ form.saving || credit.saving }
+					onSave={ saveAll }
 				/>
 			}
 		>
@@ -230,9 +251,87 @@ export default function PlayerAiNotice() {
 								'text-to-audio'
 							) }
 						</p>
+						{ credit.failure && (
+							<Notice
+								status="error"
+								isDismissible={ false }
+								actions={ [
+									{
+										label: __(
+											'Try again',
+											'text-to-audio'
+										),
+										onClick: credit.reload,
+									},
+								] }
+							>
+								{ sprintf(
+									/* translators: %s: error message from the site. */
+									__(
+										'The credit line could not be loaded: %s',
+										'text-to-audio'
+									),
+									credit.failure
+								) }
+							</Notice>
+						) }
+						{ credit.values?.available && (
+							<Section
+								title={ __( 'Credit line', 'text-to-audio' ) }
+								description={ __(
+									'Say under the player that AtlasVoice made the voice. Optional, and off until you turn it on.',
+									'text-to-audio'
+								) }
+							>
+								<Card>
+									<CardBody>
+										<div className="atlasvoice-form">
+											<ToggleControl
+												__nextHasNoMarginBottom
+												label={ sprintf(
+													/* translators: %s: the line, "Voiced by AtlasVoice". */
+													__(
+														'Show “%s” under the player',
+														'text-to-audio'
+													),
+													credit.values.text
+												) }
+												help={ __(
+													'Plain text without a link, under the natural-voice player only.',
+													'text-to-audio'
+												) }
+												checked={ creditOn }
+												onChange={ ( value ) =>
+													credit.set(
+														'enabled',
+														value
+													)
+												}
+											/>
+											{ credit.saved.enabled &&
+												! credit.saved.showing && (
+													<p className="atlasvoice-weak">
+														{ __(
+															'Your site does not use the natural voice now, so visitors do not see the line.',
+															'text-to-audio'
+														) }
+													</p>
+												) }
+										</div>
+									</CardBody>
+								</Card>
+							</Section>
+						) }
 					</div>
 				</div>
-				<Preview values={ values } />
+				<Preview
+					values={ values }
+					credit={
+						credit.values?.available && creditOn
+							? credit.values.text
+							: ''
+					}
+				/>
 			</div>
 		</Pane>
 	);

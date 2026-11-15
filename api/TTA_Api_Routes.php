@@ -67,6 +67,8 @@ class TTA_Api_Routes {
 		Words_Controller::register_routes();
 		// TTS-347: the optional line that says the voice is made by AI (Player > AI notice).
 		AI_Notice_Controller::register_routes();
+		// TTS-347: the optional line "Voiced by AtlasVoice" under the player (Player > AI notice).
+		Credit_Controller::register_routes();
 		// TTS-347: the shortcode and block reference, read-only (Player > Shortcode & block).
 		Embed_Controller::register_routes();
 		// TTS-347: which posts get a player (What is read > Where it appears).
