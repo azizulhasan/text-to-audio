@@ -31,7 +31,7 @@ class Cloud_Jobs_Controller {
 		$lang = array(
 			'type'        => 'string',
 			'default'     => '',
-			'description' => __( 'The language code of the audio, for example "en". Empty uses the language saved on the Voice screen.', 'text-to-audio' ),
+			'description' => __( 'The language code of the audio, for example "en" or "pt-BR". Empty uses the language saved on the Voice screen. A value that is not a language code is refused.', 'text-to-audio' ),
 		);
 
 		register_rest_route(

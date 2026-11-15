@@ -76,6 +76,11 @@ class Jobs {
 	const MIN_WAIT = 2;
 
 	/**
+	 * What a language code looks like: "en", "pt-BR", "zh_Hans_CN".
+	 */
+	const LANGUAGE_CODE = '/^[A-Za-z]{2,3}([-_][A-Za-z0-9]{2,8}){0,3}$/';
+
+	/**
 	 * A job nothing has touched for this long, with no check planned, lost its check.
 	 */
 	const LOST_AFTER = 120;
@@ -95,6 +100,10 @@ class Jobs {
 
 		if ( ! get_post( $post_id ) ) {
 			return self::error( 'invalid_post', __( 'This post does not exist.', 'text-to-audio' ), 404 );
+		}
+
+		if ( ! self::is_language_or_empty( $language ) ) {
+			return self::invalid_language();
 		}
 
 		if ( ! TTA_AtlasVoice_Service::is_connected() ) {
@@ -229,6 +238,11 @@ class Jobs {
 	 * @return array|null The record, or null when there is no job.
 	 */
 	public static function status( $post_id, $language = '' ) {
+		// A language that is not a code has no job (and is never read as another language).
+		if ( ! self::is_language_or_empty( $language ) ) {
+			return null;
+		}
+
 		return self::record( (int) $post_id, self::language( $language ) );
 	}
 
@@ -277,6 +291,10 @@ class Jobs {
 	 * @return array|\WP_Error The record after the cancel.
 	 */
 	public static function cancel( $post_id, $language = '' ) {
+		if ( ! self::is_language_or_empty( $language ) ) {
+			return self::invalid_language();
+		}
+
 		$post_id  = (int) $post_id;
 		$language = self::language( $language );
 		$record   = self::record( $post_id, $language );
@@ -737,7 +755,40 @@ class Jobs {
 		}
 
 		// A language code only: it becomes part of a reference and of a file name.
-		return preg_match( '/^[A-Za-z]{2,3}([-_][A-Za-z0-9]{2,8}){0,3}$/', $language ) ? $language : 'en';
+		return preg_match( self::LANGUAGE_CODE, $language ) ? $language : 'en';
+	}
+
+	/**
+	 * The refusal of a language that is not a language code.
+	 *
+	 * @return \WP_Error
+	 */
+	private static function invalid_language() {
+		return self::error( 'invalid_language', __( 'This is not a language code. Give a code such as "en" or "pt-BR", or none to use the language saved on the Voice screen.', 'text-to-audio' ), 400 );
+	}
+
+	/**
+	 * Whether a language somebody gave can be used: nothing (the saved language
+	 * is then used) or a language code.
+	 *
+	 * A value that is neither was once read as the site's language, so a typing
+	 * mistake started a job, and its cost, in a language nobody asked for.
+	 *
+	 * @param mixed $language What was given.
+	 *
+	 * @return bool
+	 */
+	private static function is_language_or_empty( $language ) {
+		if ( null === $language ) {
+			return true;
+		}
+		if ( ! is_string( $language ) ) {
+			return false;
+		}
+
+		$language = trim( $language );
+
+		return '' === $language || 1 === preg_match( self::LANGUAGE_CODE, $language );
 	}
 
 	/**

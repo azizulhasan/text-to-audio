@@ -492,9 +492,15 @@ class JobsTest extends WP_UnitTestCase {
 	public function test_a_language_that_is_not_a_code_never_reaches_a_reference_or_a_file_name() {
 		$this->service_takes_the_job();
 
-		Jobs::start( $this->post, '../../wp-config' );
+		$result = Jobs::start( $this->post, '../../wp-config' );
 
-		$this->assertSame( 'post:' . $this->post . ':en', $this->sent[0]['body']['ref'] );
+		// Since 2026-11-15 (owner's decision) such a value is refused. Before, it
+		// was read as the site's language and a job started in a language nobody
+		// asked for. Either way it never reaches a reference or a file name.
+		$this->assertWPError( $result );
+		$this->assertSame( 'invalid_language', $result->get_error_code() );
+		$this->assertSame( array(), $this->sent );
+		$this->assertNull( Jobs::status( $this->post ) );
 	}
 
 	// When the service refuses.
@@ -1151,5 +1157,132 @@ class JobsTest extends WP_UnitTestCase {
 
 		$this->assertSame( 'making', $listed[ $this->post ] );
 		$this->assertNotFalse( $poll );
+	}
+
+	// TTS-354: a language somebody gave that is not a code (owner's decision, 2026-11-15).
+
+	/**
+	 * @dataProvider values_that_are_no_language_code
+	 */
+	public function test_a_given_language_that_is_not_a_code_is_refused_and_nothing_is_sent( $language ) {
+		$this->service_takes_the_job();
+
+		$result = Jobs::start( $this->post, $language );
+
+		$this->assertWPError( $result );
+		$this->assertSame( 'invalid_language', $result->get_error_code() );
+		$this->assertSame( 400, $result->get_error_data()['status'] );
+		$this->assertStringContainsString( 'language code', $result->get_error_message() );
+		$this->assertSame( array(), $this->sent, 'Nothing is sent, so nothing is billed.' );
+		$this->assertFalse( metadata_exists( 'post', $this->post, Jobs::META ) );
+		$this->assertFalse( $this->next_poll() );
+	}
+
+	public function values_that_are_no_language_code() {
+		return array(
+			'typed with a space'   => array( 'e n!' ),
+			'a word'               => array( 'english' ),
+			'one letter'           => array( 'e' ),
+			'a path'               => array( '../../wp-config' ),
+			'markup'               => array( '<b>en</b>' ),
+			'a code and more'      => array( 'en; DROP TABLE' ),
+			'a list'               => array( array( 'en' ) ),
+			'a number'             => array( 7 ),
+			'true'                 => array( true ),
+			'too many parts'       => array( 'en-a1-b2-c3-d4' ),
+		);
+	}
+
+	/**
+	 * @dataProvider values_that_are_a_language_code
+	 */
+	public function test_a_language_code_is_sent_as_it_was_given( $language ) {
+		$this->service_takes_the_job();
+
+		$result = Jobs::start( $this->post, $language );
+
+		$this->assertNotWPError( $result );
+		$this->assertSame( 'post:' . $this->post . ':' . trim( $language ), $this->sent[0]['body']['ref'] );
+	}
+
+	public function values_that_are_a_language_code() {
+		return array(
+			'two letters'          => array( 'fr' ),
+			'three letters'        => array( 'fil' ),
+			'with a region'        => array( 'pt-BR' ),
+			'with an underscore'   => array( 'zh_CN' ),
+			'with a script'        => array( 'zh-Hans-CN' ),
+			'with spaces around'   => array( ' de ' ),
+		);
+	}
+
+	public function test_no_language_still_uses_the_saved_one() {
+		$this->service_takes_the_job();
+		Jobs::start( $this->post );
+		$this->assertSame( 'post:' . $this->post . ':en', $this->sent[0]['body']['ref'] );
+
+		$this->sent = array();
+		$this->service_takes_the_job();
+		Jobs::start( $this->post, '' );
+		// The same text and language: the same job, asked for again.
+		$this->assertSame( 'post:' . $this->post . ':en', $this->sent[0]['body']['ref'] );
+	}
+
+	public function test_a_saved_language_that_is_broken_still_falls_back_to_english() {
+		// Nobody typed this one: a broken saved setting must not stop every job.
+		update_option( 'tta_listening_settings', array( 'tta__listening_lang' => 'not a code!' ) );
+		\TTA\TTA_Cache::flush();
+		$this->service_takes_the_job();
+
+		$result = Jobs::start( $this->post );
+
+		$this->assertNotWPError( $result );
+		$this->assertSame( 'post:' . $this->post . ':en', $this->sent[0]['body']['ref'] );
+	}
+
+	public function test_a_job_cannot_be_read_or_cancelled_under_a_language_that_is_not_a_code() {
+		$this->service_takes_the_job();
+		Jobs::start( $this->post );
+		$requests = count( $this->sent );
+
+		// Before, both were read as "en" and would have found, and cancelled, the English job.
+		$this->assertNull( Jobs::status( $this->post, 'e n!' ) );
+		$cancel = Jobs::cancel( $this->post, 'e n!' );
+
+		$this->assertWPError( $cancel );
+		$this->assertSame( 'invalid_language', $cancel->get_error_code() );
+		$this->assertCount( $requests, $this->sent, 'The service was not asked to cancel anything.' );
+		$this->assertSame( 'queued', Jobs::status( $this->post )['status'] );
+		$this->assertNotFalse( $this->next_poll() );
+	}
+
+	public function test_the_route_refuses_a_language_that_is_not_a_code() {
+		$this->service_takes_the_job();
+
+		$response = $this->rest(
+			'POST',
+			array(
+				'post_id'  => $this->post,
+				'language' => 'e n!',
+			)
+		);
+
+		$this->assertSame( 400, $response->get_status() );
+		$this->assertSame( 'invalid_language', $response->get_data()['code'] );
+		$this->assertSame( array(), $this->sent );
+	}
+
+	public function test_the_command_says_why_a_language_was_refused() {
+		$this->service_takes_the_job();
+
+		try {
+			( new \TTA\CLI\Job_Command() )->create( array( (string) $this->post ), array( 'language' => 'e n!' ) );
+		} catch ( Atlasvoice_Cli_Stop $stop ) {
+			unset( $stop );
+		}
+
+		$this->assertSame( 'error', WP_CLI::$log[0][0] );
+		$this->assertStringContainsString( 'language code', WP_CLI::$log[0][1] );
+		$this->assertSame( array(), $this->sent );
 	}
 }

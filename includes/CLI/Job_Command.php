@@ -28,7 +28,9 @@ class Job_Command {
 	 * : The id of the post.
 	 *
 	 * [--language=<code>]
-	 * : The language code of the audio. Default: the language saved for the voice.
+	 * : The language code of the audio, such as en or pt-BR. Default: the
+	 * language saved for the voice. A value that is not a language code is
+	 * refused, and nothing is sent.
 	 *
 	 * ## EXAMPLES
 	 *
