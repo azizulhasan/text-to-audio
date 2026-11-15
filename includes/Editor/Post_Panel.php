@@ -35,6 +35,9 @@ class Post_Panel {
 
 	const HANDLE = 'atlasvoice-editor-panel';
 
+	/** The admin-post action of the toolbar's hide / show item. */
+	const TOGGLE_ACTION = 'atlasvoice_post_player';
+
 	/** How many days of listening are counted. */
 	const DAYS = 30;
 
@@ -53,6 +56,73 @@ class Post_Panel {
 		add_action( 'enqueue_block_editor_assets', array( __CLASS__, 'enqueue' ) );
 		add_action( 'add_meta_boxes', array( __CLASS__, 'add_box' ), 20 );
 		add_filter( 'atlasvoice_render_audio_panel', array( __CLASS__, 'replaces_audio_box' ), 99 );
+		add_action( 'admin_post_' . self::TOGGLE_ACTION, array( __CLASS__, 'handle_toolbar_toggle' ) );
+	}
+
+	/**
+	 * The toolbar's "Hide / Show the player on this post": the address to
+	 * press and what the post has now. For the post that is open on the
+	 * site or in the editor, when the user can edit it.
+	 *
+	 * @return array{shown:bool, url:string}|null Null where there is no such post.
+	 */
+	public static function toolbar_toggle() {
+		$post_id = 0;
+
+		if ( is_admin() ) {
+			$screen = function_exists( 'get_current_screen' ) ? get_current_screen() : null;
+			if ( $screen && 'post' === $screen->base && get_post() ) {
+				$post_id = (int) get_post()->ID;
+			}
+		} elseif ( is_singular() ) {
+			$post_id = (int) get_queried_object_id();
+		}
+
+		if ( ! $post_id || ! current_user_can( 'edit_post', $post_id ) ) {
+			return null;
+		}
+
+		$shown = ! in_array( $post_id, self::hidden(), true );
+		$back  = isset( $_SERVER['REQUEST_URI'] ) ? esc_url_raw( wp_unslash( $_SERVER['REQUEST_URI'] ) ) : '';
+
+		return array(
+			'shown' => $shown,
+			'url'   => wp_nonce_url(
+				add_query_arg(
+					array(
+						'action' => self::TOGGLE_ACTION,
+						'post'   => $post_id,
+						// What a press does: the opposite of what is there now.
+						'shown'  => $shown ? '0' : '1',
+						'back'   => rawurlencode( $back ),
+					),
+					admin_url( 'admin-post.php' )
+				),
+				self::TOGGLE_ACTION . '_' . $post_id
+			),
+		);
+	}
+
+	/**
+	 * Handles a press of the toolbar item, then goes back to the page.
+	 */
+	public static function handle_toolbar_toggle() {
+		$post_id = isset( $_GET['post'] ) ? absint( $_GET['post'] ) : 0;
+
+		check_admin_referer( self::TOGGLE_ACTION . '_' . $post_id );
+
+		if ( ! $post_id || ! current_user_can( 'edit_post', $post_id ) ) {
+			wp_die( esc_html__( 'You do not have permission to do this.', 'text-to-audio' ), '', array( 'response' => 403 ) );
+		}
+
+		self::show_player( $post_id, isset( $_GET['shown'] ) && '1' === $_GET['shown'] );
+
+		$back = isset( $_GET['back'] ) ? esc_url_raw( rawurldecode( wp_unslash( $_GET['back'] ) ) ) : ''; // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- sanitised by esc_url_raw.
+		// Only back to this site: wp_safe_redirect() refuses any other host.
+		wp_safe_redirect( '' !== $back ? $back : (string) get_permalink( $post_id ) );
+		if ( ! defined( 'ATLASVOICE_TESTING' ) ) {
+			exit;
+		}
 	}
 
 	/**

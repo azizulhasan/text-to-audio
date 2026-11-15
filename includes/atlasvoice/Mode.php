@@ -400,6 +400,18 @@ class Mode {
 			),
 		) );
 
+		// TTS-347: one line that says what the mode means for visitors.
+		if ( in_array( $status['state'], array( 'staging', 'production' ), true ) ) {
+			$bar->add_node( array(
+				'parent' => self::BAR_NODE_ID,
+				'id'     => self::BAR_NODE_ID . '-note',
+				'title'  => 'production' === $status['state']
+					? esc_html__( 'Visitors hear your posts.', 'text-to-audio' )
+					: esc_html__( 'Only you can see the player.', 'text-to-audio' ),
+				'meta'   => array( 'class' => 'atlasvoice-bar-note' ),
+			) );
+		}
+
 		// TTS-279: quick-actions under the dot. These call the same
 		// window.atlasvoiceGoLive()/Revert() dialog as the dashboard
 		// notice and the site-wide notice — one implementation, one
@@ -411,7 +423,7 @@ class Mode {
 			$bar->add_node( array(
 				'parent' => self::BAR_NODE_ID,
 				'id'     => self::BAR_NODE_ID . '-go-live',
-				'title'  => esc_html__( 'Go Live…', 'text-to-audio' ),
+				'title'  => esc_html__( 'Go live…', 'text-to-audio' ),
 				'href'   => '#atlasvoice-go-live',
 				'meta'   => array(
 					'onclick' => 'return window.atlasvoiceGoLive && window.atlasvoiceGoLive();',
@@ -424,7 +436,7 @@ class Mode {
 			$bar->add_node( array(
 				'parent' => self::BAR_NODE_ID,
 				'id'     => self::BAR_NODE_ID . '-revert',
-				'title'  => esc_html__( 'Revert to staging', 'text-to-audio' ),
+				'title'  => esc_html__( 'Back to staging…', 'text-to-audio' ),
 				'href'   => '#atlasvoice-revert',
 				'meta'   => array(
 					'onclick' => 'return window.atlasvoiceRevert && window.atlasvoiceRevert();',
@@ -471,12 +483,29 @@ class Mode {
 			}
 		}
 
+		// TTS-347: hide or show the player on the post that is open, without
+		// going to its editor. One click; it comes back to this page.
+		if ( class_exists( '\\TTA\\Editor\\Post_Panel' ) ) {
+			$toggle = \TTA\Editor\Post_Panel::toolbar_toggle();
+
+			if ( $toggle ) {
+				$bar->add_node( array(
+					'parent' => self::BAR_NODE_ID,
+					'id'     => self::BAR_NODE_ID . '-post-player',
+					'title'  => $toggle['shown']
+						? esc_html__( 'Hide the player on this post', 'text-to-audio' )
+						: esc_html__( 'Show the player on this post', 'text-to-audio' ),
+					'href'   => esc_url( $toggle['url'] ),
+				) );
+			}
+		}
+
 		// Settings shortcut — identical on every state so admins always
 		// have a one-click route to the full dashboard.
 		$bar->add_node( array(
 			'parent' => self::BAR_NODE_ID,
 			'id'     => self::BAR_NODE_ID . '-settings',
-			'title'  => esc_html__( 'Open AtlasVoice settings', 'text-to-audio' ),
+			'title'  => esc_html__( 'Open AtlasVoice', 'text-to-audio' ),
 			'href'   => admin_url( 'admin.php?page=text-to-audio' ),
 		) );
 	}
