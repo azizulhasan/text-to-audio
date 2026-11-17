@@ -355,4 +355,125 @@ class VoicesTest extends WP_UnitTestCase {
 		$this->assertSame( 'error', WP_CLI::$log[0][0] );
 		$this->assertStringContainsString( 'could not list its voices', WP_CLI::$log[0][1] );
 	}
+
+	// The voices of AtlasVoice Cloud say more about themselves (TTS-378).
+
+	private function cloud_list() {
+		return array(
+			'count'  => 2,
+			'voices' => array(
+				array(
+					'id'     => 'bf_emma',
+					'engine' => 'cloud',
+					'lang'   => 'en-gb',
+					'locale' => 'en-GB',
+					'name'   => 'Emma',
+					'gender' => 'female',
+					'model'  => 'kokoro',
+				),
+				array(
+					'id'     => 'en_GB-alan-medium',
+					'engine' => 'cloud',
+					'lang'   => 'en-gb',
+					'locale' => 'en-GB',
+					'name'   => 'Alan',
+					'gender' => null,
+					'model'  => 'piper',
+				),
+			),
+		);
+	}
+
+	public function test_a_voice_keeps_its_locale_gender_and_model_when_the_service_gives_them() {
+		$this->answer = array( 200, $this->cloud_list() );
+
+		$list = Voices::get( 'en-GB', 'cloud' );
+
+		$this->assertStringEndsWith( '/v1/voices?lang=en-gb&engine=cloud', $this->calls[0]['url'] );
+		$this->assertSame(
+			array(
+				'id'       => 'bf_emma',
+				'engine'   => 'cloud',
+				'language' => 'en-gb',
+				'name'     => 'Emma',
+				'locale'   => 'en-GB',
+				'gender'   => 'female',
+				'model'    => 'kokoro',
+			),
+			$list['voices'][0]
+		);
+	}
+
+	public function test_a_detail_the_service_left_empty_is_left_out() {
+		$this->answer = array( 200, $this->cloud_list() );
+
+		$alan = Voices::get( '', 'cloud' )['voices'][1];
+
+		$this->assertArrayNotHasKey( 'gender', $alan );
+		$this->assertSame( 'piper', $alan['model'] );
+		$this->assertSame( 'en-GB', $alan['locale'] );
+	}
+
+	public function test_a_plain_voice_is_listed_as_before() {
+		$this->assertSame( array( 'id', 'engine', 'language', 'name' ), array_keys( Voices::get()['voices'][0] ) );
+	}
+
+	public function test_the_details_are_cleaned_like_the_rest() {
+		$this->answer = array(
+			200,
+			array(
+				'voices' => array(
+					array(
+						'id'     => 'x',
+						'locale' => '<b>en-GB</b>',
+						'gender' => 'Female <script>',
+						'model'  => array( 'kokoro' ),
+						'extra'  => 'not kept',
+					),
+				),
+			),
+		);
+
+		$voice = Voices::get()['voices'][0];
+
+		$this->assertSame( 'en-GB', $voice['locale'] );
+		$this->assertSame( 'female', $voice['gender'] );
+		$this->assertArrayNotHasKey( 'model', $voice );
+		$this->assertArrayNotHasKey( 'extra', $voice );
+	}
+
+	public function test_an_extension_is_told_when_the_list_was_read_anew_and_not_from_the_kept_answer() {
+		$this->answer = array( 200, $this->cloud_list() );
+		$told         = array();
+		add_action(
+			'atlasvoice_cloud_voices_read',
+			function ( $voices, $language, $engine ) use ( &$told ) {
+				$told[] = array( count( $voices ), $language, $engine );
+			},
+			10,
+			3
+		);
+
+		Voices::get( '', 'cloud' );
+		Voices::get( '', 'cloud' );
+
+		$this->assertSame( array( array( 2, '', 'cloud' ) ), $told );
+		remove_all_actions( 'atlasvoice_cloud_voices_read' );
+	}
+
+	public function test_an_extension_is_not_told_when_the_service_gave_no_list() {
+		$this->answer = null;
+		$told         = 0;
+		add_action(
+			'atlasvoice_cloud_voices_read',
+			function () use ( &$told ) {
+				++$told;
+			}
+		);
+
+		Voices::get( '', 'cloud' );
+
+		$this->assertSame( 0, $told );
+		remove_all_actions( 'atlasvoice_cloud_voices_read' );
+	}
 }

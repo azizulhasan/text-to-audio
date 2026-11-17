@@ -47,6 +47,11 @@ class Voices {
 	const MAX_VOICES = 2000;
 
 	/**
+	 * What a voice can say beside its id, engine, language and name.
+	 */
+	const DETAILS = array( 'locale', 'gender', 'model' );
+
+	/**
 	 * The voices.
 	 *
 	 * @param string $language Only voices of this language, e.g. "en" or "pt-br". Empty: every language.
@@ -54,7 +59,7 @@ class Voices {
 	 * @param bool   $refresh  Ask the service now instead of using the kept answer.
 	 *
 	 * @return array {
-	 *     voices: array<int, array{id:string, engine:string, language:string, name:string}>,
+	 *     voices: array<int, array{id:string, engine:string, language:string, name:string, locale?:string, gender?:string, model?:string}>,
 	 *     count: int, language: string, engine: string, source: 'service'|'none',
 	 *     fetched_at: int, error: string, request_id: string
 	 * }
@@ -83,8 +88,19 @@ class Voices {
 
 			set_transient( $key, $answer, self::CACHE_SECONDS );
 
+			/**
+			 * Fires when the service's list of voices was read anew (not from
+			 * the kept answer). An extension that ships its own list of an
+			 * engine's voices learns here which ones the service added.
+			 *
+			 * @param array  $voices   The cleaned voices.
+			 * @param string $language The language asked for, or ''.
+			 * @param string $engine   The engine asked for, or ''.
+			 */
+			do_action( 'atlasvoice_cloud_voices_read', $answer['voices'], $language, $engine );
+
 			return self::shape( $answer, $language, $engine );
-		}
+		}//end if
 
 		// The service could not answer: an empty list that says why. The
 		// plugin's own lists are what its screens fall back on.
@@ -133,13 +149,27 @@ class Voices {
 				continue;
 			}
 
-			$clean[] = array(
+			$entry = array(
 				'id'       => $id,
 				'engine'   => isset( $voice['engine'] ) && is_scalar( $voice['engine'] ) ? sanitize_key( sanitize_text_field( (string) $voice['engine'] ) ) : '',
 				'language' => isset( $voice['lang'] ) && is_scalar( $voice['lang'] ) ? sanitize_text_field( (string) $voice['lang'] ) : '',
 				'name'     => isset( $voice['name'] ) && is_scalar( $voice['name'] ) ? sanitize_text_field( (string) $voice['name'] ) : $id,
 			);
-		}
+
+			// What some engines say beside it (the AtlasVoice Cloud voices do):
+			// the locale a voice is listed under, its gender and its model.
+			// Kept only when the service gave it, so a plain voice stays as it was.
+			foreach ( self::DETAILS as $detail ) {
+				if ( isset( $voice[ $detail ] ) && is_scalar( $voice[ $detail ] ) ) {
+					$value = sanitize_text_field( (string) $voice[ $detail ] );
+					if ( '' !== $value ) {
+						$entry[ $detail ] = 'locale' === $detail ? $value : sanitize_key( $value );
+					}
+				}
+			}
+
+			$clean[] = $entry;
+		}//end foreach
 
 		return $clean;
 	}
