@@ -43,6 +43,29 @@ class Route_Access {
 	}
 
 	/**
+	 * Allows a visitor of the site whose page carries a wp_rest nonce. For
+	 * what the player on a page does for its visitor (the first play of a
+	 * post); the route itself decides what a visitor may ask for.
+	 *
+	 * @param \WP_REST_Request $request The request.
+	 *
+	 * @return true|\WP_Error
+	 */
+	public static function visitor( $request ) {
+		$nonce = (string) $request->get_header( 'X-WP-Nonce' );
+
+		if ( '' !== $nonce && wp_verify_nonce( $nonce, 'wp_rest' ) ) {
+			return true;
+		}
+
+		return new \WP_Error(
+			'rest_forbidden',
+			__( 'Invalid or missing nonce.', 'text-to-audio' ),
+			array( 'status' => 403 )
+		);
+	}
+
+	/**
 	 * Allows everyone who can edit the post the route names in `id`. For
 	 * what belongs to one post (its audio, its player), not to the site.
 	 *

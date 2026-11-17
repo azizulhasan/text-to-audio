@@ -17,6 +17,7 @@ import RestNonce from './tts/RestNonce';
 import EditorNote from './tts/AtlasVoiceEditorNote';
 import BrowserFallback from './tts/AtlasVoiceBrowserFallback';
 import StatusMeter from './tts/AtlasVoiceStatusMeter';
+import AudioJob from './tts/AtlasVoiceAudioJob';
 
 const { __, sprintf } = wp.i18n;
 
@@ -271,6 +272,31 @@ export class AtlasVoiceMp3Player extends AtlasVoiceProgressivePlayer {
 
         const totalChars = batches.reduce((n, b) => n + b.length, 0);
 
+        // TTS-354: the audio is made as one job on the service. The player asks
+        // once, shows how far it is, and plays the file when it is there; a
+        // second visitor joins the same job. Only when the site says a job is
+        // not the way (an older or busy service, a page in another language, a
+        // very long text) is the audio made batch by batch below, as before.
+        this.showStatus(__('Making the audio…', 'text-to-audio'));
+        const job = await AudioJob.make({
+            postId,
+            content: this.content,
+            fileKey: String(this.extra.file_url_key || ''),
+            send: (method, params) => this.askAboutJob(method, params),
+            wait: (ms) => new Promise((resolve) => setTimeout(resolve, ms)),
+            onProgress: ({ part, parts, share }) => this.showStatus(parts > 1
+                /* translators: 1: current part, 2: number of parts. */
+                ? sprintf(__('Making the audio · part %1$d of %2$d', 'text-to-audio'), part, parts)
+                : __('Making the audio…', 'text-to-audio'),
+            share),
+        });
+        if (job.url) {
+            return { url: job.url };
+        }
+        if (!job.fallback) {
+            return { code: job.code };
+        }
+
         for (let attempt = 0; attempt <= MAX_LOCK_RETRIES; attempt++) {
             let last = null;
             // TTS-321: the visitor pressed play, so each part plays as it arrives.
@@ -350,6 +376,43 @@ export class AtlasVoiceMp3Player extends AtlasVoiceProgressivePlayer {
             throw new Error((data && data.message) || '');
         }
         return data;
+    }
+
+    /**
+     * TTS-354: one question to the site about this post's audio job.
+     *
+     * @param {string}  method  POST to start or join, GET to ask how far it is.
+     * @param {Object}  params  post_id, file_url_key and, to start, content.
+     * @param {boolean} retried Whether the nonce was renewed already.
+     * @return {Promise<Object|null>} The site's answer; null when it could not be asked.
+     */
+    async askAboutJob(method, params, retried = false) {
+        try {
+            let url = AtlasVoiceMp3Player.route(AudioJob.ROUTE);
+            const init = {
+                method,
+                credentials: 'same-origin',
+                headers: { 'X-WP-Nonce': window.ttsObj?.rest_nonce || '' },
+            };
+            if (method === 'GET') {
+                url += (url.includes('?') ? '&' : '?') + new URLSearchParams(params).toString();
+            } else {
+                init.headers['Content-Type'] = 'application/json; charset=UTF-8';
+                init.body = JSON.stringify(params);
+            }
+
+            const res = await fetch(url, init);
+            const data = await res.json().catch(() => null);
+
+            // TTS-343: the page came from a page cache with an expired nonce.
+            if (!retried && RestNonce.isExpired(res.status, data) && await RestNonce.renew()) {
+                return this.askAboutJob(method, params, true);
+            }
+
+            return res.ok ? data : null;
+        } catch (e) {
+            return null;
+        }
     }
 
     async send(body, retried = false) {
