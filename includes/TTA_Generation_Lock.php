@@ -23,6 +23,11 @@ defined( 'ABSPATH' ) || exit;
  *
  * A caller that gets "no" answers `locked`; the players already wait and
  * retry, then play the finished file.
+ *
+ * TTS-354: a post's audio is made one way at a time. While its audio job is
+ * being made (Cloud\Jobs), a NEW batch run waits too: found on a live run,
+ * where one page load started the job and another the batches, and the post
+ * was billed twice. When the job is done the retry finds the stored file.
  */
 final class TTA_Generation_Lock {
 
@@ -67,6 +72,11 @@ final class TTA_Generation_Lock {
 		$now  = time();
 
 		$active = is_array( $lock ) && isset( $lock['touched'] ) && ( $now - (int) $lock['touched'] ) < self::STALE_SECONDS;
+
+		// A run that is already going finishes; only a new one waits for the job.
+		if ( (int) $batch_no <= 1 && ! ( $active && (string) $lock['user_id'] === (string) $user_id ) && self::job_is_being_made( $post_id ) ) {
+			return false;
+		}
 
 		if ( $active ) {
 			if ( (int) $batch_no <= 1 || (string) $lock['user_id'] !== (string) $user_id ) {
@@ -120,6 +130,38 @@ final class TTA_Generation_Lock {
 				'parts' => $parts,
 			)
 			: null;
+	}
+
+	/**
+	 * TTS-354: whether a batch run holds the post right now. An audio job is
+	 * not started for it then: the run's audio is on its way already.
+	 *
+	 * @param int $post_id The post.
+	 * @return bool
+	 */
+	public static function is_held( $post_id ) {
+		$lock = get_transient( self::key( $post_id ) );
+
+		return is_array( $lock ) && isset( $lock['touched'] ) && ( time() - (int) $lock['touched'] ) < self::STALE_SECONDS;
+	}
+
+	/**
+	 * TTS-354: whether the post's audio job is being made and was heard of
+	 * lately. A job nobody has heard of for a while does not hold the post.
+	 *
+	 * @param int $post_id The post.
+	 * @return bool
+	 */
+	private static function job_is_being_made( $post_id ) {
+		if ( ! class_exists( '\TTA\Cloud\Jobs' ) ) {
+			return false;
+		}
+
+		$record = \TTA\Cloud\Jobs::status( absint( $post_id ) );
+
+		return is_array( $record )
+			&& in_array( $record['status'], array( 'queued', 'running', 'downloading' ), true )
+			&& time() - (int) $record['updated'] <= \TTA\Cloud\Jobs::LOST_AFTER;
 	}
 
 	/**

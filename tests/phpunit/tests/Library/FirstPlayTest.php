@@ -74,6 +74,7 @@ class FirstPlayTest extends WP_UnitTestCase {
 	}
 
 	public function tear_down() {
+		\TTA\TTA_Generation_Lock::release( $this->post );
 		remove_filter( 'pre_http_request', array( $this, 'intercept' ), 10 );
 		remove_all_filters( 'tts_get_player_id' );
 		remove_all_filters( 'atlasvoice_first_play_text' );
@@ -645,5 +646,97 @@ class FirstPlayTest extends WP_UnitTestCase {
 
 		$this->assertStringNotContainsString( self::KEY, $json );
 		$this->assertStringNotContainsString( self::JOB, $json );
+	}
+
+	// ---- one way at a time (found on the live run, 2026-11-17) ------------------------
+
+	public function test_while_the_job_is_being_made_a_new_batch_run_waits() {
+		$this->service_takes_the_job();
+		First_Play::start( $this->post, self::TEXT );
+
+		$this->assertFalse( \TTA\TTA_Generation_Lock::acquire( $this->post, 'another-page', 1, 2 ), 'Batch 1 of another page is answered "locked".' );
+	}
+
+	public function test_the_batch_route_answers_locked_and_sends_nothing_while_the_job_is_being_made() {
+		$this->service_takes_the_job();
+		First_Play::start( $this->post, self::TEXT );
+		$before = count( $this->sent );
+
+		$answer = \TTA\TTA_GTTS_Generation::handle(
+			array(
+				'post_id'    => $this->post,
+				'user_id'    => 'another-page',
+				'title'      => 'the-old-mill',
+				'temp_title' => 'the-old-mill-1',
+				'content'    => 'The old mill.',
+				'settings'   => array( 'language' => 'en' ),
+			)
+		);
+
+		$this->assertSame( 'locked', $answer['data']['message'] );
+		$this->assertSame( $before, count( $this->sent ), 'Nothing more goes to the service.' );
+	}
+
+	public function test_a_batch_run_that_is_already_going_finishes() {
+		\TTA\TTA_Generation_Lock::acquire( $this->post, 'the-page', 1, 3 );
+		$this->service_takes_the_job();
+		// A job made by somebody else meanwhile (an admin's "Make audio").
+		\TTA\Cloud\Jobs::start( $this->post, '', self::TEXT );
+
+		$this->assertTrue( \TTA\TTA_Generation_Lock::acquire( $this->post, 'the-page', 2 ) );
+	}
+
+	public function test_once_the_job_is_done_the_batch_route_plays_its_file() {
+		$this->service_takes_the_job();
+		First_Play::start( $this->post, self::TEXT );
+		$this->time_passes();
+		$this->service_finished_the_job();
+		First_Play::status( $this->post );
+
+		$answer = \TTA\TTA_GTTS_Generation::handle(
+			array(
+				'post_id'    => $this->post,
+				'user_id'    => 'another-page',
+				'title'      => 'the-old-mill',
+				'temp_title' => 'the-old-mill-1',
+				'content'    => 'The old mill.',
+				'settings'   => array( 'language' => 'en' ),
+			)
+		);
+
+		$this->assertTrue( $answer['data']['file_already_exists'] );
+		$this->assertStringContainsString( '/jobs/post-' . $this->post . '-en-', $answer['data']['url'] );
+	}
+
+	public function test_a_job_nobody_heard_of_for_a_while_does_not_hold_the_post() {
+		$this->service_takes_the_job();
+		First_Play::start( $this->post, self::TEXT );
+		$this->time_passes( Jobs::LOST_AFTER + 5, false );
+
+		$this->assertTrue( \TTA\TTA_Generation_Lock::acquire( $this->post, 'another-page', 1 ) );
+	}
+
+	public function test_while_a_batch_run_holds_the_post_no_job_is_started() {
+		\TTA\TTA_Generation_Lock::acquire( $this->post, 'the-page', 2, 5 );
+
+		$answer = First_Play::start( $this->post, self::TEXT );
+
+		$this->assertSame( array( 'fallback', 'batches_running' ), array( $answer['state'], $answer['code'] ) );
+		$this->assertSame( array(), $this->sent );
+	}
+
+	public function test_an_abandoned_batch_run_does_not_hold_the_post() {
+		set_transient(
+			\TTA\TTA_Generation_Lock::key( $this->post ),
+			array(
+				'user_id' => 'gone',
+				'post_id' => $this->post,
+				'touched' => time() - \TTA\TTA_Generation_Lock::STALE_SECONDS - 1,
+			),
+			300
+		);
+		$this->service_takes_the_job();
+
+		$this->assertSame( 'making', First_Play::start( $this->post, self::TEXT )['state'] );
 	}
 }

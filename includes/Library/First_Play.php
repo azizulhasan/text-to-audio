@@ -106,6 +106,12 @@ class First_Play {
 			return self::from_record( $post_id, $record );
 		}
 
+		// A batch run (an older page, Bulk MP3) is making this post's audio:
+		// the player waits for it the usual way instead of paying twice.
+		if ( \TTA\TTA_Generation_Lock::is_held( $post_id ) ) {
+			return self::answer( self::FALLBACK, array( 'code' => 'batches_running' ) );
+		}
+
 		$text = is_string( $text ) ? trim( $text ) : '';
 
 		/**
