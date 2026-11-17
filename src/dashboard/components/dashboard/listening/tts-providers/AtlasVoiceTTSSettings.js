@@ -3,6 +3,7 @@ import { Row, Col, Form, Button, Alert, Spinner } from "react-bootstrap";
 import { __, sprintf } from "@wordpress/i18n";
 
 import { GTTS_LANGUAGES } from "../gttsLanguages";
+import { codeInList, readServiceLanguages } from "../serviceLanguages";
 import AtlasVoiceUsage from "../../atlasvoice/AtlasVoiceUsage";
 
 /**
@@ -35,6 +36,8 @@ export default function AtlasVoiceTTSSettings({ listeningSettings, handleChange,
   // The site is registered to another email: offer to move it (proves control of the site).
   const [takeoverOffer, setTakeoverOffer] = useState(null);
   const [error, setError] = useState("");
+  // TTS-378: the languages as AtlasVoice Cloud lists them, once they are known.
+  const [serviceLanguages, setServiceLanguages] = useState(null);
 
   useEffect(() => {
     call("GET")
@@ -46,6 +49,33 @@ export default function AtlasVoiceTTSSettings({ listeningSettings, handleChange,
       })
       .catch(() => setError(__("Could not load the AtlasVoice TTS status.", "text-to-audio")));
   }, []);
+
+  // TTS-378: a connected site is offered the languages the service lists now.
+  // A site that is not connected asks nothing: nothing is sent before the
+  // owner agreed (wp.org Guideline 7). The plugin's own list is used until the
+  // answer is there and whenever the service cannot give one.
+  const connected = !!state?.connected;
+  useEffect(() => {
+    if (!connected || !showLanguage) {
+      setServiceLanguages(null);
+      return undefined;
+    }
+
+    let current = true;
+    readServiceLanguages(
+      window.tta_obj?.api_url || window.ttsObj?.api_url,
+      window.ttsObj?.rest_nonce,
+      (url, options) => fetch(url, options)
+    ).then((languages) => {
+      if (current) {
+        setServiceLanguages(languages);
+      }
+    });
+
+    return () => {
+      current = false;
+    };
+  }, [connected, showLanguage]);
 
   const connect = async () => {
     setBusy(true);
@@ -98,7 +128,8 @@ export default function AtlasVoiceTTSSettings({ listeningSettings, handleChange,
   };
 
   const language = listeningSettings.tta__listening_lang || "";
-  const languageKnown = Object.keys(GTTS_LANGUAGES).some((code) => code.toLowerCase() === String(language).toLowerCase());
+  const languages = serviceLanguages || GTTS_LANGUAGES;
+  const listedCode = codeInList(language, languages);
 
   return (
     <>
@@ -285,11 +316,21 @@ export default function AtlasVoiceTTSSettings({ listeningSettings, handleChange,
               onChange={handleChange}
               name="tta__listening_lang"
               id="tta__listening_lang"
-              value={languageKnown ? Object.keys(GTTS_LANGUAGES).find((c) => c.toLowerCase() === language.toLowerCase()) : ""}
+              value={listedCode || language}
               className="tta_orange_voice_select"
             >
               <option value="" disabled>{__("Choose a language", "text-to-audio")}</option>
-              {Object.entries(GTTS_LANGUAGES).map(([code, name]) => (
+              {/* A saved language the list does not have is kept and shown, so opening the screen never loses it. */}
+              {language && !listedCode && (
+                <option value={language}>
+                  {sprintf(
+                    /* translators: %s: a language code. */
+                    __("%s (not offered any more)", "text-to-audio"),
+                    language
+                  )}
+                </option>
+              )}
+              {Object.entries(languages).map(([code, name]) => (
                 <option key={code} value={code}>{name}</option>
               ))}
             </Form.Select>
