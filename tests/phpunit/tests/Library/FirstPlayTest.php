@@ -181,11 +181,20 @@ class FirstPlayTest extends WP_UnitTestCase {
 		$this->answers['GET /files/'][]    = array( 200, self::MP3 );
 	}
 
-	/** Makes the stored job look as if nobody asked about it for a while. */
-	private function time_passes( $seconds = 5 ) {
+	/**
+	 * Makes the stored job look as if nobody asked about it for a while, and
+	 * the time the service named for the next question as if it had come.
+	 */
+	private function time_passes( $seconds = 5, $service_is_due = true ) {
 		$all                  = get_post_meta( $this->post, Jobs::META, true );
 		$all['en']['updated'] = time() - $seconds;
 		update_post_meta( $this->post, Jobs::META, wp_slash( $all ) );
+
+		if ( $service_is_due ) {
+			$args = array( $this->post, 'en' );
+			wp_clear_scheduled_hook( Jobs::HOOK, $args );
+			wp_schedule_single_event( time() - 1, Jobs::HOOK, $args );
+		}
 	}
 
 	private function requests_to( $fragment, $method = '' ) {
@@ -282,6 +291,47 @@ class FirstPlayTest extends WP_UnitTestCase {
 		$this->service_says( $this->job( 'running', array( 'parts_done' => 4 ) ) );
 		First_Play::status( $this->post );
 		First_Play::status( $this->post );
+		First_Play::status( $this->post );
+
+		$this->assertCount( 1, $this->requests_to( '/v1/jobs/' . self::JOB ) );
+	}
+
+	public function test_the_service_sets_the_pace_visitors_do_not_ask_before_the_time_it_named() {
+		$this->service_takes_the_job();
+		First_Play::start( $this->post, self::TEXT );
+		// Long after the least gap, but the service asked for a later question.
+		$this->time_passes( 5, false );
+		$args = array( $this->post, 'en' );
+		wp_clear_scheduled_hook( Jobs::HOOK, $args );
+		wp_schedule_single_event( time() + 3, Jobs::HOOK, $args );
+
+		$answer = First_Play::status( $this->post );
+
+		$this->assertSame( 'making', $answer['state'] );
+		$this->assertCount( 0, $this->requests_to( '/v1/jobs/' . self::JOB ) );
+	}
+
+	public function test_once_the_time_the_service_named_has_come_the_next_visitor_asks() {
+		$this->service_takes_the_job();
+		First_Play::start( $this->post, self::TEXT );
+		$this->time_passes( 5, true );
+		$this->service_says( $this->job( 'running', array( 'parts_done' => 6 ) ) );
+
+		$answer = First_Play::status( $this->post );
+
+		$this->assertSame( 7, $answer['part'] );
+		$this->assertCount( 1, $this->requests_to( '/v1/jobs/' . self::JOB ) );
+		// The job engine planned the next question for the time the service named now.
+		$this->assertGreaterThanOrEqual( time() + 2, wp_next_scheduled( Jobs::HOOK, array( $this->post, 'en' ) ) );
+	}
+
+	public function test_a_job_whose_planned_check_was_lost_is_still_asked_about() {
+		$this->service_takes_the_job();
+		First_Play::start( $this->post, self::TEXT );
+		$this->time_passes( 5, false );
+		wp_clear_scheduled_hook( Jobs::HOOK, array( $this->post, 'en' ) );
+		$this->service_says( $this->job( 'running', array( 'parts_done' => 3 ) ) );
+
 		First_Play::status( $this->post );
 
 		$this->assertCount( 1, $this->requests_to( '/v1/jobs/' . self::JOB ) );

@@ -49,7 +49,10 @@ class First_Play {
 	/** The longest text one job takes (the service's limit). */
 	const MAX_CHARS = 200000;
 
-	/** Seconds between two questions to the service about one job, however many visitors wait. */
+	/**
+	 * The least seconds between two questions to the service about one job,
+	 * however many visitors wait. The service can ask for more (may_ask()).
+	 */
 	const ASK_GAP = 2;
 
 	/** How long a player waits before it asks again, in milliseconds. */
@@ -163,7 +166,7 @@ class First_Play {
 			return self::answer( self::FALLBACK, array( 'code' => 'no_job' ) );
 		}
 
-		if ( self::is_being_made( $record ) && time() - $record['updated'] >= self::ASK_GAP ) {
+		if ( self::is_being_made( $record ) && self::may_ask( $post_id, $record ) ) {
 			$record = self::ask( $post_id, $record );
 		}
 
@@ -230,6 +233,28 @@ class First_Play {
 
 		/** This filter is documented in includes/Library/Audio.php. */
 		return (string) apply_filters( 'atlasvoice_cloud_job_file_key', TTA_Helper::tts_get_file_url_key( $language ), (int) $post_id, $language );
+	}
+
+	/**
+	 * Whether the service may be asked about a job now. The service sets the
+	 * pace: each of its answers says when to ask next (poll_after_ms, spread
+	 * so that many sites do not all ask at the same moment), and the job
+	 * engine plans its next check for that time. Visitors who wait do not ask
+	 * earlier than that, and never more often than every ASK_GAP seconds.
+	 *
+	 * @param int   $post_id The post.
+	 * @param array $record  The job's record.
+	 *
+	 * @return bool
+	 */
+	private static function may_ask( $post_id, array $record ) {
+		if ( time() - (int) $record['updated'] < self::ASK_GAP ) {
+			return false;
+		}
+
+		$planned = wp_next_scheduled( Jobs::HOOK, array( (int) $post_id, self::language() ) );
+
+		return ! $planned || time() >= (int) $planned;
 	}
 
 	/**
