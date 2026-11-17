@@ -401,6 +401,11 @@ We are looking for people to help translate this plugin. If you can help, we wou
 Help us and the WordPress community translate the plugin. [Contact us](http://atlasaidev.com/contact-us/) and we'll guide you through the process.
 
 
+= 2.4.0-beta.12 ( 17 Nov 2026 ) =
+Beta: for testing before the 2.4.0 release. Use it with AtlasVoice Pro 3.5.0-beta.12.
+Improved : Includes the released 2.3.26: the browser voice reads the whole article on iPhone and iPad, Resume continues from the right place, and word highlighting keeps up with MP3 players.
+Security : The natural voice (AtlasVoice TTS) now checks every audio request on the server, so audio is only made for the post it belongs to, never saved with missing parts, and never made twice at the same time.
+
 = 2.4.0-beta.11 ( 9 Nov 2026 ) =
 Beta: for testing before the 2.4.0 release. Use it with AtlasVoice Pro 3.5.0-beta.11.
 Improved : Includes the released 2.3.25: a behind-the-scenes tidy-up of the code. Nothing changes in how the plugin works.
