@@ -2,10 +2,10 @@ import React, {useState, useEffect} from 'react';
 import {
      Form, Row, Col, Container,
 
-    Button, Accordion
+    Button, Accordion, Alert
 } from 'react-bootstrap';
 import {ToastContainer} from 'react-toastify';
-import {__} from '@wordpress/i18n';
+import {__, _n, sprintf} from '@wordpress/i18n';
 import Icon from '../components/Icon';
 /**
  * Scripts
@@ -17,6 +17,8 @@ import 'react-toastify/dist/ReactToastify.css';
  * Scripts
  */
 import {postWithoutImage, getMultilingualActiveLanguages} from '../components/context/utilities';
+// TTS-354: the run's state for the message on the page (replaces a browser pop-up).
+import {idleRun, startRun, stepRun, outcomeOf} from './bulkRun';
 
 export default function GenerateBulkMp3File({postId, language, selectedLang, isRegenerateFile}) {
     const [settings, setSettings] = useState({
@@ -28,7 +30,8 @@ export default function GenerateBulkMp3File({postId, language, selectedLang, isR
     const [postIDs, setPostIDs] = useState([]);
     const [postContents, setPostContents] = useState([])
     const [isDataLoaded, setIsDataLoaded] = useState(false)
-    const [isAllMP3FileGenerated, setIsAllMP3FileGenerated] = useState(false)
+    // TTS-354: how far the run is: total, made, failed; shown on the page.
+    const [run, setRun] = useState(idleRun())
 
     const handleContentChange = (e) => {
         // setContent(e.target.value);
@@ -103,13 +106,18 @@ export default function GenerateBulkMp3File({postId, language, selectedLang, isR
     const handleSubmit = async (e) => {
         e.preventDefault();
 
+        if (run.status === 'running') {
+            return;
+        }
+
         if (Object.keys(postContents).length) {
             let mp3FileGenerateCount = 0;
             if (settings.tts_regenerate_mp3_files) {
-                if (!confirm(__('Are you sure? You want to regenerate all MP3 files ?', 'text-to-audio'))) {
+                if (!confirm(__('Make the audio of these posts again? Their current MP3 files are replaced.', 'text-to-audio'))) {
                     return;
                 }
             }
+            setRun(startRun(Object.keys(postContents).length));
             for (let postId of Object.keys(postContents)) {
                 let postSettings = postContents[postId];
                 postSettings.settings.is_regenerate_file = settings.tts_regenerate_mp3_files;
@@ -129,6 +137,7 @@ export default function GenerateBulkMp3File({postId, language, selectedLang, isR
 
                 let bulkMP3File = await new BulkMP3File(postSettings)
                 console.log({mp3file: bulkMP3File.fileURL})
+                const madeBefore = mp3FileGenerateCount;
                 if (!bulkMP3File.fileURL) {
                     if (ttsObjPro.player_id == 3) {
                         let mp3File = await bulkMP3File.init_gtts(1)
@@ -168,6 +177,14 @@ export default function GenerateBulkMp3File({postId, language, selectedLang, isR
                     setPostURL(bulkMP3File.fileURL, mp3FileGenerateCount, postId)
                 }
 
+                // TTS-354: a post that could not be made counts too, so the run always ends.
+                setRun((current) => stepRun(current, mp3FileGenerateCount > madeBefore));
+            }
+
+            // The loader of the last post is not needed any more.
+            let playerContent = document.getElementById('player_content_1');
+            if (playerContent) {
+                playerContent.innerHTML = '';
             }
         }
 
@@ -198,26 +215,74 @@ export default function GenerateBulkMp3File({postId, language, selectedLang, isR
             return parsedContents;
         });
 
-        let postIDCount = Object.keys(postContents).length;
-        if (mp3FileGenerateCount === postIDCount) {
-            // TTS-237: Clear the shared loader container one final time once
-            // all posts are done. The accordion eye icons (driven by state)
-            // take over as the "done" indicator per-row.
-            let playerContent = document.getElementById('player_content_1');
-            if (playerContent) {
-                playerContent.innerHTML = '';
-            }
-            alert(__('All MP3 File Generated', 'text-to-audio'))
-            if (document.getElementById('tts_bulk_mp3_file_generate_save_button')) {
-                document.getElementById('tts_bulk_mp3_file_generate_save_button').innerHTML = 'Generate MP3 File'
-                setIsAllMP3FileGenerated(true)
-            }
-        } else {
-            if (document.getElementById('tts_bulk_mp3_file_generate_save_button')) {
-                document.getElementById('tts_bulk_mp3_file_generate_save_button').innerHTML = mp3FileGenerateCount + ' MP3 file generated out of ' + postIDCount;
-            }
-        }
+        // TTS-354: how far the run is, and how it ended, is said on the page
+        // (runMessage below), not in a browser pop-up that blocks the page.
     }
+
+    /**
+     * TTS-354: the line under the button: how far the run is, or how it ended.
+     *
+     * @return {Object|null} { variant, text }, or null before a run.
+     */
+    function runMessage() {
+        if (run.status === 'running') {
+            const done = run.made + run.failed;
+
+            return {
+                variant: 'info',
+                text: sprintf(
+                    /* translators: 1: posts finished so far, 2: number of posts. */
+                    __('Making the audio… %1$d of %2$d posts done. Keep this page open until it finishes.', 'text-to-audio'),
+                    done,
+                    run.total
+                ),
+            };
+        }
+
+        const outcome = outcomeOf(run);
+        if (outcome === 'all') {
+            return {
+                variant: 'success',
+                text: sprintf(
+                    /* translators: %d: number of posts. */
+                    _n('The audio of %d post is ready.', 'The audio of all %d posts is ready.', run.total, 'text-to-audio'),
+                    run.total
+                ),
+            };
+        }
+        if (outcome === 'some' || outcome === 'none') {
+            return {
+                variant: outcome === 'some' ? 'warning' : 'danger',
+                text: sprintf(
+                    /* translators: 1: posts with audio, 2: number of posts, 3: posts without audio. */
+                    _n(
+                        '%1$d of %2$d posts have audio. %3$d post could not be made; the posts marked with a cross can be tried again.',
+                        '%1$d of %2$d posts have audio. %3$d posts could not be made; the posts marked with a cross can be tried again.',
+                        run.failed,
+                        'text-to-audio'
+                    ),
+                    run.made,
+                    run.total,
+                    run.failed
+                ),
+            };
+        }
+
+        return null;
+    }
+
+    const message = runMessage();
+
+    // The screen is given no language: the site's own comes with Pro's data on
+    // the page. Before, the text said "The site language is undefined".
+    const siteLanguage = selectedLang || window?.ttsObjPro?.site_locale || window?.ttsObjPro?.language || '';
+    const contentHint = siteLanguage
+        ? sprintf(
+            /* translators: %s: the site's language, for example en-US. */
+            __('The site language is %s. To make the MP3 file in another language, paste the translated text here and choose the language, then make the MP3 file.', 'text-to-audio'),
+            siteLanguage
+        )
+        : __('To make the MP3 file in another language, paste the translated text here and choose the language, then make the MP3 file.', 'text-to-audio');
 
     function checkAllPropertiesAreEmpty(obj) {
         // Iterate over each property in the object
@@ -249,7 +314,7 @@ export default function GenerateBulkMp3File({postId, language, selectedLang, isR
                 <Container className={'atlasVoice-container'}>
                     <div className={'atlasVoice-row'}>
                         <Col bsPrefix="atlasVoice" xs={12} sm={12} lg={8}>
-                            How it works? <a style={{textDecoration: 'none',}} className={'text-danger'} target='_blank'
+                            {__('How it works?', 'text-to-audio')} <a style={{textDecoration: 'none',}} className={'text-danger'} target='_blank'
                                              href='https://www.youtube.com/watch?v=HFoqlkPCP80'>
                                                             <Icon name="youtube" /></a>
                         </Col>
@@ -262,7 +327,7 @@ export default function GenerateBulkMp3File({postId, language, selectedLang, isR
                     <Row className=' mt-3'>
                         <Col xs={12} sm={6} lg={4}>
                             <Form.Label htmlFor='tta__settings_enable_button_add'>
-                                Regenerate All MP3 Files.
+                                {__('Make the audio of these posts again', 'text-to-audio')}
                             </Form.Label>
                         </Col>
                         <Col xs={12} sm={12} lg={8}>
@@ -310,7 +375,7 @@ export default function GenerateBulkMp3File({postId, language, selectedLang, isR
                                                                         onChange={handleContentChange}
                                                                         onPaste={handleContentChange}
                                                                         rows={10}
-                                                                        placeholder={`Site language is ${selectedLang}. If you want to generate the MP3 file for other languages, paste the translated content here and select the language, then generate the MP3 file.`}
+                                                                        placeholder={contentHint}
                                                                     />
                                                                 </Form.Group>
                                                             </Accordion.Body>
@@ -332,6 +397,7 @@ export default function GenerateBulkMp3File({postId, language, selectedLang, isR
                                         variant="primary"
                                         type={'submit'}
                                         id={'tts_bulk_mp3_file_generate_save_button'}
+                                        disabled={run.status === 'running'}
                                         style={{
                                             width: '100%',
                                             marginTop: '5px',
@@ -340,8 +406,18 @@ export default function GenerateBulkMp3File({postId, language, selectedLang, isR
                                             cursor: 'pointer'
                                         }}
                                     >
-                                        Generate MP3 File
+                                        {run.status === 'running'
+                                            ? __('Making the audio…', 'text-to-audio')
+                                            : __('Generate MP3 files', 'text-to-audio')}
                                     </Button>
+                                </div>
+                                {/* TTS-354: read out by screen readers when it changes; stays until the next run. */}
+                                <div role="status" aria-live="polite" className={'atlasVoice-mt-3'}>
+                                    {message && (
+                                        <Alert variant={message.variant} className={'mb-0'}>
+                                            {message.text}
+                                        </Alert>
+                                    )}
                                 </div>
                             </Form>
                         </Col>
@@ -349,7 +425,7 @@ export default function GenerateBulkMp3File({postId, language, selectedLang, isR
                 </Container>
             </React.Fragment>
             :
-            <h1>Loading</h1>
+            <h1>{__('Loading…', 'text-to-audio')}</h1>
 
     );
 }
