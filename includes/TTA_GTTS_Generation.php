@@ -2,6 +2,10 @@
 
 namespace TTA;
 
+use TTA\Audio\Batch_Merger;
+use TTA\Audio\Part_Claim;
+use TTA\Audio\Text_Gate;
+
 defined( 'ABSPATH' ) || exit;
 
 /**
@@ -32,6 +36,13 @@ class TTA_GTTS_Generation {
 		if ( TTA_AtlasVoice_Service::PLAYER_ID !== (int) get_player_id() ) {
 			return self::fail( 'player_not_active' );
 		}
+
+		// The same server checks as Pro's players (post, file name, folder, size).
+		$body = Text_Gate::check( $body );
+		if ( is_wp_error( $body ) ) {
+			return self::fail( $body->get_error_code() );
+		}
+		$batch_no = (int) $body['batch_no'];
 
 		$post_id = isset( $body['post_id'] ) ? absint( $body['post_id'] ) : 0;
 		$post    = $post_id ? get_post( $post_id ) : null;
@@ -122,7 +133,18 @@ class TTA_GTTS_Generation {
 		// Another run is already generating this post (another visitor, or this
 		// visitor's own earlier run): back off rather than paying twice for the
 		// same audio. The player waits and then plays the finished file.
-		if ( ! TTA_Generation_Lock::acquire( $post_id, $user_id, TTA_Generation_Lock::batch_number( $temp_title ) ) ) {
+		if ( ! TTA_Generation_Lock::acquire( $post_id, $user_id, $batch_no ) ) {
+			return self::ok( '', 'locked', false );
+		}
+
+		// A later batch whose run is gone would make a part nobody can join.
+		if ( ! Batch_Merger::run_is_open( $dir, $title, $batch_no ) ) {
+			return self::incomplete( $post_id, $final_file, $dir_url . $title . '.mp3' );
+		}
+
+		// One request per batch: a second one (another tab, the same visitor id)
+		// waits and reuses the finished part instead of paying for it again.
+		if ( ! Part_Claim::acquire( $dir, $temp_title ) ) {
 			return self::ok( '', 'locked', false );
 		}
 
@@ -138,8 +160,12 @@ class TTA_GTTS_Generation {
 			return self::fail( $result['code'] );
 		}
 
-		if ( $skipped && ! $is_last ) {
-			return self::ok( '', 'batch_skipped', false );
+		if ( $skipped ) {
+			// Counts as present when the parts are joined, but adds no audio.
+			Batch_Merger::mark_skipped( $dir, $temp_title );
+			if ( ! $is_last ) {
+				return self::ok( '', 'batch_skipped', false );
+			}
 		}
 
 		if ( ! $skipped && ! TTA_Audio_Storage::put_contents( $dir . $temp_title . '.mp3', $result['audio'] ) ) {
@@ -152,12 +178,19 @@ class TTA_GTTS_Generation {
 			return self::ok( $dir_url . $temp_title . '.mp3', 'batch_stored', false );
 		}
 
-		$file_url = TTA_Audio_Storage::merge_batches( $dir, $dir_url, $title );
-		TTA_Generation_Lock::release( $post_id );
+		// Join batches 1..N only when every one is there.
+		$parts = Batch_Merger::merge( $dir, $title, $batch_no );
+		if ( is_wp_error( $parts ) ) {
+			if ( 'incomplete_audio' === $parts->get_error_code() ) {
+				return self::incomplete( $post_id, $final_file, $dir_url . $title . '.mp3' );
+			}
+			TTA_Generation_Lock::release( $post_id );
 
-		if ( ! $file_url ) {
 			return self::fail( 'merge_failed' );
 		}
+		array_map( 'wp_delete_file', $parts );
+		TTA_Generation_Lock::release( $post_id );
+		$file_url = $dir_url . $title . '.mp3';
 
 		$file_url_key = isset( $settings['file_url_key'] ) && '' !== $settings['file_url_key']
 			? sanitize_text_field( (string) $settings['file_url_key'] )
@@ -179,6 +212,26 @@ class TTA_GTTS_Generation {
 		do_action( 'atlasvoice_final_mp3_written', $final_file, $file_url, $post_id, $body );
 
 		return self::ok( $file_url, 'completed', false );
+	}
+
+	/**
+	 * A batch is missing, so nothing was joined. A complete file from an earlier
+	 * run stays and is played; otherwise the player says the audio could not be
+	 * made, and the next play only makes the missing batches.
+	 *
+	 * @param int    $post_id
+	 * @param string $final_file
+	 * @param string $final_url
+	 * @return array
+	 */
+	private static function incomplete( $post_id, $final_file, $final_url ) {
+		TTA_Generation_Lock::release( $post_id );
+
+		if ( is_file( $final_file ) && filesize( $final_file ) > 0 ) {
+			return self::ok( $final_url, '', true );
+		}
+
+		return self::fail( 'incomplete_audio' );
 	}
 
 	private static function ok( $url, $message, $exists ) {
