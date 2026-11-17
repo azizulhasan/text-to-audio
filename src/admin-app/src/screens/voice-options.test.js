@@ -2,9 +2,12 @@ import {
 	BROWSER_PLAYER,
 	closestLanguage,
 	fieldsForEngine,
+	languagesFromVoices,
 	languagesOf,
+	NATURAL_ENGINE,
 	naturalLanguages,
 	naturalSpeaks,
+	pickNaturalLanguage,
 	readBrowserVoices,
 	voiceForLanguage,
 } from './voice-options';
@@ -174,5 +177,145 @@ describe( 'the voice after a language change', () => {
 
 	it( 'is empty when no voice speaks the language', () => {
 		expect( voiceForLanguage( 'bn-BD', 'Samantha', VOICES ) ).toBe( '' );
+	} );
+} );
+
+describe( 'the natural voice as AtlasVoice Cloud lists it (TTS-378)', () => {
+	const SERVICE = [
+		{ id: 'gtts-en', engine: 'gtts', language: 'en', name: 'English' },
+		{
+			id: 'gtts-en-uk',
+			engine: 'gtts',
+			language: 'en-uk',
+			name: 'English (United Kingdom)',
+		},
+		{ id: 'gtts-tlh', engine: 'gtts', language: 'tlh', name: 'Klingon' },
+		{ id: 'gtts-da', engine: 'gtts', language: 'da', name: 'Danish' },
+	];
+	const options = languagesFromVoices( SERVICE );
+
+	it( 'asks for the engine the natural voice runs on', () => {
+		expect( NATURAL_ENGINE ).toBe( 'gtts' );
+	} );
+
+	it( 'makes one language of each voice, by name', () => {
+		expect( options ).toEqual( [
+			{ value: 'da', label: 'Danish' },
+			{ value: 'en', label: 'English' },
+			{ value: 'en-uk', label: 'English (United Kingdom)' },
+			{ value: 'tlh', label: 'Klingon' },
+		] );
+	} );
+
+	it( 'leaves out what is not a voice with a language, and doubles', () => {
+		expect(
+			languagesFromVoices( [
+				{ id: 'a', language: 'en', name: 'English' },
+				{ id: 'b', language: 'en', name: 'English again' },
+				{ id: 'c', language: '', name: 'No language' },
+				{ id: 'd', name: 'No language either' },
+				{ id: 'e', language: 7, name: 'A number' },
+				null,
+				'en',
+				{ id: 'f', language: 'de' },
+			] )
+		).toEqual( [
+			{ value: 'de', label: 'de' },
+			{ value: 'en', label: 'English' },
+		] );
+		expect( languagesFromVoices( undefined ) ).toEqual( [] );
+		expect( languagesFromVoices( 'many' ) ).toEqual( [] );
+	} );
+
+	it( 'offers the service’s languages when they are known', () => {
+		expect( naturalLanguages( options ) ).toBe( options );
+		expect( naturalLanguages( options ).map( ( o ) => o.value ) ).toContain(
+			'tlh'
+		);
+	} );
+
+	it( 'offers the plugin’s own list when the service gave none', () => {
+		const own = naturalLanguages();
+
+		expect( naturalLanguages( null ) ).toEqual( own );
+		expect( naturalLanguages( [] ) ).toEqual( own );
+		expect( own.length ).toBeGreaterThan( 50 );
+	} );
+
+	it( 'a language is spoken when the service lists it, whatever the plugin’s own list says', () => {
+		expect( naturalSpeaks( 'tlh', options ) ).toBe( true );
+		expect( naturalSpeaks( 'tlh' ) ).toBe( false );
+		// The plugin's own list has French; this service list has not.
+		expect( naturalSpeaks( 'fr', options ) ).toBe( false );
+		expect( naturalSpeaks( 'fr' ) ).toBe( true );
+		expect( naturalSpeaks( 'fr', [] ) ).toBe( true );
+		expect( naturalSpeaks( 'constructor', options ) ).toBe( false );
+	} );
+
+	it.each( [
+		[ 'en-uk', 'en-uk' ],
+		[ 'EN_UK', 'en-uk' ],
+		[ 'en-US', 'en' ],
+		[ 'da-DK', 'da' ],
+		[ 'fr-FR', 'en' ],
+		[ '', 'en' ],
+		[ undefined, 'en' ],
+	] )( 'picks the closest listed language for %j', ( wanted, expected ) => {
+		expect( pickNaturalLanguage( wanted, options ) ).toBe( expected );
+	} );
+
+	it( 'picks the first language when the list has no English', () => {
+		expect(
+			pickNaturalLanguage( 'fr', [ { value: 'da', label: 'Danish' } ] )
+		).toBe( 'da' );
+	} );
+
+	it( 'picks from the plugin’s own list when the service gave none', () => {
+		expect( pickNaturalLanguage( 'fr-FR', null ) ).toBe( 'fr' );
+		expect( pickNaturalLanguage( 'fr-FR' ) ).toBe( 'fr' );
+	} );
+
+	it( 'choosing the natural voice keeps a language the service lists', () => {
+		expect(
+			fieldsForEngine(
+				NATURAL,
+				current( { language: 'tlh' } ),
+				VOICES,
+				options
+			)
+		).toEqual( {} );
+	} );
+
+	it( 'choosing the natural voice moves a language the service does not list to one it does', () => {
+		expect(
+			fieldsForEngine(
+				NATURAL,
+				current( { language: 'fr' } ),
+				VOICES,
+				options
+			)
+		).toEqual( { language: 'en' } );
+		expect(
+			fieldsForEngine(
+				NATURAL,
+				current( { language: 'en-US' } ),
+				VOICES,
+				options
+			)
+		).toEqual( { language: 'en' } );
+	} );
+
+	it( 'without a list from the service the choice works as before', () => {
+		expect(
+			fieldsForEngine( NATURAL, current( { language: 'fr' } ), VOICES )
+		).toEqual( {} );
+		expect(
+			fieldsForEngine(
+				NATURAL,
+				current( { language: 'fr' } ),
+				VOICES,
+				null
+			)
+		).toEqual( {} );
 	} );
 } );

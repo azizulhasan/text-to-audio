@@ -1,5 +1,11 @@
 import '@testing-library/jest-dom';
-import { act, cleanup, fireEvent, screen } from '@testing-library/react';
+import {
+	act,
+	cleanup,
+	fireEvent,
+	screen,
+	waitFor,
+} from '@testing-library/react';
 import { addFilter, removeFilter } from '@wordpress/hooks';
 import { axe, toHaveNoViolations } from 'jest-axe';
 
@@ -53,6 +59,31 @@ const CHOICE = {
 	],
 };
 
+/** The site could not get the service's voices (TTA\Cloud\Voices). */
+const NO_SERVICE_VOICES = {
+	voices: [],
+	count: 0,
+	language: '',
+	engine: 'gtts',
+	source: 'none',
+	fetched_at: 0,
+	error: 'service_unreachable',
+	request_id: '',
+};
+
+/** The service lists three languages; one of them is new to the plugin. */
+const SERVICE_VOICES = {
+	...NO_SERVICE_VOICES,
+	source: 'service',
+	error: '',
+	count: 3,
+	voices: [
+		{ id: 'gtts-en', engine: 'gtts', language: 'en', name: 'English' },
+		{ id: 'gtts-fr', engine: 'gtts', language: 'fr', name: 'French' },
+		{ id: 'gtts-tlh', engine: 'gtts', language: 'tlh', name: 'Klingon' },
+	],
+};
+
 /**
  * A stand-in for the site: the connection route and the voice route.
  *
@@ -62,11 +93,13 @@ const CHOICE = {
  * @param {Object}   options.failLoad  { status, message } to refuse the first load.
  * @param {Object}   options.choice    The voice choice at the start.
  * @param {boolean}  options.noChoice  Refuse the voice route.
+ * @param {Object}   options.voices    What the site answers for the service's voices
+ *                                     (TTA\Cloud\Voices), or 'fail' to refuse the request.
  * @return {Object} { calls, state }.
  */
 function fakeSite(
 	start = NOT_CONNECTED,
-	{ onConnect, failLoad, choice = CHOICE, noChoice } = {}
+	{ onConnect, failLoad, choice = CHOICE, noChoice, voices } = {}
 ) {
 	const site = { calls: [], state: start, choice };
 	const reply = ( body, ok = true, status = 200 ) =>
@@ -77,6 +110,15 @@ function fakeSite(
 		const method = options.method || 'GET';
 		const body = options.body ? JSON.parse( options.body ) : undefined;
 		site.calls.push( { url, method, body } );
+
+		// TTS-378: the voices AtlasVoice Cloud offers, as the site passes them on.
+		if ( url.includes( 'cloud/voices' ) ) {
+			if ( voices === 'fail' ) {
+				return reply( { message: 'nope' }, false, 500 );
+			}
+
+			return reply( voices || NO_SERVICE_VOICES );
+		}
 
 		if ( url.includes( 'tta/v1/voice' ) ) {
 			if ( noChoice ) {
@@ -1175,5 +1217,128 @@ describe( 'Voice: trying another engine and coming back', () => {
 		expect(
 			site.calls.filter( ( call ) => call.method === 'POST' )
 		).toHaveLength( 0 );
+	} );
+} );
+
+describe( 'Voice › Voice › the languages AtlasVoice Cloud lists (TTS-378)', () => {
+	const voiceCalls = ( site ) =>
+		site.calls.filter( ( call ) => call.url.includes( 'cloud/voices' ) );
+	const natural = { ...CHOICE, connected: true, player_id: 3 };
+	// Finding one option among many is slow on a busy machine: the list is
+	// waited for by its text, with room.
+	const listed = () => screen.findByText( 'Klingon', {}, { timeout: 8000 } );
+	jest.setTimeout( 20000 );
+
+	it( 'asks the site for the natural voice’s languages when the site is connected', async () => {
+		const site = fakeSite( CONNECTED, {
+			choice: { ...natural, language: 'fr' },
+			voices: SERVICE_VOICES,
+		} );
+		renderWithApp( <VoiceVoice /> );
+
+		await listed();
+
+		expect( voiceCalls( site ) ).toHaveLength( 1 );
+		expect( voiceCalls( site )[ 0 ].method ).toBe( 'GET' );
+		expect( voiceCalls( site )[ 0 ].url ).toBe(
+			'https://site.test/wp-json/tta/v1/cloud/voices?engine=gtts'
+		);
+	} );
+
+	it( 'does not ask for a site that is not connected', async () => {
+		const site = fakeSite( NOT_CONNECTED, { voices: SERVICE_VOICES } );
+		renderWithApp( <VoiceVoice /> );
+
+		await screen.findByText( 'Connect the natural voice' );
+
+		expect( voiceCalls( site ) ).toHaveLength( 0 );
+	} );
+
+	it( 'offers what the service lists, a new language included, and nothing else', async () => {
+		fakeSite( CONNECTED, {
+			choice: { ...natural, language: 'fr' },
+			voices: SERVICE_VOICES,
+		} );
+		renderWithApp( <VoiceVoice /> );
+
+		await listed();
+
+		const language = screen.getByLabelText( 'Language' );
+		expect( language ).toHaveValue( 'fr' );
+		expect(
+			Array.from( language.options ).map( ( option ) => option.text )
+		).toEqual( [ 'English', 'French', 'Klingon' ] );
+	} );
+
+	it( 'saves a language only the service lists', async () => {
+		const site = fakeSite( CONNECTED, {
+			choice: { ...natural, language: 'fr' },
+			voices: SERVICE_VOICES,
+		} );
+		renderWithApp( <VoiceVoice /> );
+
+		await listed();
+		fireEvent.change( screen.getByLabelText( 'Language' ), {
+			target: { value: 'tlh' },
+		} );
+		fireEvent.click( screen.getByRole( 'button', { name: 'Save' } ) );
+
+		await waitFor( () =>
+			expect(
+				site.calls.filter(
+					( call ) =>
+						call.method === 'POST' &&
+						call.url.includes( 'tta/v1/voice' )
+				)
+			).toHaveLength( 1 )
+		);
+		expect(
+			site.calls.find(
+				( call ) =>
+					call.method === 'POST' &&
+					call.url.includes( 'tta/v1/voice' )
+			).body
+		).toEqual( { language: 'tlh' } );
+	} );
+
+	it( 'keeps and marks a saved language the service does not list any more', async () => {
+		fakeSite( CONNECTED, {
+			choice: { ...natural, language: 'de' },
+			voices: SERVICE_VOICES,
+		} );
+		renderWithApp( <VoiceVoice /> );
+
+		await listed();
+
+		expect( screen.getByLabelText( 'Language' ) ).toHaveValue( 'de' );
+		expect(
+			screen.getByRole( 'option', {
+				name: 'de (not offered any more)',
+			} )
+		).toBeInTheDocument();
+	} );
+
+	it.each( [
+		[ 'the service could not be reached', NO_SERVICE_VOICES ],
+		[ 'the service listed nothing', { ...SERVICE_VOICES, voices: [] } ],
+		[ 'the site refused the request', 'fail' ],
+	] )( 'offers the plugin’s own list when %s', async ( _why, voices ) => {
+		const site = fakeSite( CONNECTED, {
+			choice: { ...natural, language: 'fr' },
+			voices,
+		} );
+		renderWithApp( <VoiceVoice /> );
+
+		const language = await screen.findByLabelText( 'Language' );
+		await waitFor( () => expect( voiceCalls( site ) ).toHaveLength( 1 ) );
+
+		expect( language ).toHaveValue( 'fr' );
+		expect(
+			screen.getByRole( 'option', { name: 'German' } )
+		).toBeInTheDocument();
+		expect(
+			screen.queryByRole( 'option', { name: 'Klingon' } )
+		).not.toBeInTheDocument();
+		expect( language.options.length ).toBeGreaterThan( 50 );
 	} );
 } );

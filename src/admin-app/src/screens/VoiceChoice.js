@@ -30,6 +30,7 @@ import {
 	naturalLanguages,
 	naturalSpeaks,
 	useBrowserVoices,
+	useServiceLanguages,
 	voiceForLanguage,
 } from './voice-options';
 
@@ -121,6 +122,9 @@ export default function VoiceChoice( {
 } ) {
 	const { boot } = useApp();
 	const voices = useBrowserVoices();
+	// TTS-378: the natural voice's languages as AtlasVoice Cloud lists them,
+	// for a connected site; the plugin's own list until then and without it.
+	const serviceLanguages = useServiceLanguages( boot, connected );
 	const { values, set } = form;
 	const natural = values.natural_player_id;
 	const playerId = values.player_id;
@@ -165,7 +169,8 @@ export default function VoiceChoice( {
 		const also = fieldsForEngine(
 			readsInBrowser( chosen ) ? BROWSER_PLAYER : id,
 			values,
-			voices
+			voices,
+			serviceLanguages
 		);
 		for ( const name of Object.keys( also ) ) {
 			set( name, also[ name ] );
@@ -190,7 +195,7 @@ export default function VoiceChoice( {
 		browserVoices.unshift( values.voice );
 	}
 
-	const naturalOptions = naturalLanguages();
+	const naturalOptions = naturalLanguages( serviceLanguages );
 	const wideSpeed = values.rate < 0.5 || values.rate > 2;
 	const classicUrl = boot.classicUrl + classicHashFor( 'voice:voice' );
 
@@ -464,7 +469,10 @@ export default function VoiceChoice( {
 									value={ values.language }
 									options={ [
 										// A saved language the list does not know is kept and shown.
-										...( naturalSpeaks( values.language )
+										...( naturalSpeaks(
+											values.language,
+											serviceLanguages
+										)
 											? []
 											: [
 													{
