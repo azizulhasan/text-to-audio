@@ -74,8 +74,9 @@ class Cloud_Command {
 	 * --email=<email>
 	 * : Where AtlasVoice may contact you about the service.
 	 *
-	 * --agree
-	 * : You agree that post text is sent to AtlasVoice Cloud to make the audio. Required.
+	 * [--agree]
+	 * : You agree that post text is sent to AtlasVoice Cloud to make the audio. Nothing is sent without it.
+	 *   (WP-CLI takes a flag only as an optional part, so the command itself asks for it.)
 	 *
 	 * [--takeover]
 	 * : Move a site that is registered to another email to this one.

@@ -190,4 +190,46 @@ class CliCommandsTest extends WP_UnitTestCase {
 
 		$this->assertSame( Ui_Command::class, WP_CLI::$commands['atlasvoice late'] );
 	}
+
+	/**
+	 * Found on a live run (2026-11-17): the real WP-CLI refuses a command
+	 * whose documentation lists a flag as a required part ("--agree" on a
+	 * line of its own), with "invalid synopsis part". A flag can only be an
+	 * optional part ("[--agree]"); a command that needs it checks for it.
+	 */
+	public function test_no_command_documents_a_flag_as_a_required_part() {
+		$wrong = array();
+
+		foreach ( (array) glob( dirname( __DIR__, 4 ) . '/includes/CLI/*.php' ) as $file ) {
+			foreach ( file( $file ) as $number => $line ) {
+				if ( preg_match( '/^\s*\*\s+--[a-z][a-z0-9-]*\s*$/', $line ) ) {
+					$wrong[] = basename( $file ) . ':' . ( $number + 1 ) . ' ' . trim( $line );
+				}
+			}
+		}
+
+		$this->assertSame( array(), $wrong );
+	}
+
+	public function test_connecting_still_needs_the_agreement_and_sends_nothing_without_it() {
+		$sent = 0;
+		$stop = static function () use ( &$sent ) {
+			++$sent;
+
+			return new WP_Error( 'test_offline', 'No network in this test.' );
+		};
+		add_filter( 'pre_http_request', $stop );
+		WP_CLI::reset();
+
+		try {
+			( new \TTA\CLI\Cloud_Command() )->connect( array(), array( 'email' => 'owner@example.org' ) );
+		} catch ( Atlasvoice_Cli_Stop $stop_exception ) {
+			unset( $stop_exception );
+		}
+		remove_filter( 'pre_http_request', $stop );
+
+		$this->assertSame( 'error', WP_CLI::$log[0][0] );
+		$this->assertStringContainsString( '--agree', WP_CLI::$log[0][1] );
+		$this->assertSame( 0, $sent );
+	}
 }
