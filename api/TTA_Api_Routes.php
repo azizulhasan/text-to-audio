@@ -45,6 +45,8 @@ class TTA_Api_Routes {
 		Read_Along_Controller::register_routes();
 		// TTS-378: the site's AtlasVoice Cloud account, read-only.
 		Cloud_Account_Controller::register_routes();
+		// TTS-378: the voices AtlasVoice Cloud offers, as the service lists them.
+		Cloud_Voices_Controller::register_routes();
 		// TTS-347: the Pro plans, read-only (Account & plans > Plans).
 		Plans_Controller::register_routes();
 		// TTS-347: the Home screen's summary, and hiding one of its items.

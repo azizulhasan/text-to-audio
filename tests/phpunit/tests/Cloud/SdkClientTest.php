@@ -564,4 +564,111 @@ class SdkClientTest extends WP_UnitTestCase {
 		$this->assertTrue( $result->reached() );
 		$this->assertSame( 404, $result->status );
 	}
+
+	// The voices (TTS-378).
+
+	public function test_voices_lists_what_the_service_offers_without_sending_the_key() {
+		$voices                     = array(
+			'count'  => 2,
+			'voices' => array(
+				array(
+					'id'     => 'gtts-en',
+					'engine' => 'gtts',
+					'lang'   => 'en',
+					'name'   => 'English',
+				),
+				array(
+					'id'     => 'gtts-en-uk',
+					'engine' => 'gtts',
+					'lang'   => 'en-uk',
+					'name'   => 'English (United Kingdom)',
+				),
+			),
+		);
+		$this->transport->answers[] = $this->json( 200, $voices );
+
+		$result = $this->client->voices();
+
+		$sent = $this->transport->sent[0];
+		$this->assertSame( 'GET', $sent->method );
+		$this->assertSame( 'https://api.atlasvoice.cloud/v1/voices', $sent->url );
+		$this->assertNull( $sent->body );
+		$this->assertArrayNotHasKey( 'Authorization', $sent->headers, 'The list is public: the key stays on the site.' );
+		$this->assertTrue( $result->ok() );
+		$this->assertSame( $voices, $result->data );
+	}
+
+	public function test_voices_can_be_narrowed_to_a_language_and_an_engine() {
+		$this->transport->answers[] = $this->json(
+			200,
+			array(
+				'count'  => 0,
+				'voices' => array(),
+			)
+		);
+		$this->transport->answers[] = $this->json(
+			200,
+			array(
+				'count'  => 0,
+				'voices' => array(),
+			)
+		);
+		$this->transport->answers[] = $this->json(
+			200,
+			array(
+				'count'  => 0,
+				'voices' => array(),
+			)
+		);
+
+		$this->client->voices( 'pt-br' );
+		$this->client->voices( '', 'gtts' );
+		$this->client->voices( 'zh_CN', 'cloud' );
+
+		$this->assertSame( 'https://api.atlasvoice.cloud/v1/voices?lang=pt-br', $this->transport->sent[0]->url );
+		$this->assertSame( 'https://api.atlasvoice.cloud/v1/voices?engine=gtts', $this->transport->sent[1]->url );
+		$this->assertSame( 'https://api.atlasvoice.cloud/v1/voices?lang=zh_CN&engine=cloud', $this->transport->sent[2]->url );
+	}
+
+	/**
+	 * @dataProvider words_that_are_not_a_language_or_an_engine
+	 */
+	public function test_a_value_that_is_not_a_language_or_an_engine_is_not_sent( $language, $engine ) {
+		$result = $this->client->voices( $language, $engine );
+
+		$this->assertSame( array(), $this->transport->sent );
+		$this->assertFalse( $result->ok() );
+		$this->assertFalse( $result->reached() );
+		$this->assertNotSame( '', $result->transport_error );
+	}
+
+	public function words_that_are_not_a_language_or_an_engine() {
+		return array(
+			'a second parameter'   => array( 'en&engine=cloud', '' ),
+			'another route'        => array( '../account', '' ),
+			'a space'              => array( 'en us', '' ),
+			'a list'               => array( array( 'en' ), '' ),
+			'a very long word'     => array( str_repeat( 'a', 129 ), '' ),
+			'an engine with a dot' => array( 'en', 'gtts.v2' ),
+			'an engine with a tag' => array( '', '<b>gtts</b>' ),
+		);
+	}
+
+	public function test_a_service_that_cannot_list_its_voices_is_a_result_not_an_exception() {
+		$result = $this->client->voices( 'en' );
+
+		$this->assertFalse( $result->ok() );
+		$this->assertFalse( $result->reached() );
+
+		$this->transport->answers[] = $this->json( 500, array( 'error' => array( 'code' => 'internal_error' ) ) );
+		$down                       = $this->client->voices( 'en' );
+
+		$this->assertFalse( $down->ok() );
+		$this->assertTrue( $down->reached() );
+	}
+
+	public function test_the_sdk_says_its_version_with_the_voices_call_in_it() {
+		$this->assertSame( '0.4.0', Client::VERSION );
+		$this->assertTrue( method_exists( Client::class, 'voices' ) );
+	}
 }

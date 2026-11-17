@@ -30,7 +30,7 @@ use AtlasVoice\Sdk\Contracts\Logger;
  */
 final class Client {
 
-	const VERSION = '0.3.0';
+	const VERSION = '0.4.0';
 
 	/**
 	 * The longest a single call may wait, whatever a caller asks for. One
@@ -47,6 +47,8 @@ final class Client {
 	const ID_CHARS  = 'A-Za-z0-9-';
 	const KEY_CHARS = 'A-Za-z0-9_.:-';
 	const REF_CHARS = 'A-Za-z0-9_.:\\/#@+-';
+	// A language ("en", "pt-br", "zh_CN") or the name of an engine ("gtts").
+	const WORD_CHARS = 'A-Za-z0-9_-';
 
 	/**
 	 * Settings.
@@ -393,6 +395,37 @@ final class Client {
 		}
 
 		return $this->call( 'DELETE', '/v1/jobs/' . $id, null, false, self::DEFAULT_TIMEOUT, true );
+	}
+
+	/**
+	 * Lists the voices the service offers. The list is public, so the
+	 * project key is not sent: a platform can show voices before it has one.
+	 *
+	 * The service is the one that knows which voices exist; a platform shows
+	 * its answer and keeps it for a while, because voices are added rarely.
+	 *
+	 * @param string $language Only voices of this language, e.g. "en" or "pt-br". Empty: every language.
+	 * @param string $engine   Only voices of this engine, e.g. "gtts". Empty: every engine.
+	 *
+	 * @return Result data: count, voices [ { id, engine, lang, name } ].
+	 */
+	public function voices( $language = '', $engine = '' ) {
+		$query = array();
+
+		foreach ( array(
+			'lang'   => $language,
+			'engine' => $engine,
+		) as $name => $value ) {
+			if ( '' === $value || null === $value ) {
+				continue;
+			}
+			if ( ! self::is_token( $value, self::WORD_CHARS ) ) {
+				return $this->refused( 'lang' === $name ? 'This is not a language.' : 'This is not an engine.' );
+			}
+			$query[] = $name . '=' . rawurlencode( $value );
+		}
+
+		return $this->call( 'GET', '/v1/voices' . ( $query ? '?' . implode( '&', $query ) : '' ), null, false, self::DEFAULT_TIMEOUT, false, array(), false );
 	}
 
 	/**

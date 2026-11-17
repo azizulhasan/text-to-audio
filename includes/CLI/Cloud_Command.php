@@ -8,6 +8,7 @@
 namespace TTA\CLI;
 
 use TTA\Cloud\Connection;
+use TTA\Cloud\Voices;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -142,5 +143,66 @@ class Cloud_Command {
 		Connection::disconnect();
 
 		\WP_CLI::success( 'Disconnected. Audio already made keeps playing.' );
+	}
+
+	/**
+	 * Lists the voices AtlasVoice Cloud offers, as the service reports them.
+	 *
+	 * The list is public on the service: no key is sent, and a site that is
+	 * not connected can read it. It is kept for a few hours.
+	 *
+	 * ## OPTIONS
+	 *
+	 * [--language=<language>]
+	 * : Only voices of this language, for example en or pt-br.
+	 *
+	 * [--engine=<engine>]
+	 * : Only voices of this engine, for example gtts.
+	 *
+	 * [--refresh]
+	 * : Ask AtlasVoice Cloud now instead of using the kept list.
+	 *
+	 * [--format=<format>]
+	 * : How to print it.
+	 * ---
+	 * default: table
+	 * options:
+	 *   - table
+	 *   - json
+	 * ---
+	 *
+	 * ## EXAMPLES
+	 *
+	 *     $ wp atlasvoice cloud voices --language=en
+	 *
+	 * @param array $args       Positional arguments (none).
+	 * @param array $assoc_args Flags: language, engine, refresh, format.
+	 */
+	public function voices( $args, $assoc_args ) {
+		$list = Voices::get(
+			isset( $assoc_args['language'] ) ? (string) $assoc_args['language'] : '',
+			isset( $assoc_args['engine'] ) ? (string) $assoc_args['engine'] : '',
+			! empty( $assoc_args['refresh'] )
+		);
+
+		if ( isset( $assoc_args['format'] ) && 'json' === $assoc_args['format'] ) {
+			\WP_CLI::line( (string) wp_json_encode( $list ) );
+
+			return;
+		}
+
+		if ( 'service' !== $list['source'] ) {
+			\WP_CLI::error( 'AtlasVoice Cloud could not list its voices' . ( '' !== $list['error'] ? ' (' . $list['error'] . ')' : '' ) . '. Please try again in a few minutes.' );
+
+			return;
+		}
+
+		if ( ! $list['voices'] ) {
+			\WP_CLI::line( 'No voice matches.' );
+
+			return;
+		}
+
+		\WP_CLI\Utils\format_items( 'table', $list['voices'], array( 'id', 'engine', 'language', 'name' ) );
 	}
 }
